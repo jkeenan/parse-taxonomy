@@ -1,8 +1,11 @@
+Changes
+lib/Parse/File/Taxonomy.pm
+LICENSE
+Makefile.PL
 MANIFEST
 README
-LICENSE
+t/000-test-prep.t
+t/001-new.t
+t/data/alpha.csv
+t/data/duplicate_field.csv
 Todo
-Changes
-Makefile.PL
-lib/Parse/File/Taxonomy.pm
-t/001_load.t

@@ -1,16 +1,13 @@
 package Parse::File::Taxonomy;
 use strict;
+use Carp;
+use Text::CSV;
+#use Text::CSV::Hashify;
+use Scalar::Util qw( reftype );
+our $VERSION = '0.01';
+use Data::Dumper;$Data::Dumper::Indent=1;
+use Data::Dump;
 
-BEGIN {
-    use Exporter ();
-    use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = '0.01';
-    @ISA         = qw(Exporter);
-    #Give a hoot don't pollute, do not export more than needed by default
-    @EXPORT      = qw();
-    @EXPORT_OK   = qw();
-    %EXPORT_TAGS = ();
-}
 
 =head1 NAME
 
@@ -302,7 +299,7 @@ This would produce:
         "Delta"                 => { ... },
     };
 
-That's better.  We have 13 elements in the hash, each corresponding to one of
+That is better.  We have 13 elements in the hash, each corresponding to one of
 the 13 data records in the taxonomy file submitted.
 
 Suppose the user wanted to use the string C< - > in the key.  The method would
@@ -356,6 +353,134 @@ This would produce:
         "All Suppliers|||Gamma|||Iota|||Delta"      => { ... },
         "All Suppliers|||Delta"                     => { ... },
     };
+
+=head1 METHODS
+
+=head2 C<new()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+
+=cut
+
+sub new {
+    my ($class, $args) = @_;
+    my %data;
+
+    croak "Argument to 'new()' must be hashref"
+        unless (ref($args) and reftype($args) eq 'HASH');
+    croak "Argument to 'new()' must have 'file' element" unless $args->{file};
+    croak "Cannot locate file '$args->{file}'"
+        unless (-f $args->{file});
+    $data{file} = delete $args->{file};
+
+    if (exists $args->{rules}) {
+        croak "Argument to 'rules' element must be an array ref"
+            unless reftype($args->{rules}) eq 'ARRAY';
+        foreach my $rule (@{$args->{rules}}) {
+            croak "Each element in 'rules' must be a code ref"
+                unless reftype($rule) eq 'CODE';
+        }
+    }
+    $data{rules} = delete $args->{rules};
+
+    if (exists $args->{path_col_idx}) {
+        croak "Argument to 'path_col_idx' must be integer"
+            unless $args->{path_col_idx} =~ m/^\d+$/;
+    }
+    $data{path_col_idx} = delete $args->{path_col_idx} || 0;
+
+    # We've now handled all the Parse::File::Taxonomy-specific options.
+    # Any remaining options are assumed to be intended for Text::CSV::new().
+
+    $args->{binary} = 1;
+    my $csv = Text::CSV->new ( $args )
+        or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+    open my $IN, "<", $data{file}
+        or croak "Unable to open '$data{file}' for reading";
+    my $header_ref = $csv->getline($IN);
+
+    croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data{file}'"
+        if $data{path_col_idx} > $#{$header_ref};
+
+    my %header_fields_seen;
+    for (@{$header_ref}) {
+        if (exists $header_fields_seen{$_}) {
+            croak "Duplicate field '$_' observed in '$data{file}'";
+        }
+        else {
+            $header_fields_seen{$_}++;
+        }
+    }
+    $data{fields} = $header_ref;
+    $csv->column_names(@{$header_ref});
+
+#    # 'hoh format
+#    my %keys_seen;
+#    my @keys_list = ();
+#    my %parsed_data;
+#    # 'aoh' format
+#    my @parsed_data;
+#
+#    PARSE_FILE: while (my $record = $csv->getline_hr($IN)) {
+#        if ($data{format} eq 'hoh') {
+#            my $kk = $record->{$data{key}};
+#            if ($keys_seen{$kk}) {
+#                croak "Key '$kk' already seen";
+#            }
+#            else {
+#                $keys_seen{$kk}++;
+#                push @keys_list, $kk;
+#                $parsed_data{$kk} = $record;
+#                last PARSE_FILE if (
+#                    defined $data{max_rows} and
+#                    scalar(keys %parsed_data) == $data{max_rows}
+#                );
+#            }
+#        }
+#        else { # format: 'aoh'
+#            push @parsed_data, $record;
+#            last PARSE_FILE if (
+#                defined $data{max_rows} and
+#                scalar(@parsed_data) == $data{max_rows}
+#            );
+#        }
+#    }
+#    $data{all} = ($data{format} eq 'aoh') ? \@parsed_data : \%parsed_data;
+#    $data{keys} = \@keys_list if $data{format} eq 'hoh';
+#    $data{csv} = $csv;
+    close $IN or croak "Unable to close after reading";
+
+    while (my ($k,$v) = each %{$args}) {
+        $data{$k} = $v;
+    }
+    return bless \%data, $class;
+}
+
+=head2 C<hashify_taxonomy()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
 
 =cut
 
