@@ -7,5 +7,8 @@ README
 t/000-test-prep.t
 t/001-new.t
 t/data/alpha.csv
+t/data/alt_path_col_sep.csv
 t/data/duplicate_field.csv
+t/data/duplicate_path.csv
+t/data/missing_parents.csv
 Todo

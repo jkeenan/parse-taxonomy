@@ -204,7 +204,7 @@ sequentially.
 
 =head2 The Parse::File::Taxonomy Object
 
-What methods would we like to be able to call on an object returned by the 
+What methods would we like to be able to call on an object returned by the
 C<Parse::File::Taxonomy> constructor?
 
 The mere fact that C<new()> returns an object should suffice to say that the
@@ -248,7 +248,7 @@ those fields for the branch nodes.  The following doesn't seem right:
     my $inelegant_hashref = {
         'Alpha' => {
             other_fields    => { ... },
-            children        => { 
+            children        => {
                 'Epsilon' => {
                     other_fields    => { ... },
                     children        => {
@@ -399,6 +399,16 @@ sub new {
             unless $args->{path_col_idx} =~ m/^\d+$/;
     }
     $data{path_col_idx} = delete $args->{path_col_idx} || 0;
+    $data{path_col_sep} = exists $args->{path_col_sep}
+        ? $args->{path_col_sep}
+        : '|';
+    if (exists $args->{path_col_sep}) {
+        $data{path_col_sep} = $args->{path_col_sep};
+        delete $args->{path_col_sep};
+    }
+    else {
+        $data{path_col_sep} = '|';
+    }
 
     # We've now handled all the Parse::File::Taxonomy-specific options.
     # Any remaining options are assumed to be intended for Text::CSV::new().
@@ -423,43 +433,54 @@ sub new {
         }
     }
     $data{fields} = $header_ref;
-    $csv->column_names(@{$header_ref});
+    $data{path_col} = $data{fields}->[$data{path_col_idx}];
 
-#    # 'hoh format
-#    my %keys_seen;
-#    my @keys_list = ();
-#    my %parsed_data;
-#    # 'aoh' format
-#    my @parsed_data;
-#
-#    PARSE_FILE: while (my $record = $csv->getline_hr($IN)) {
-#        if ($data{format} eq 'hoh') {
-#            my $kk = $record->{$data{key}};
-#            if ($keys_seen{$kk}) {
-#                croak "Key '$kk' already seen";
-#            }
-#            else {
-#                $keys_seen{$kk}++;
-#                push @keys_list, $kk;
-#                $parsed_data{$kk} = $record;
-#                last PARSE_FILE if (
-#                    defined $data{max_rows} and
-#                    scalar(keys %parsed_data) == $data{max_rows}
-#                );
-#            }
-#        }
-#        else { # format: 'aoh'
-#            push @parsed_data, $record;
-#            last PARSE_FILE if (
-#                defined $data{max_rows} and
-#                scalar(@parsed_data) == $data{max_rows}
-#            );
-#        }
-#    }
-#    $data{all} = ($data{format} eq 'aoh') ? \@parsed_data : \%parsed_data;
-#    $data{keys} = \@keys_list if $data{format} eq 'hoh';
-#    $data{csv} = $csv;
+    my $all_records = $csv->getline_all($IN);
     close $IN or croak "Unable to close after reading";
+
+    # Confirm no duplicate entries in column holding path:
+    my %paths_seen = ();
+    for my $rec (@{$all_records}) {
+        $paths_seen{$rec->[$data{path_col_idx}]}++;
+    }
+    my @dupe_paths = ();
+    for my $path (sort keys %paths_seen) {
+        push @dupe_paths, $path if $paths_seen{$path} > 1;
+    }
+    my $error_msg = <<ERROR_MSG;
+No duplicate entries are permitted in column designated as path.
+The following entries appear the number of times shown:
+ERROR_MSG
+    for my $path (@dupe_paths) {
+        $error_msg .= "  $path:" . sprintf("  %6s\n" => $paths_seen{$path});
+    }
+    croak $error_msg if @dupe_paths;
+
+    # Confirm each node appears in taxonomy:
+    my $path_args = { map { $_ => $args->{$_} } keys %{$args} };
+    $path_args->{sep_char} = $data{path_col_sep};
+    my $path_csv = Text::CSV->new ( $path_args )
+        or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+    my %missing_parents = ();
+    for my $path (sort keys %paths_seen) {
+        my $status  = $path_csv->parse($path);
+        my @columns = $path_csv->fields();
+        if (@columns > 2) {
+            my $parent =
+                join($path_args->{sep_char} => @columns[0 .. ($#columns - 1)]);
+            unless (exists $paths_seen{$parent}) {
+                $missing_parents{$path} = $parent;
+            }
+        }
+    }
+    $error_msg = <<SECOND_ERROR_MSG;
+Each node in the taxonomy must have a parent.
+The following nodes lack the expected parent:
+SECOND_ERROR_MSG
+    for my $path (sort keys %missing_parents) {
+        $error_msg .= "  $path:  $missing_parents{$path}\n";
+    }
+    croak $error_msg if scalar(keys %missing_parents);
 
     while (my ($k,$v) = each %{$args}) {
         $data{$k} = $v;
@@ -483,6 +504,75 @@ sub new {
 
 
 =cut
+
+=head2 C<fields()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+    my $fields = $self->fields();
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
+sub fields {
+    my $self = shift;
+    return $self->{fields};
+}
+
+=head2 C<path_col_idx()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+    my $path_col_idx = $self->path_col_idx;
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
+sub path_col_idx {
+    my $self = shift;
+    return $self->{path_col_idx};
+}
+
+=head2 C<path_col(()>
+
+=over 4
+
+=item * Purpose
+
+=item * Arguments
+
+    my $path_col = $self->path_col;
+
+=item * Return Value
+
+=item * Comment
+
+=back
+
+=cut
+
+sub path_col {
+    my $self = shift;
+    return $self->{path_col};
+}
 
 1;
 
