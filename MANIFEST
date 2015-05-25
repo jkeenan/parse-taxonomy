@@ -11,4 +11,5 @@ t/data/alt_path_col_sep.csv
 t/data/duplicate_field.csv
 t/data/duplicate_path.csv
 t/data/missing_parents.csv
+t/data/wrong_row_count.csv
 Todo

@@ -131,6 +131,21 @@ my ($obj, $source, $expect);
 }
 
 {
+    $source = "./t/data/wrong_row_count.csv";
+    local $@;
+    eval {
+        $obj = Parse::File::Taxonomy->new( {
+            file    => $source,
+        } );
+    };
+
+    like($@, qr/^Header row had \d+ records.  The following records had different counts:/s,
+        "'new()' died due to wrong number of columns in one or more rows");
+    like($@, qr/\|Alpha:\s+7/s, "Identified record with too many columns");
+    like($@, qr/\|Alpha\|Epsilon:\s+5/s, "Identified record with too few columns");
+}
+
+{
     $source = "./t/data/missing_parents.csv";
     local $@;
     eval {
@@ -153,7 +168,7 @@ my ($obj, $source, $expect);
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
-
+Data::Dump::pp($obj);
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
     is(ref($fields), 'ARRAY', "'fields' method returned an arrayref");

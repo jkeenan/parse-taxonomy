@@ -433,28 +433,45 @@ sub new {
         }
     }
     $data{fields} = $header_ref;
+    my $field_count = scalar(@{$data{fields}});
     $data{path_col} = $data{fields}->[$data{path_col_idx}];
 
     my $all_records = $csv->getline_all($IN);
     close $IN or croak "Unable to close after reading";
 
+
     # Confirm no duplicate entries in column holding path:
+    # Confirm all rows have same number of columns as header:
+    my @bad_count_records = ();
     my %paths_seen = ();
     for my $rec (@{$all_records}) {
         $paths_seen{$rec->[$data{path_col_idx}]}++;
+        my $this_row_count = scalar(@{$rec});
+        if ($this_row_count != $field_count) {
+            push @bad_count_records,
+                [ $rec->[$data{path_col_idx}], $this_row_count ];
+        }
     }
     my @dupe_paths = ();
     for my $path (sort keys %paths_seen) {
         push @dupe_paths, $path if $paths_seen{$path} > 1;
     }
-    my $error_msg = <<ERROR_MSG;
+    my $error_msg = <<ERROR_MSG_DUPE;
 No duplicate entries are permitted in column designated as path.
 The following entries appear the number of times shown:
-ERROR_MSG
+ERROR_MSG_DUPE
     for my $path (@dupe_paths) {
         $error_msg .= "  $path:" . sprintf("  %6s\n" => $paths_seen{$path});
     }
     croak $error_msg if @dupe_paths;
+
+    $error_msg = <<ERROR_MSG_WRONG_COUNT;
+Header row had $field_count records.  The following records had different counts:
+ERROR_MSG_WRONG_COUNT
+    for my $rec (@bad_count_records) {
+        $error_msg .= "  $rec->[0]: $rec->[1]\n";
+    }
+    croak $error_msg if @bad_count_records;
 
     # Confirm each node appears in taxonomy:
     my $path_args = { map { $_ => $args->{$_} } keys %{$args} };
@@ -473,10 +490,10 @@ ERROR_MSG
             }
         }
     }
-    $error_msg = <<SECOND_ERROR_MSG;
+    $error_msg = <<ERROR_MSG_ORPHAN;
 Each node in the taxonomy must have a parent.
 The following nodes lack the expected parent:
-SECOND_ERROR_MSG
+ERROR_MSG_ORPHAN
     for my $path (sort keys %missing_parents) {
         $error_msg .= "  $path:  $missing_parents{$path}\n";
     }
@@ -485,6 +502,16 @@ SECOND_ERROR_MSG
     while (my ($k,$v) = each %{$args}) {
         $data{$k} = $v;
     }
+    my @all;
+    for my $row (@{$all_records}) {
+        my $rowhash;
+        $rowhash->{data} = {
+            map { $data{fields}->[$_] => $row->[$_] } (0 .. $#{$row})
+        };
+        $rowhash->{key} = $row->[$data{path_col_idx}];
+        push @all, $rowhash;
+    }
+    $data{all} = \@all;
     return bless \%data, $class;
 }
 
