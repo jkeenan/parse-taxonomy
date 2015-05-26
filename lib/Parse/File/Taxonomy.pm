@@ -332,7 +332,7 @@ and use the string C<|||> as the delimiter in the key, the method would be
 called like this:
 
     $hashref = $self->hashify_taxonomy( {
-        key_delim   => q{ - },
+        key_delim   => q{|||},
         root_str    => q{All Suppliers},
     } );
 
@@ -362,14 +362,82 @@ This would produce:
 
 =item * Purpose
 
+Parse::File::Taxonomy constructor.
+
 =item * Arguments
 
-=item * Return Value
+One optional hash reference whose elements are keyed on any of the following
+arguments:
 
-=item * Comment
+=over 4
+
+=item * C<file>
+
+Absolute path to the incoming taxonomy file.  Currently required (but this may
+change if we implement ability to use a list of CSV strings instead of a
+file).
+
+=item * C<rules>
+
+TODO
+
+=item * C<path_col_idx>
+
+If the column to be used as the "path" column in the incoming taxonomy file is
+B<not> the first column, this option must be set to the integer representing
+the "path" column's index position (count starts at 0).  Defaults to C<0>.
+
+=item * C<path_col_sep>
+
+If the string used to distinguish columns in the incoming taxonomy file is not
+a comma (C<,>), this option must be set.  Defaults to C<,>.
+
+=item *  Text::CSV options
+
+Any other options which could normally be passed to C<Text::CSV->new()> will
+be passed through to that module's constructor.  On the recommendation of the
+Text::CSV documentation, C<binary> is always set to a true value.
 
 =back
 
+=item * Return Value
+
+Parse::File::Taxonomy object.
+
+=item * Comment
+
+C<new()> will throw an exception under any of the following conditions:
+
+=over 4
+
+=item * Argument to C<new()> is not a reference.
+
+=item * Argument to C<new()> is not a hash reference.
+
+=item * Unable to locate the file which is the value of the C<file> element.
+
+=item * Argument to C<path_col_idx> element is not an integer.
+
+=item * Argument to C<path_col_idx> is greater than the index number of the
+last element in the header row of the incoming taxonomy file, I<i.e.,> the
+C<path_col_idx> is wrong.
+
+=item * The same field is found more than once in the header row of the
+incoming taxonomy file.
+
+=item * Unable to open or close the incoming taxonomy file for reading.
+
+=item * In the column designated as the "path" column, the same value is
+observed more than once.
+
+=item * A non-parent node's parent node cannot be located in the incoming taxonomy file.
+
+=item * A data row has a number of fields different from the number of fields
+in the header row.
+
+=back
+
+=back
 
 =cut
 
@@ -550,6 +618,9 @@ switch to a Perl-true value.
 
 In the example above, this would result in a key spelled C<|Alpha|Beta|Gamma>.
 
+Note further that if the C<root_str> switch is set to a true value, any
+setting to C<retain_leading_path_col_sep> will be ignored.
+
 =item * C<key_delim>
 
 A string which will be used in composing the key of the hashref returned by
@@ -571,8 +642,7 @@ C<Alpha - Beta - Gamma>.
 A string which will be used in composing the key of the hashref returned by
 this method.  The user will set this switch if she wishes to have the root
 note explicitly represented.  Using this switch will automatically cause
-C<retain_leading_path_col_sep> to be set to a true value, as the root node
-will have to be delimited from the other nodes.
+C<retain_leading_path_col_sep> to be ignored.
 
 Suppose the user wished to have C<All Suppliers> be the text for the root
 node.  Suppose further that the user wanted to use the string C< - > as the
@@ -607,7 +677,14 @@ sub hashify_taxonomy {
     my %hashified;
     for my $rec (@{$self->{all}}) {
         my $k = $rec->{key};
-        $k =~ s/^\Q$self->{path_col_sep}\E(.*)/$1/;
+        if ($args->{root_str}) {
+            $k = $args->{root_str} . $k;
+        }
+        else {
+            if (! $args->{retain_leading_path_col_sep}) {
+                $k =~ s/^\Q$self->{path_col_sep}\E(.*)/$1/;
+            }
+        }
         if ($args->{key_delim}) {
             $k =~ s/\Q$self->{path_col_sep}\E/$args->{key_delim}/g;
         }
