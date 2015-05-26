@@ -521,16 +521,101 @@ ERROR_MSG_ORPHAN
 
 =item * Purpose
 
+Turn a validated taxonomy into a Perl hash keyed on the column designated as
+the path column.
+
 =item * Arguments
 
-=item * Return Value
+    $hashref = $self->hashify_taxonomy();
 
-=item * Comment
+Takes an optional hashref holding a list of any of the following elements:
+
+=over 4
+
+=item * C<retain_leading_path_col_sep>
+
+Boolean, defaulting to C<0>.  Typically, in hashifying the taxonomy we can
+omit the name, if any, of the root node because it's the same for all entries.
+In that case, there's probably not much to be gained by retaining the first
+instance of the C<path_col_sep>.  So, typically, a path in the incoming
+taxonomy file represented by C<|Alpha|Beta|Gamma> would be represented as key
+C<Alpha|Beta|Gamma>.
+
+However, should you wish to retain that leading C<path_col_sep>, set this
+switch to a Perl-true value.
+
+    $hashref = $self->hashify_taxonomy( {
+        retain_leading_path_col_sep => 1,
+    } );
+
+In the example above, this would result in a key spelled C<|Alpha|Beta|Gamma>.
+
+=item * C<key_delim>
+
+A string which will be used in composing the key of the hashref returned by
+this method.  The user may select this key if she does not want to use the
+value found in the incoming CSV file (which by default will be the pipe
+character (C<|>) and which may be overridden with the C<path_col_sep> argument
+to C<new()>.
+
+    $hashref = $self->hashify_taxonomy( {
+        key_delim   => q{ - },
+    } );
+
+In the above variant, a path that in the incoming taxonomy file was
+represented by C<|Alpha|Beta|Gamma> will in C<$hashref> be represented by
+C<Alpha - Beta - Gamma>.
+
+=item * C<root_str>
+
+A string which will be used in composing the key of the hashref returned by
+this method.  The user will set this switch if she wishes to have the root
+note explicitly represented.  Using this switch will automatically cause
+C<retain_leading_path_col_sep> to be set to a true value, as the root node
+will have to be delimited from the other nodes.
+
+Suppose the user wished to have C<All Suppliers> be the text for the root
+node.  Suppose further that the user wanted to use the string C< - > as the
+delimiter within the key.
+
+    $hashref = $self->hashify_taxonomy( {
+        root_str    => q{All Suppliers},
+        key_delim   => q{ - },
+    } );
+
+Then incoming path C<|Alpha|Beta|Gamma> would be keyed as:
+
+    All Suppliers - Alpha - Beta - Gamma
 
 =back
 
+=item * Return Value
+
+Hash reference.  The number of elements in this hash should be equal to the
+number of non-header records in the taxonomy.
+
+=back
 
 =cut
+
+sub hashify_taxonomy {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'new()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+    }
+    my %hashified;
+    for my $rec (@{$self->{all}}) {
+        my $k = $rec->{key};
+        $k =~ s/^\Q$self->{path_col_sep}\E(.*)/$1/;
+        if ($args->{key_delim}) {
+            $k =~ s/\Q$self->{path_col_sep}\E/$args->{key_delim}/g;
+        }
+        $hashified{$k} = $rec->{data};
+    }
+    return \%hashified;
+}
+
 
 =head2 C<fields()>
 
@@ -599,6 +684,11 @@ sub path_col_idx {
 sub path_col {
     my $self = shift;
     return $self->{path_col};
+}
+
+sub path_col_sep {
+    my $self = shift;
+    return $self->{path_col_sep};
 }
 
 1;

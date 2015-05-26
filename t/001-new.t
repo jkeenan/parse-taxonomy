@@ -168,7 +168,7 @@ my ($obj, $source, $expect);
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
-Data::Dump::pp($obj);
+#Data::Dump::pp($obj);
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
     is(ref($fields), 'ARRAY', "'fields' method returned an arrayref");
@@ -182,6 +182,9 @@ Data::Dump::pp($obj);
     my $path_col = $obj->path_col;
     is($path_col, $expect, "Path column is named '$expect'");
 
+    $expect = '|';
+    my $path_col_sep = $obj->path_col_sep;
+    is($path_col_sep, $expect, "Path column separator is '$expect'");
 }
 
 {
@@ -206,4 +209,7 @@ Data::Dump::pp($obj);
     my $path_col = $obj->path_col;
     is($path_col, $expect, "Path column is named '$expect'");
 
+    $expect = ',';
+    my $path_col_sep = $obj->path_col_sep;
+    is($path_col_sep, $expect, "Path column separator is '$expect'");
 }
