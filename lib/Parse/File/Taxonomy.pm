@@ -2,7 +2,6 @@ package Parse::File::Taxonomy;
 use strict;
 use Carp;
 use Text::CSV;
-#use Text::CSV::Hashify;
 use Scalar::Util qw( reftype );
 our $VERSION = '0.01';
 use Data::Dumper;$Data::Dumper::Indent=1;
@@ -12,6 +11,17 @@ use Data::Dump;
 =head1 NAME
 
 Parse::File::Taxonomy - Validate a file for use as a taxonomy
+
+=head1 SYNOPSIS
+
+    use Parse::File::Taxonomy;
+
+    $source = "./t/data/alpha.csv";
+    $obj = Parse::File::Taxonomy->new( {
+        file    => $source,
+    } );
+
+    $hashified_taxonomy = $obj->hashify_taxonomy();
 
 =head1 DESCRIPTION
 
@@ -370,28 +380,32 @@ Parse::File::Taxonomy constructor.
 
 =item * Arguments
 
-One optional hash reference whose elements are keyed on any of the following
-arguments:
+    $source = "./t/data/alpha.csv";
+    $obj = Parse::File::Taxonomy->new( {
+        file    => $source,
+    } );
+
+Single hash reference.  Elements in that hash are keyed on:
 
 =over 4
 
 =item * C<file>
 
-Absolute path to the incoming taxonomy file.  Currently required (but this may
-change if we implement ability to use a list of CSV strings instead of a
-file).
+Absolute or relative path to the incoming taxonomy file.  Currently
+B<required> (but this may change if we implement ability to use a list of CSV
+strings instead of a file).
 
 =item * C<path_col_idx>
 
 If the column to be used as the "path" column in the incoming taxonomy file is
 B<not> the first column, this option must be set to the integer representing
-the "path" column's index position (count starts at 0).  Defaults to C<0>.
+the "path" column's index position (count starts at 0).  Optional; defaults to C<0>.
 
 =item * C<path_col_sep>
 
 If the string used to distinguish components of the path in the path column in
 the incoming taxonomy file is not a pipe (C<|>), this option must be set.
-Defaults to C<|>.
+Optional; defaults to C<|>.
 
 =item *  Text::CSV options
 
