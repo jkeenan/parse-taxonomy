@@ -1,5 +1,18 @@
 README for Perl extension Parse-File-Taxonomy
 
+    use Parse::File::Taxonomy;
+
+    $source = "./t/data/alpha.csv";
+    $obj = Parse::File::Taxonomy->new( {
+        file    => $source,
+    } );
+
+    $hashified_taxonomy = $obj->hashify_taxonomy();
+
+More documentation in lib/Parse/File/Taxonomy.pm.  Once installed, say:
+
+    perldoc Parse::File::Taxonomy
+
 You should be able to use this set of instructions to install the module...
 
     perl Makefile.PL
