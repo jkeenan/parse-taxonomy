@@ -186,7 +186,7 @@ The C<Parse::File::Taxonomy> constructor, C<new()>, will probe a taxonomy file
 provided to it as an argument to determine whether it can be considered a
 valid taxonomy according to the description provided above.
 
-C<Parse::File::Taxonomy->new() should also be able to accept a reference to an
+TODO:  C<Parse::File::Taxonomy->new() should also be able to accept a reference to an
 array of CSV records already held in memory.
 
 TODO:  What would it mean for C<Parse::File::Taxonomy->new() to accept a
@@ -194,15 +194,19 @@ filehandle as an argument, rather than a file?  Would that be difficult to
 implement?
 
 The user of this library, however, must be permitted to write B<additional
-validation rules> which will be applied to a taxonomy file provided as an
-argument to the constructor.  Should the file fail to meet those rules, the
-file will not be considered a valid taxonomy even if it meets the rules built
-into the library itself.  Hence, C<Parse::File::Taxonomy->new()> must also be
-able to accept a reference to an array of references to subroutines, each of
-which subroutines must express one additional validation rule to be applied
-sequentially.
+user-specified validation rules> which will be applied to a taxonomy by means
+of a method called on a Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
+user may choose not to proceed further even though the taxonomy meets the
+basic validation criteria implemented in the constructor.  This method will
+probably take a reference to an array of subroutines references as its
+argument.  Each such code reference will be a user-defined rule which the
+taxonomy must obey.  The method will apply each code reference to the taxonomy in
+sequence and will return with a true value if and only if all the individual
+criteria return true as well.
 
 =head2 The Parse::File::Taxonomy Object
+
+B<Note:>  This section is mostly the author thinking out loud.
 
 What methods would we like to be able to call on an object returned by the
 C<Parse::File::Taxonomy> constructor?
@@ -377,10 +381,6 @@ Absolute path to the incoming taxonomy file.  Currently required (but this may
 change if we implement ability to use a list of CSV strings instead of a
 file).
 
-=item * C<rules>
-
-TODO
-
 =item * C<path_col_idx>
 
 If the column to be used as the "path" column in the incoming taxonomy file is
@@ -389,8 +389,9 @@ the "path" column's index position (count starts at 0).  Defaults to C<0>.
 
 =item * C<path_col_sep>
 
-If the string used to distinguish columns in the incoming taxonomy file is not
-a comma (C<,>), this option must be set.  Defaults to C<,>.
+If the string used to distinguish components of the path in the path column in
+the incoming taxonomy file is not a pipe (C<|>), this option must be set.
+Defaults to C<|>.
 
 =item *  Text::CSV options
 
@@ -700,13 +701,22 @@ sub hashify_taxonomy {
 
 =item * Purpose
 
+Identify the names of the columns in the taxonomy.
+
 =item * Arguments
 
     my $fields = $self->fields();
 
+No arguments; the information is already inside the object.
+
 =item * Return Value
 
+Reference to an array holding a list of the columns as they appear in the
+header row of the incoming taxonomy file.
+
 =item * Comment
+
+Read-only.
 
 =back
 
@@ -723,13 +733,23 @@ sub fields {
 
 =item * Purpose
 
+Identify the index position (count starts at 0) of the column in the incoming
+taxonomy file which serves as the path column.
+
 =item * Arguments
 
     my $path_col_idx = $self->path_col_idx;
 
+No arguments; the information is already inside the object.
+
 =item * Return Value
 
+Integer in the range from 0 to 1 less than the number of columns in the header
+row.
+
 =item * Comment
+
+Read-only.
 
 =back
 
@@ -740,19 +760,28 @@ sub path_col_idx {
     return $self->{path_col_idx};
 }
 
-=head2 C<path_col(()>
+=head2 C<path_col()>
 
 =over 4
 
 =item * Purpose
 
+Identify the name of the column in the incoming taxonomy which serves as the
+path column.
+
 =item * Arguments
 
     my $path_col = $self->path_col;
 
+No arguments; the information is already inside the object.
+
 =item * Return Value
 
+String.
+
 =item * Comment
+
+Read-only.
 
 =back
 
@@ -762,6 +791,34 @@ sub path_col {
     my $self = shift;
     return $self->{path_col};
 }
+
+=head2 C<path_col_sep()>
+
+=over 4
+
+=item * Purpose
+
+Identify the string used to separate path components once the taxonomy has
+been created.  This is just a "getter" and is logically distinct from the
+option to C<new()> which is, in effect, a "setter."
+
+=item * Arguments
+
+    my $path_col_sep = $self->path_col_sep;
+
+No arguments; the information is already inside the object.
+
+=item * Return Value
+
+String.
+
+=item * Comment
+
+Read-only.
+
+=back
+
+=cut
 
 sub path_col_sep {
     my $self = shift;
