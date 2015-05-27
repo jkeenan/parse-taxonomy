@@ -10,7 +10,7 @@ use Parse::File::Taxonomy;
 use Test::More qw(no_plan); # tests => 1;
 use Data::Dump;
 
-my ($obj, $source, $expect);
+my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
@@ -20,7 +20,33 @@ my ($obj, $source, $expect);
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
 
-    my $hashified;
+    local $@;
+    eval {
+        $hashified = $obj->hashify_taxonomy(
+            key_delim => q{ - },
+        );
+    };
+    like($@, qr/^Argument to 'new\(\)' must be hashref/,
+        "'hashify_taxonomy()' died to lack of hashref as argument; was just a key-value pair");
+
+    local $@;
+    eval {
+        $hashified = $obj->hashify_taxonomy( [
+            key_delim => q{ - },
+        ] );
+    };
+    like($@, qr/^Argument to 'new\(\)' must be hashref/,
+        "'hashify_taxonomy()' died to lack of hashref as argument; was arrayref");
+}
+
+{
+    $source = "./t/data/beta.csv";
+    $obj = Parse::File::Taxonomy->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::File::Taxonomy');
+
     $hashified = $obj->hashify_taxonomy();
     $expect = {
         "Alpha" => {
