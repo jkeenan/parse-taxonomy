@@ -160,10 +160,6 @@ my ($obj, $source, $expect, $hashified);
     $hashified = $obj->hashify_taxonomy( {
         key_delim => q{ - },
     } );
-#say STDERR "AAA:";
-#Data::Dump::pp($hashified);
-#say STDERR "BBB:";
-
     $expect = {
         "Alpha" => {
                     currency_code => "USD",

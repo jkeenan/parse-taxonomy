@@ -41,22 +41,6 @@ my ($obj, $source, $expect);
     local $@;
     eval {
         $obj = Parse::File::Taxonomy->new( {
-            file    => $source,
-            rules => [
-                sub { print "Hello World\n" },
-                [ qw( a b c ) ],
-            ],
-        } );
-    };
-    like($@, qr/^Each element in 'rules' must be a code ref/,
-        "'new()' died to non-coderef element in arrayref which is value of 'rules' argument");
-}
-
-{
-    $source = "./t/data/alpha.csv";
-    local $@;
-    eval {
-        $obj = Parse::File::Taxonomy->new( {
             file            => $source,
             path_col_idx    => 'path',
         } );
@@ -82,9 +66,7 @@ my ($obj, $source, $expect);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
-            rules => [ sub { print "Hello World\n" } ],
-        } );
+        $obj = Parse::File::Taxonomy->new( { } );
     };
     like($@, qr/^Argument to 'new\(\)' must have 'file' element/,
         "'new()' died to lack of 'file' element in hashref passed as argument");
@@ -168,7 +150,7 @@ my ($obj, $source, $expect);
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
-#Data::Dump::pp($obj);
+
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
     is(ref($fields), 'ARRAY', "'fields' method returned an arrayref");
@@ -185,7 +167,45 @@ my ($obj, $source, $expect);
     $expect = '|';
     my $path_col_sep = $obj->path_col_sep;
     is($path_col_sep, $expect, "Path column separator is '$expect'");
-}
+
+    $expect = {
+      "|Alpha"               => 5,
+      "|Alpha|Epsilon"       => 1,
+      "|Alpha|Epsilon|Kappa" => 0,
+      "|Alpha|Zeta"          => 2,
+      "|Alpha|Zeta|Lambda"   => 0,
+      "|Alpha|Zeta|Mu"       => 0,
+      "|Beta"                => 2,
+      "|Beta|Eta"            => 0,
+      "|Beta|Theta"          => 0,
+      "|Delta"               => 0,
+      "|Gamma"               => 2,
+      "|Gamma|Iota"          => 1,
+      "|Gamma|Iota|Nu"       => 0,
+    };
+    my $child_counts = $obj->get_all_child_counts;
+    is_deeply($child_counts, $expect, "Got expected child count for each node");
+
+    {
+        my ($n, $node_child_count);
+
+        local $@;
+        $n = 'foo';
+        eval { $node_child_count = $obj->get_child_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_child_count' is not a node");
+        local $@;
+
+        $n = '|Gamma';
+        $node_child_count = $obj->get_child_count($n);
+        is($node_child_count, 2, "Node with 2 children found");
+
+        $n = '|Gamma|Iota|Nu';
+        $node_child_count = $obj->get_child_count($n);
+        is($node_child_count, 0, "Node with 0 children found");
+    }
+}     
+
 
 {
     $source = "./t/data/alt_path_col_sep.csv";

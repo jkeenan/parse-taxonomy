@@ -4,7 +4,6 @@ use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 our $VERSION = '0.01';
-use Data::Dumper;$Data::Dumper::Indent=1;
 use Data::Dump;
 
 
@@ -467,16 +466,6 @@ sub new {
         unless (-f $args->{file});
     $data{file} = delete $args->{file};
 
-    if (exists $args->{rules}) {
-        croak "Argument to 'rules' element must be an array ref"
-            unless reftype($args->{rules}) eq 'ARRAY';
-        foreach my $rule (@{$args->{rules}}) {
-            croak "Each element in 'rules' must be a code ref"
-                unless reftype($rule) eq 'CODE';
-        }
-    }
-    $data{rules} = delete $args->{rules};
-
     if (exists $args->{path_col_idx}) {
         croak "Argument to 'path_col_idx' must be integer"
             unless $args->{path_col_idx} =~ m/^\d+$/;
@@ -594,7 +583,15 @@ ERROR_MSG_ORPHAN
         $rowhash->{key} = $row->[$data{path_col_idx}];
         push @all, $rowhash;
     }
+    my %child_counts = map { $_->{key} => 0  } @all;
+    for my $node (keys %child_counts) {
+        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
+            $child_counts{$node}++
+                if $other_node =~ m/^\Q$node$args->{path_col_sep}\E/;
+        }
+    }
     $data{all} = \@all;
+    $data{child_counts} = \%child_counts;
     return bless \%data, $class;
 }
 
@@ -837,6 +834,29 @@ Read-only.
 sub path_col_sep {
     my $self = shift;
     return $self->{path_col_sep};
+}
+
+sub get_all_child_counts {
+    my $self = shift;
+    return $self->{child_counts};
+}
+
+sub get_child_count {
+    my ($self, $node) = @_;
+    croak "Node '$node' not found" unless exists $self->{child_counts}{$node};
+    return $self->{child_counts}{$node};
+}
+
+sub local_validate {
+    my ($self, $args) = @_;
+
+    croak "Argument to 'rules' element must be an array ref"
+        unless defined $args and reftype($args->{rules}) eq 'ARRAY';
+    foreach my $rule (@{$args}) {
+        croak "Each element in 'rules' must be a code ref"
+            unless reftype($rule) eq 'CODE';
+    }
+    return 1;
 }
 
 1;
