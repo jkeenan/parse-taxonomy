@@ -10,7 +10,7 @@ use Parse::File::Taxonomy;
 use Test::More qw(no_plan); # tests => 1;
 use Data::Dump;
 
-my ($obj, $source, $expect);
+my ($obj, $source);
 
 {
     $source = "./t/data/alpha.csv";
@@ -145,70 +145,18 @@ my ($obj, $source, $expect);
 
 {
     $source = "./t/data/alpha.csv";
+    note($source);
     $obj = Parse::File::Taxonomy->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
 
-    $expect = [ "path","nationality","gender","age","income","id_no" ];
-    my $fields = $obj->fields;
-    is(ref($fields), 'ARRAY', "'fields' method returned an arrayref");
-    is_deeply($fields, $expect, "Got expected arrayref of columns");
-
-    $expect = 0;
-    my $path_col_idx = $obj->path_col_idx;
-    is($path_col_idx, $expect, "Column with index '$expect' is path column");
-
-    $expect = 'path';
-    my $path_col = $obj->path_col;
-    is($path_col, $expect, "Path column is named '$expect'");
-
-    $expect = '|';
-    my $path_col_sep = $obj->path_col_sep;
-    is($path_col_sep, $expect, "Path column separator is '$expect'");
-
-    $expect = {
-      "|Alpha"               => 5,
-      "|Alpha|Epsilon"       => 1,
-      "|Alpha|Epsilon|Kappa" => 0,
-      "|Alpha|Zeta"          => 2,
-      "|Alpha|Zeta|Lambda"   => 0,
-      "|Alpha|Zeta|Mu"       => 0,
-      "|Beta"                => 2,
-      "|Beta|Eta"            => 0,
-      "|Beta|Theta"          => 0,
-      "|Delta"               => 0,
-      "|Gamma"               => 2,
-      "|Gamma|Iota"          => 1,
-      "|Gamma|Iota|Nu"       => 0,
-    };
-    my $child_counts = $obj->get_all_child_counts;
-    is_deeply($child_counts, $expect, "Got expected child count for each node");
-
-    {
-        my ($n, $node_child_count);
-
-        local $@;
-        $n = 'foo';
-        eval { $node_child_count = $obj->get_child_count($n); };
-        like($@, qr/Node '$n' not found/,
-            "Argument '$n' to 'get_child_count' is not a node");
-        local $@;
-
-        $n = '|Gamma';
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, 2, "Node with 2 children found");
-
-        $n = '|Gamma|Iota|Nu';
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, 0, "Node with 0 children found");
-    }
-}     
-
+} 
 
 {
     $source = "./t/data/alt_path_col_sep.csv";
+    note($source);
     $obj = Parse::File::Taxonomy->new( {
         file            => $source,
         path_col_sep    => ',',
@@ -216,20 +164,4 @@ my ($obj, $source, $expect);
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy');
 
-    $expect = [ "path","nationality","gender","age","income","id_no" ];
-    my $fields = $obj->fields;
-    is(ref($fields), 'ARRAY', "'fields' method returned an arrayref");
-    is_deeply($fields, $expect, "Got expected arrayref of columns");
-
-    $expect = 0;
-    my $path_col_idx = $obj->path_col_idx;
-    is($path_col_idx, $expect, "Column with index '$expect' is path column");
-
-    $expect = 'path';
-    my $path_col = $obj->path_col;
-    is($path_col, $expect, "Path column is named '$expect'");
-
-    $expect = ',';
-    my $path_col_sep = $obj->path_col_sep;
-    is($path_col_sep, $expect, "Path column separator is '$expect'");
 }

@@ -508,7 +508,7 @@ sub new {
     my $field_count = scalar(@{$data{fields}});
     $data{path_col} = $data{fields}->[$data{path_col_idx}];
 
-    my $all_records = $csv->getline_all($IN);
+    my $data_records = $csv->getline_all($IN);
     close $IN or croak "Unable to close after reading";
 
 
@@ -516,7 +516,7 @@ sub new {
     # Confirm all rows have same number of columns as header:
     my @bad_count_records = ();
     my %paths_seen = ();
-    for my $rec (@{$all_records}) {
+    for my $rec (@{$data_records}) {
         $paths_seen{$rec->[$data{path_col_idx}]}++;
         my $this_row_count = scalar(@{$rec});
         if ($this_row_count != $field_count) {
@@ -570,141 +570,34 @@ ERROR_MSG_ORPHAN
         $error_msg .= "  $path:  $missing_parents{$path}\n";
     }
     croak $error_msg if scalar(keys %missing_parents);
+    $data{data_records} = $data_records;
+
 
     while (my ($k,$v) = each %{$args}) {
         $data{$k} = $v;
     }
-    my @all;
-    for my $row (@{$all_records}) {
-        my $rowhash;
-        $rowhash->{data} = {
-            map { $data{fields}->[$_] => $row->[$_] } (0 .. $#{$row})
-        };
-        $rowhash->{key} = $row->[$data{path_col_idx}];
-        push @all, $rowhash;
-    }
-    my %child_counts = map { $_->{key} => 0  } @all;
-    for my $node (keys %child_counts) {
-        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
-            $child_counts{$node}++
-                if $other_node =~ m/^\Q$node$args->{path_col_sep}\E/;
-        }
-    }
-    $data{all} = \@all;
-    $data{child_counts} = \%child_counts;
+#    my @all;
+#    for my $row (@{$data_records}) {
+#        my $rowhash;
+#        $rowhash->{data} = {
+#            map { $data{fields}->[$_] => $row->[$_] } (0 .. $#{$row})
+#        };
+#        $rowhash->{key} = $row->[$data{path_col_idx}];
+#        push @all, $rowhash;
+#    }
+#    my %child_counts = map { $_->{key} => 0  } @all;
+#    for my $node (keys %child_counts) {
+#        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
+#            $child_counts{$node}++
+#                if $other_node =~ m/^\Q$node$args->{path_col_sep}\E/;
+#        }
+#    }
+#    $data{all} = \@all;
+##say STDERR "CCC:";
+##Data::Dump::pp($data{all});
+#    $data{child_counts} = \%child_counts;
     return bless \%data, $class;
 }
-
-=head2 C<hashify_taxonomy()>
-
-=over 4
-
-=item * Purpose
-
-Turn a validated taxonomy into a Perl hash keyed on the column designated as
-the path column.
-
-=item * Arguments
-
-    $hashref = $self->hashify_taxonomy();
-
-Takes an optional hashref holding a list of any of the following elements:
-
-=over 4
-
-=item * C<retain_leading_path_col_sep>
-
-Boolean, defaulting to C<0>.  Typically, in hashifying the taxonomy we can
-omit the name, if any, of the root node because it's the same for all entries.
-In that case, there's probably not much to be gained by retaining the first
-instance of the C<path_col_sep>.  So, typically, a path in the incoming
-taxonomy file represented by C<|Alpha|Beta|Gamma> would be represented as key
-C<Alpha|Beta|Gamma>.
-
-However, should you wish to retain that leading C<path_col_sep>, set this
-switch to a Perl-true value.
-
-    $hashref = $self->hashify_taxonomy( {
-        retain_leading_path_col_sep => 1,
-    } );
-
-In the example above, this would result in a key spelled C<|Alpha|Beta|Gamma>.
-
-Note further that if the C<root_str> switch is set to a true value, any
-setting to C<retain_leading_path_col_sep> will be ignored.
-
-=item * C<key_delim>
-
-A string which will be used in composing the key of the hashref returned by
-this method.  The user may select this key if she does not want to use the
-value found in the incoming CSV file (which by default will be the pipe
-character (C<|>) and which may be overridden with the C<path_col_sep> argument
-to C<new()>.
-
-    $hashref = $self->hashify_taxonomy( {
-        key_delim   => q{ - },
-    } );
-
-In the above variant, a path that in the incoming taxonomy file was
-represented by C<|Alpha|Beta|Gamma> will in C<$hashref> be represented by
-C<Alpha - Beta - Gamma>.
-
-=item * C<root_str>
-
-A string which will be used in composing the key of the hashref returned by
-this method.  The user will set this switch if she wishes to have the root
-note explicitly represented.  Using this switch will automatically cause
-C<retain_leading_path_col_sep> to be ignored.
-
-Suppose the user wished to have C<All Suppliers> be the text for the root
-node.  Suppose further that the user wanted to use the string C< - > as the
-delimiter within the key.
-
-    $hashref = $self->hashify_taxonomy( {
-        root_str    => q{All Suppliers},
-        key_delim   => q{ - },
-    } );
-
-Then incoming path C<|Alpha|Beta|Gamma> would be keyed as:
-
-    All Suppliers - Alpha - Beta - Gamma
-
-=back
-
-=item * Return Value
-
-Hash reference.  The number of elements in this hash should be equal to the
-number of non-header records in the taxonomy.
-
-=back
-
-=cut
-
-sub hashify_taxonomy {
-    my ($self, $args) = @_;
-    if (defined $args) {
-        croak "Argument to 'new()' must be hashref"
-            unless (ref($args) and reftype($args) eq 'HASH');
-    }
-    my %hashified;
-    for my $rec (@{$self->{all}}) {
-        my $k = $rec->{key};
-        if ($args->{root_str}) {
-            $k = $args->{root_str} . $k;
-        }
-        else {
-            if (! $args->{retain_leading_path_col_sep}) {
-                $k =~ s/^\Q$self->{path_col_sep}\E(.*)/$1/;
-            }
-        }
-        if ($args->{key_delim}) {
-            $k =~ s/\Q$self->{path_col_sep}\E/$args->{key_delim}/g;
-        }
-        $hashified{$k} = $rec->{data};
-    }
-    return \%hashified;
-}
-
 
 =head2 C<fields()>
 
@@ -836,6 +729,304 @@ sub path_col_sep {
     return $self->{path_col_sep};
 }
 
+=head2 C<data_records()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its data rows as a Perl
+data structure.
+
+=item * Arguments
+
+    $data_records = $self->data_records;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The array will hold the data records
+found in the incoming taxonomy file in their order in that file.
+
+=item * Comment
+
+Does not contain any information about the fields in the taxonomy, so you
+should probably either (a) use in conjunction with C<fields()> method above;
+or (b) use C<fields_and_data_records()>.
+
+=back
+
+=cut
+
+sub data_records {
+    my $self = shift;
+    return $self->{data_records};
+}
+
+=head2 C<fields_and_data_records()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its header and data rows as a Perl
+data structure.
+
+=item * Arguments
+
+    $data_records = $self->fields_and_data_records;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The first element in the array will
+hold the header row (same as output of C<fields()>).  The remaining elements
+will hold the data records found in the incoming taxonomy file in their order
+in that file.
+
+=back
+
+=cut
+
+sub fields_and_data_records {
+    my $self = shift;
+    my @all_rows = $self->fields;
+    for my $row (@{$self->data_records}) {
+        push @all_rows, $row;
+    }
+    return \@all_rows;
+}
+
+=head2 C<data_records_path_components()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its data rows as a Perl
+data structure.  In each element of this list, the path is now represented as
+an array reference rather than a string.
+
+=item * Arguments
+
+    $data_records_path_components = $self->data_records_path_components;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The array will hold the data records
+found in the incoming taxonomy file in their order in that file.
+
+=item * Comment
+
+Does not contain any information about the fields in the taxonomy, so you
+should probably either (a) use in conjunction with C<fields()> method above;
+or (b) use C<fields_and_data_records_path_components()>.
+
+=back
+
+=cut
+
+sub data_records_path_components {
+    my $self = shift;
+    my @all_rows = ();
+    for my $row (@{$self->{data_records}}) {
+        my $path_col = $row->[$self->{path_col_idx}];
+        my @path_components = split(/\Q$self->{path_col_sep}\E/, $path_col);
+        my @rewritten = ();
+        for (my $i = 0; $i <= $#{$row}; $i++) {
+            if ($i != $self->{path_col_idx}) {
+                push @rewritten, $row->[$i];
+            }
+            else {
+                push @rewritten, \@path_components;
+            }
+        }
+        push @all_rows, \@rewritten;
+    }
+    return \@all_rows;
+}
+
+=head2 C<fields_and_data_records_path_components()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its data rows as a Perl
+data structure.  The first element in this list is an array reference holding
+the header row.  In each data element of this list, the path is now represented as
+an array reference rather than a string.
+
+=item * Arguments
+
+    $fields_and_data_records_path_components = $self->fields_and_data_records_path_components;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The array will hold the data records
+found in the incoming taxonomy file in their order in that file.
+
+=back
+
+=cut
+
+sub fields_and_data_records_path_components {
+    my $self = shift;
+    my @all_rows = $self->fields;
+    for my $row (@{$self->{data_records}}) {
+        my $path_col = $row->[$self->{path_col_idx}];
+        my @path_components = split(/\Q$self->{path_col_sep}\E/, $path_col);
+        my @rewritten = ();
+        for (my $i = 0; $i <= $#{$row}; $i++) {
+            if ($i != $self->{path_col_idx}) {
+                push @rewritten, $row->[$i];
+            }
+            else {
+                push @rewritten, \@path_components;
+            }
+        }
+        push @all_rows, \@rewritten;
+    }
+    return \@all_rows;
+}
+
+#    my %child_counts = map { $_->{key} => 0  } @all;
+#    for my $node (keys %child_counts) {
+#        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
+#            $child_counts{$node}++
+#                if $other_node =~ m/^\Q$node$args->{path_col_sep}\E/;
+#        }
+#    }
+
+sub child_counts {
+    my $self = shift;
+    my %child_counts = map { $_->[$self->{path_col_idx}] => 0 } @{$self->{data_records}};
+    for my $node (keys %child_counts) {
+        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
+            $child_counts{$node}++
+                if $other_node =~ m/^\Q$node$self->{path_col_sep}\E/;
+        }
+    }
+    return \%child_counts;
+}
+
+=head2 C<hashify_taxonomy()>
+
+=over 4
+
+=item * Purpose
+
+Turn a validated taxonomy into a Perl hash keyed on the column designated as
+the path column.
+
+=item * Arguments
+
+    $hashref = $self->hashify_taxonomy();
+
+Takes an optional hashref holding a list of any of the following elements:
+
+=over 4
+
+=item * C<retain_leading_path_col_sep>
+
+Boolean, defaulting to C<0>.  Typically, in hashifying the taxonomy we can
+omit the name, if any, of the root node because it's the same for all entries.
+In that case, there's probably not much to be gained by retaining the first
+instance of the C<path_col_sep>.  So, typically, a path in the incoming
+taxonomy file represented by C<|Alpha|Beta|Gamma> would be represented as key
+C<Alpha|Beta|Gamma>.
+
+However, should you wish to retain that leading C<path_col_sep>, set this
+switch to a Perl-true value.
+
+    $hashref = $self->hashify_taxonomy( {
+        retain_leading_path_col_sep => 1,
+    } );
+
+In the example above, this would result in a key spelled C<|Alpha|Beta|Gamma>.
+
+Note further that if the C<root_str> switch is set to a true value, any
+setting to C<retain_leading_path_col_sep> will be ignored.
+
+=item * C<key_delim>
+
+A string which will be used in composing the key of the hashref returned by
+this method.  The user may select this key if she does not want to use the
+value found in the incoming CSV file (which by default will be the pipe
+character (C<|>) and which may be overridden with the C<path_col_sep> argument
+to C<new()>.
+
+    $hashref = $self->hashify_taxonomy( {
+        key_delim   => q{ - },
+    } );
+
+In the above variant, a path that in the incoming taxonomy file was
+represented by C<|Alpha|Beta|Gamma> will in C<$hashref> be represented by
+C<Alpha - Beta - Gamma>.
+
+=item * C<root_str>
+
+A string which will be used in composing the key of the hashref returned by
+this method.  The user will set this switch if she wishes to have the root
+note explicitly represented.  Using this switch will automatically cause
+C<retain_leading_path_col_sep> to be ignored.
+
+Suppose the user wished to have C<All Suppliers> be the text for the root
+node.  Suppose further that the user wanted to use the string C< - > as the
+delimiter within the key.
+
+    $hashref = $self->hashify_taxonomy( {
+        root_str    => q{All Suppliers},
+        key_delim   => q{ - },
+    } );
+
+Then incoming path C<|Alpha|Beta|Gamma> would be keyed as:
+
+    All Suppliers - Alpha - Beta - Gamma
+
+=back
+
+=item * Return Value
+
+Hash reference.  The number of elements in this hash should be equal to the
+number of non-header records in the taxonomy.
+
+=back
+
+=cut
+
+sub hashify_taxonomy {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'new()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+    }
+    my %hashified;
+    for my $rec (@{$self->{all}}) {
+        my $k = $rec->{key};
+        if ($args->{root_str}) {
+            $k = $args->{root_str} . $k;
+        }
+        else {
+            if (! $args->{retain_leading_path_col_sep}) {
+                $k =~ s/^\Q$self->{path_col_sep}\E(.*)/$1/;
+            }
+        }
+        if ($args->{key_delim}) {
+            $k =~ s/\Q$self->{path_col_sep}\E/$args->{key_delim}/g;
+        }
+        $hashified{$k} = $rec->{data};
+    }
+    return \%hashified;
+}
+
+
 sub get_all_child_counts {
     my $self = shift;
     return $self->{child_counts};
@@ -855,6 +1046,12 @@ sub local_validate {
     foreach my $rule (@{$args}) {
         croak "Each element in 'rules' must be a code ref"
             unless reftype($rule) eq 'CODE';
+        # In order to be able to iterate through a list of rules, we'll need
+        # some consistent way of referring to the data structure in the
+        # taxonomy.  I'm increasingly doubtful that the current way ('all') is
+        # useful.  Do we expect the user to operate (use as substance for a
+        # rule) the rows in the incoming file?  The keys in the hashref
+        # returned by hashify_taxonomy()?
     }
     return 1;
 }

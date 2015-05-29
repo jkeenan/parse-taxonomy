@@ -19,3 +19,4 @@ nytprof.out
 *.bs
 Parse-File-Taxonomy-*.tar.gz
 /nytprof/
+*.swp
