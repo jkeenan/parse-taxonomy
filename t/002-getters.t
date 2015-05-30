@@ -7,8 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::File::Taxonomy;
-use Test::More qw(no_plan); # tests => 1;
-use Data::Dump;
+use Test::More tests => 31;
 
 my ($obj, $source, $expect);
 
@@ -140,32 +139,30 @@ my ($obj, $source, $expect);
       "|Gamma|Iota|Nu"       => 0,
     };
     my $child_counts = $obj->child_counts();
-#Data::Dump::pp($child_counts);
     is_deeply($child_counts, $expect, "Got expected child count for each node");
 
 
-#    my $child_counts = $obj->get_all_child_counts;
-#
-#    {
-#        my ($n, $node_child_count);
-#
-#        local $@;
-#        $n = 'foo';
-#        eval { $node_child_count = $obj->get_child_count($n); };
-#        like($@, qr/Node '$n' not found/,
-#            "Argument '$n' to 'get_child_count' is not a node");
-#        local $@;
-#
-#        $n = '|Gamma';
-#        $node_child_count = $obj->get_child_count($n);
-#        is($node_child_count, 2, "Node with 2 children found");
-#
-#        $n = '|Gamma|Iota|Nu';
-#        $node_child_count = $obj->get_child_count($n);
-#        is($node_child_count, 0, "Node with 0 children found");
-#    }
-} 
+    {
+        my ($n, $node_child_count);
 
+        local $@;
+        $n = 'foo';
+        eval { $node_child_count = $obj->get_child_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_child_count' is not a node");
+        local $@;
+
+        $n = '|Gamma';
+        $expect = 2;
+        $node_child_count = $obj->get_child_count($n);
+        is($node_child_count, $expect, "Node with $expect descendants found");
+
+        $n = '|Gamma|Iota|Nu';
+        $expect = 0;
+        $node_child_count = $obj->get_child_count($n);
+        is($node_child_count, $expect, "Node with $expect descendants -- leaf node -- found");
+    }
+} 
 
 {
     $source = "./t/data/alt_path_col_sep.csv";
