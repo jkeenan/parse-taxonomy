@@ -3,4 +3,6 @@ Revision history for Perl module Parse::File::Taxonomy
 0.01 Sun May 24 11:20:50 2015
     - original version; created by ExtUtils::ModuleMaker 0.52
 
+0.02 Sat May 30 14:32:34 EDT 2015
+    - first CPAN release
 

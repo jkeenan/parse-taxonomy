@@ -8,7 +8,7 @@ use utf8;
 use lib ('./lib');
 use Parse::File::Taxonomy;
 use Test::More tests => 6;
-use Data::Dump;
+#use Data::Dump;
 
 my ($obj, $source);
 

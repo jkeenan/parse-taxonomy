@@ -3,9 +3,8 @@ use strict;
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
-our $VERSION = '0.01';
-use Data::Dump;
-
+our $VERSION = '0.02';
+#use Data::Dump;
 
 =head1 NAME
 
@@ -26,6 +25,8 @@ Parse::File::Taxonomy - Validate a file for use as a taxonomy
 
 This module takes as input a plain-text file, verifies that it can be used as
 a taxonomy, then creates a Perl data structure representing that taxonomy.
+
+B<This is an ALPHA release.>
 
 =head2 Taxonomy: definition
 
@@ -195,177 +196,24 @@ The C<Parse::File::Taxonomy> constructor, C<new()>, will probe a taxonomy file
 provided to it as an argument to determine whether it can be considered a
 valid taxonomy according to the description provided above.
 
-TODO:  C<Parse::File::Taxonomy->new() should also be able to accept a reference to an
-array of CSV records already held in memory.
+TODO:  C<Parse::File::Taxonomy->new() should also be able to accept a
+reference to an array of CSV records already held in memory.
 
 TODO:  What would it mean for C<Parse::File::Taxonomy->new() to accept a
 filehandle as an argument, rather than a file?  Would that be difficult to
 implement?
 
-The user of this library, however, must be permitted to write B<additional
-user-specified validation rules> which will be applied to a taxonomy by means
-of a method called on a Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
+TODO:  The user of this library, however, must be permitted to write
+B<additional user-specified validation rules> which will be applied to a
+taxonomy by means of a C<local_validate()> method called on a
+Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
 user may choose not to proceed further even though the taxonomy meets the
 basic validation criteria implemented in the constructor.  This method will
-probably take a reference to an array of subroutines references as its
-argument.  Each such code reference will be a user-defined rule which the
-taxonomy must obey.  The method will apply each code reference to the taxonomy in
-sequence and will return with a true value if and only if all the individual
-criteria return true as well.
-
-=head2 The Parse::File::Taxonomy Object
-
-B<Note:>  This section is mostly the author thinking out loud.
-
-What methods would we like to be able to call on an object returned by the
-C<Parse::File::Taxonomy> constructor?
-
-The mere fact that C<new()> returns an object should suffice to say that the
-taxonomy file submitted represents a valid taxonomy.  Hence, we should B<not>
-need an C<is_valid()> method.
-
-If we wanted to have a method which returned a reference to a hash depicting
-the tree structure, we would have to take into consideration that in Perl we
-can auto-vivify intermediate levels of a multi-level hash:
-
-Returning to the taxonomy file depicting the data in Diagram 2:
-
-    my $hashref = {
-        'Alpha' => {
-            'Epsilon' => {
-                'Kappa'     => 1,
-            },
-            'Zeta' => {
-                'Lambda'    => 1,
-                'Mu'        => 1,
-            },
-        },
-        'Beta'  => {
-            'Eta'   => 1,
-            'Theta' => 1,
-        },
-        'Gamma' => {
-            'Iota'  => {
-                'Nu'        => 1,
-            },
-        },
-        'Delta' => 1,
-    };
-
-This data structure does a good job of representing the 7 leaf nodes in the
-taxonomy.  But suppose we wanted to represent all the other, non-C<path> fields in
-the submitted taxonomy file.  We could assign a hashref of those fields to
-each leaf node, instead of assigning C<1>.  But there wouldn't be an elegant way to represent
-those fields for the branch nodes.  The following doesn't seem right:
-
-    my $inelegant_hashref = {
-        'Alpha' => {
-            other_fields    => { ... },
-            children        => {
-                'Epsilon' => {
-                    other_fields    => { ... },
-                    children        => {
-                        'Kappa'         => { ... },
-                    }
-                },
-                'Zeta' => {
-                    other_fields    => { ... },
-                    children        => {
-                        'Lambda'        => { ... },
-                        'Mu'            => { ... },
-                    }
-                },
-            },
-        },
-        # ...
-    };
-
-What we probably want is a hash which represents the entire path for a given
-record in the taxonomy in the B<key> of a hash element, thereby permitting the other
-columns in a given record in the taxonomy file to be represented in the
-B<value> of that element.  We would want the user to be able to supply a
-string to server as delimiter for the components of that key (we would supply
-a convenient default) and we would enable the user to supply some string to
-denote the root level (which would otherwise default to not used to formulate
-the key).
-
-Suppose we say that we will use pipe as the default delimiter in this method.
-Then the taxonomy file representing Diagram 2 would be hashified as follows:
-
-    $hashref = $self->hashify_taxonomy();
-
-This would produce:
-
-    {
-        "Alpha"                 => { ... },
-        "Alpha|Epsilon"         => { ... },
-        "Alpha|Epsilon|Kappa"   => { ... },
-        "Alpha|Zeta"            => { ... },
-        "Alpha|Zeta|Lambda"     => { ... },
-        "Alpha|Zeta|Mu"         => { ... },
-        "Beta"                  => { ... },
-        "Beta|Eta"              => { ... },
-        "Beta|Theta"            => { ... },
-        "Gamma"                 => { ... },
-        "Gamma|Iota"            => { ... },
-        "Gamma|Iota|Delta"      => { ... },
-        "Delta"                 => { ... },
-    };
-
-That is better.  We have 13 elements in the hash, each corresponding to one of
-the 13 data records in the taxonomy file submitted.
-
-Suppose the user wanted to use the string C< - > in the key.  The method would
-then be called:
-
-    $hashref = $self->hashify_taxonomy( {
-        key_delim   => q{ - },
-    } );
-
-This would produce:
-
-    {
-        "Alpha"                     => { ... },
-        "Alpha - Epsilon"           => { ... },
-        "Alpha - Epsilon - Kappa"   => { ... },
-        "Alpha - Zeta"              => { ... },
-        "Alpha - Zeta - Lambda"     => { ... },
-        "Alpha - Zeta - Mu"         => { ... },
-        "Beta"                      => { ... },
-        "Beta - Eta"                => { ... },
-        "Beta - Theta"              => { ... },
-        "Gamma"                     => { ... },
-        "Gamma - Iota"              => { ... },
-        "Gamma - Iota - Delta"      => { ... },
-        "Delta"                     => { ... },
-    };
-
-If the user wanted to denote the root node with the string C<All Suppliers>
-and use the string C<|||> as the delimiter in the key, the method would be
-called like this:
-
-    $hashref = $self->hashify_taxonomy( {
-        key_delim   => q{|||},
-        root_str    => q{All Suppliers},
-    } );
-
-This would produce:
-
-    {
-        "All Suppliers|||Alpha"                     => { ... },
-        "All Suppliers|||Alpha|||Epsilon"           => { ... },
-        "All Suppliers|||Alpha|||Epsilon|||Kappa"   => { ... },
-        "All Suppliers|||Alpha|||Zeta"              => { ... },
-        "All Suppliers|||Alpha|||Zeta|||Lambda"     => { ... },
-        "All Suppliers|||Alpha|||Zeta|||Mu"         => { ... },
-        "All Suppliers|||Beta"                      => { ... },
-        "All Suppliers|||Beta|||Eta"                => { ... },
-        "All Suppliers|||Beta|||Theta"              => { ... },
-        "All Suppliers|||Gamma"                     => { ... },
-        "All Suppliers|||Gamma|||Iota"              => { ... },
-        "All Suppliers|||Gamma|||Iota|||Delta"      => { ... },
-        "All Suppliers|||Delta"                     => { ... },
-    };
+take a reference to an array of subroutines references as its argument.  Each
+such code reference will be a user-defined rule which the taxonomy must obey.
+The method will apply each code reference to the taxonomy in sequence and will
+return with a true value if and only if all the individual criteria return
+true as well.
 
 =head1 METHODS
 
