@@ -6,7 +6,12 @@ use Test::More tests => 1;
 
 my @dummy = qw(
     alpha.csv
+    alt_path_col_sep.csv
+    beta.csv
     duplicate_field.csv
+    duplicate_path.csv
+    missing_parents.csv
+    wrong_row_count.csv
 );
 
 my %seen_bad;
