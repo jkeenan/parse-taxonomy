@@ -261,10 +261,7 @@ Read-only.
 
 =cut
 
-sub fields {
-    my $self = shift;
-    return $self->{fields};
-}
+# Implemented in lib/Parse/File/Taxonomy.pm
 
 =head2 C<path_col_idx()>
 

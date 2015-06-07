@@ -280,6 +280,13 @@ The method will apply each code reference to the taxonomy in sequence and will
 return with a true value if and only if all the individual criteria return
 true as well.
 
+=cut
+
+sub fields {
+    my $self = shift;
+    return $self->{fields};
+}
+
 
 1;
 

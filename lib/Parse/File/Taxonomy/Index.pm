@@ -1,5 +1,6 @@
 package Parse::File::Taxonomy::Index;
 use strict;
+use parent qw( Parse::File::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
@@ -201,9 +202,6 @@ Read-only.
 
 =cut
 
-sub fields {
-    my $self = shift;
-    return $self->{fields};
-}
+# Implemented in lib/Parse/File/Taxonomy.pm
 
 1;
