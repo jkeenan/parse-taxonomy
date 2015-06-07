@@ -1,18 +1,19 @@
 # perl
-# t/000-test-prep.t - verify presence of files needed for testing of
-# Parse::File::Taxonomy::Path
+# t/500-test-prep.t - verify presence of files needed for testing of
+# Parse::File::Taxonomy::Index
 use strict;
 use warnings;
 use Test::More tests => 1;
 
 my @dummy = qw(
-    alpha.csv
-    alt_path_col_sep.csv
-    beta.csv
-    duplicate_field.csv
-    duplicate_path.csv
-    missing_parents.csv
-    wrong_row_count.csv
+    bad_row_count.csv
+    delta.csv
+    duplicate_header_field.csv
+    duplicate_id.csv
+    epsilon.csv
+    ids_missing_parents.csv
+    sibling_same_name.csv
+    zeta.csv
 );
 
 my %seen_bad;
