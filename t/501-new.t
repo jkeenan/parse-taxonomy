@@ -188,10 +188,6 @@ my ($obj, $source, $expect);
 
     $expect = 'name';
     is($obj->{component_col}, $expect, "component_col: $expect");
-
-    # Move this to t/002-getters.t
-    $expect = ["id","parent_id","name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
-    is_deeply($obj->fields, $expect, "Got expected columns");
 }
 
 {
@@ -218,9 +214,5 @@ my ($obj, $source, $expect);
 
     $expect = 'my_name';
     is($obj->{component_col}, $expect, "component_col: $expect");
-
-    # Move this to t/002-getters.t
-    $expect = ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
-    is_deeply($obj->fields, $expect, "Got expected columns");
 }
 

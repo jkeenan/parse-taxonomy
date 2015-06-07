@@ -391,11 +391,6 @@ or (b) use C<fields_and_data_records()>.
 
 =cut
 
-sub data_records {
-    my $self = shift;
-    return $self->{data_records};
-}
-
 =head2 C<fields_and_data_records()>
 
 =over 4

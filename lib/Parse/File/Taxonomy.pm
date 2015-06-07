@@ -287,6 +287,10 @@ sub fields {
     return $self->{fields};
 }
 
+sub data_records {
+    my $self = shift;
+    return $self->{data_records};
+}
 
 1;
 
