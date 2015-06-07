@@ -1,5 +1,6 @@
 Changes
 lib/Parse/File/Taxonomy.pm
+lib/Parse/File/Taxonomy/Path.pm
 LICENSE
 Makefile.PL
 MANIFEST

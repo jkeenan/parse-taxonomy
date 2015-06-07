@@ -6,18 +6,18 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy;
+use Parse::File::Taxonomy::Path;
 use Test::More tests => 12;
 
 my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
     local $@;
     eval {
@@ -40,11 +40,11 @@ my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
     $expect = {
         "|Alpha" => {

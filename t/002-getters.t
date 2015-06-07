@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy;
+use Parse::File::Taxonomy::Path;
 use Test::More tests => 31;
 
 my ($obj, $source, $expect);
@@ -14,11 +14,11 @@ my ($obj, $source, $expect);
 {
     $source = "./t/data/alpha.csv";
     note($source);
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
@@ -167,12 +167,12 @@ my ($obj, $source, $expect);
 {
     $source = "./t/data/alt_path_col_sep.csv";
     note($source);
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file            => $source,
         path_col_sep    => ',',
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;

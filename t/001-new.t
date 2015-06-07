@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy;
+use Parse::File::Taxonomy::Path;
 use Test::More tests => 20;
 
 my ($obj, $source);
@@ -15,7 +15,7 @@ my ($obj, $source);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new(
+        $obj = Parse::File::Taxonomy::Path->new(
             file    => $source,
         );
     };
@@ -27,7 +27,7 @@ my ($obj, $source);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( [
+        $obj = Parse::File::Taxonomy::Path->new( [
             file    => $source,
         ] );
     };
@@ -39,7 +39,7 @@ my ($obj, $source);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file            => $source,
             path_col_idx    => 'path',
         } );
@@ -52,7 +52,7 @@ my ($obj, $source);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file            => $source,
             path_col_idx    => 6,
         } );
@@ -65,7 +65,7 @@ my ($obj, $source);
     $source = "./t/data/alpha.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( { } );
+        $obj = Parse::File::Taxonomy::Path->new( { } );
     };
     like($@, qr/^Argument to 'new\(\)' must have 'file' element/,
         "'new()' died to lack of 'file' element in hashref passed as argument");
@@ -75,7 +75,7 @@ my ($obj, $source);
     $source = "./t/data/nonexistent.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file    => $source,
         } );
     };
@@ -87,7 +87,7 @@ my ($obj, $source);
     $source = "./t/data/duplicate_field.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file    => $source,
         } );
     };
@@ -99,7 +99,7 @@ my ($obj, $source);
     $source = "./t/data/duplicate_path.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file    => $source,
         } );
     };
@@ -115,7 +115,7 @@ my ($obj, $source);
     $source = "./t/data/wrong_row_count.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file    => $source,
         } );
     };
@@ -130,7 +130,7 @@ my ($obj, $source);
     $source = "./t/data/missing_parents.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy->new( {
+        $obj = Parse::File::Taxonomy::Path->new( {
             file    => $source,
         } );
     };
@@ -145,22 +145,22 @@ my ($obj, $source);
 {
     $source = "./t/data/alpha.csv";
     note($source);
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
 } 
 
 {
     $source = "./t/data/alt_path_col_sep.csv";
     note($source);
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file            => $source,
         path_col_sep    => ',',
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy');
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
 
 }
