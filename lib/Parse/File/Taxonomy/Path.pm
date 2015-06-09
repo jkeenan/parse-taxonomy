@@ -121,7 +121,19 @@ sub new {
     croak "Argument to 'new()' must have either 'file' or 'components' element but not both"
         if ($args->{file} and $args->{components});
     if ($args->{components}) {
-        # TODO
+        croak "Value of 'components' element must be hashref"
+            unless (ref($args->{components}) and reftype($args->{components}) eq 'HASH');
+        for my $k ( qw| fields data_records | ) {
+            croak "Value of 'components' element must have '$k' key-value pair"
+                unless exists $args->{components}->{$k};
+            croak "Value of '$k' element must be arrayref"
+                unless (ref($args->{components}->{$k}) and
+                    reftype($args->{components}->{$k}) eq 'ARRAY');
+        }
+        for my $row (@{$args->{components}->{data_records}}) {
+            croak "Each element in 'data_records' array must be arrayref"
+                unless (ref($row) and reftype($row) eq 'ARRAY');
+        }
     }
     if ($args->{file}) {
         croak "Cannot locate file '$args->{file}'"

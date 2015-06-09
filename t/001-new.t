@@ -8,6 +8,7 @@ use utf8;
 use lib ('./lib');
 use Parse::File::Taxonomy::Path;
 use Test::More qw(no_plan); # tests => 20;
+use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
 
@@ -187,7 +188,7 @@ my ($obj, $source, $fields, $data_records);
     {
         local $@;
         $source = "./t/data/alpha.csv";
-        eval { 
+        eval {
             $obj = Parse::File::Taxonomy::Path->new( {
                 file        => $source,
                 components  => {
@@ -200,7 +201,7 @@ my ($obj, $source, $fields, $data_records);
             qr/Argument to 'new\(\)' must have either 'file' or 'components' element but not both/,
             "'new()' failed: cannot supply both 'file' and 'components' elements in arguments");
     }
-    
+
     {
         local $@;
         eval {
@@ -212,8 +213,46 @@ my ($obj, $source, $fields, $data_records);
             } );
         };
         like($@,
-            qr//,
+            qr/Value of 'components' element must be hashref/,
             "'new()' failed: value of 'components' element must be hash ref");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => 'foo',
+            } );
+        };
+        like($@,
+            qr/Value of 'components' element must be hashref/,
+            "'new()' failed: value of 'components' element must be hash ref");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    data_records    => $data_records,
+                }
+            } );
+        };
+        like($@, qr/Value of 'components' element must have 'fields' key-value pair/,
+            "'new()' failed: 'components' element lacked 'fields' element");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields    => $fields,
+                }
+            } );
+        };
+        like($@, qr/Value of 'components' element must have 'data_records' key-value pair/,
+            "'new()' failed: 'components' element lacked 'data_records' element");
     }
 
     {
@@ -227,7 +266,7 @@ my ($obj, $source, $fields, $data_records);
             } );
         };
         like($@,
-            qr//,
+            qr/Value of 'fields' element must be arrayref/,
             "'new()' failed: value of 'fields' element must be array ref");
     }
 
@@ -242,37 +281,46 @@ my ($obj, $source, $fields, $data_records);
             } );
         };
         like($@,
-            qr//,
+            qr/Value of 'data_records' element must be arrayref/,
             "'new()' failed: value of 'data_records' element must be array ref");
     }
 
     {
         local $@;
-        eval { 
+        eval {
             $obj = Parse::File::Taxonomy::Path->new( {
                 components  => {
-                    data_records    => $data_records,
+                    fields          => $fields,
+                    data_records    => [
+                        [",Alpha", "", "", "", "", ""],
+                        'foo'
+                    ],
                 }
             } );
         };
-        like($@, qr//,
-            "'new()' failed: 'components' element lacked 'fields' element");
+        like($@,
+            qr/Each element in 'data_records' array must be arrayref/,
+            "'new()' failed: element in array 'data_records' element must be array ref");
     }
-    
+
     {
         local $@;
-        eval { 
+        eval {
             $obj = Parse::File::Taxonomy::Path->new( {
                 components  => {
-                    fields    => $fields,
+                    fields          => $fields,
+                    data_records    => [
+                        [",Alpha", "", "", "", "", ""],
+                        { foo => 'bar' },
+                    ],
                 }
             } );
         };
-        like($@, qr//,
-            "'new()' failed: 'components' element lacked 'data_records' element");
+        like($@,
+            qr/Each element in 'data_records' array must be arrayref/,
+            "'new()' failed: element in array 'data_records' element must be array ref");
     }
-    
-    
+
     {
         $obj = Parse::File::Taxonomy::Path->new( {
             components  => {
