@@ -120,6 +120,23 @@ sub new {
         unless ($args->{file} or $args->{components});
     croak "Argument to 'new()' must have either 'file' or 'components' element but not both"
         if ($args->{file} and $args->{components});
+
+    if (exists $args->{path_col_idx}) {
+        croak "Argument to 'path_col_idx' must be integer"
+            unless $args->{path_col_idx} =~ m/^\d+$/;
+    }
+    $data{path_col_idx} = delete $args->{path_col_idx} || 0;
+    $data{path_col_sep} = exists $args->{path_col_sep}
+        ? $args->{path_col_sep}
+        : '|';
+    if (exists $args->{path_col_sep}) {
+        $data{path_col_sep} = $args->{path_col_sep};
+        delete $args->{path_col_sep};
+    }
+    else {
+        $data{path_col_sep} = '|';
+    }
+
     if ($args->{components}) {
         croak "Value of 'components' element must be hashref"
             unless (ref($args->{components}) and reftype($args->{components}) eq 'HASH');
@@ -134,27 +151,16 @@ sub new {
             croak "Each element in 'data_records' array must be arrayref"
                 unless (ref($row) and reftype($row) eq 'ARRAY');
         }
+        # We don't want to stick $args->{components} into the object as is.
+        # Rather, we want to insert 'fields' and 'data_records' for
+        # consistency with the 'file' interface.  But to do that we first need
+        # to impose the same validations that we do for the 'file' interface.
+        # We also need to populate 'path_col'.
     }
-    if ($args->{file}) {
+    else {
         croak "Cannot locate file '$args->{file}'"
             unless (-f $args->{file});
         $data{file} = delete $args->{file};
-
-        if (exists $args->{path_col_idx}) {
-            croak "Argument to 'path_col_idx' must be integer"
-                unless $args->{path_col_idx} =~ m/^\d+$/;
-        }
-        $data{path_col_idx} = delete $args->{path_col_idx} || 0;
-        $data{path_col_sep} = exists $args->{path_col_sep}
-            ? $args->{path_col_sep}
-            : '|';
-        if (exists $args->{path_col_sep}) {
-            $data{path_col_sep} = $args->{path_col_sep};
-            delete $args->{path_col_sep};
-        }
-        else {
-            $data{path_col_sep} = '|';
-        }
 
         # We've now handled all the Parse::File::Taxonomy::Path-specific options.
         # Any remaining options are assumed to be intended for Text::CSV::new().
@@ -166,6 +172,8 @@ sub new {
             or croak "Unable to open '$data{file}' for reading";
         my $header_ref = $csv->getline($IN);
 
+        # AAA start of validations which we have to replicate in the
+        # 'components' interface
         croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data{file}'"
             if $data{path_col_idx} > $#{$header_ref};
 
@@ -185,7 +193,7 @@ sub new {
         my $data_records = $csv->getline_all($IN);
         close $IN or croak "Unable to close after reading";
 
-
+        # BBB
         # Confirm no duplicate entries in column holding path:
         # Confirm all rows have same number of columns as header:
         my @bad_count_records = ();
@@ -244,6 +252,7 @@ ERROR_MSG_ORPHAN
             $error_msg .= "  $path:  $missing_parents{$path}\n";
         }
         croak $error_msg if scalar(keys %missing_parents);
+        # BBB end of validations
         $data{data_records} = $data_records;
     }
 
@@ -251,8 +260,8 @@ ERROR_MSG_ORPHAN
     while (my ($k,$v) = each %{$args}) {
         $data{$k} = $v;
     }
-#say STDERR "AAA:";
-#Data::Dump::pp(\%data);
+say STDERR "AAA:";
+Data::Dump::pp(\%data);
     return bless \%data, $class;
 }
 
