@@ -321,6 +321,10 @@ my ($obj, $source, $fields, $data_records);
             "'new()' failed: element in array 'data_records' element must be array ref");
     }
 
+    # TODO: Write tests for the failure conditions triggered in
+    # _prepare_fields() and _prepare_data_records() for components interface
+
+
     {
         $obj = Parse::File::Taxonomy::Path->new( {
             components  => {

@@ -112,7 +112,7 @@ in the header row.
 
 sub new {
     my ($class, $args) = @_;
-    my %data;
+    my $data;
 
     croak "Argument to 'new()' must be hashref"
         unless (ref($args) and reftype($args) eq 'HASH');
@@ -125,16 +125,16 @@ sub new {
         croak "Argument to 'path_col_idx' must be integer"
             unless $args->{path_col_idx} =~ m/^\d+$/;
     }
-    $data{path_col_idx} = delete $args->{path_col_idx} || 0;
-    $data{path_col_sep} = exists $args->{path_col_sep}
+    $data->{path_col_idx} = delete $args->{path_col_idx} || 0;
+    $data->{path_col_sep} = exists $args->{path_col_sep}
         ? $args->{path_col_sep}
         : '|';
     if (exists $args->{path_col_sep}) {
-        $data{path_col_sep} = $args->{path_col_sep};
+        $data->{path_col_sep} = $args->{path_col_sep};
         delete $args->{path_col_sep};
     }
     else {
-        $data{path_col_sep} = '|';
+        $data->{path_col_sep} = '|';
     }
 
     if ($args->{components}) {
@@ -156,11 +156,15 @@ sub new {
         # consistency with the 'file' interface.  But to do that we first need
         # to impose the same validations that we do for the 'file' interface.
         # We also need to populate 'path_col'.
+        _prepare_fields($data, $args->{components}->{fields});
+        my $these_data_records = $args->{components}->{data_records};
+        delete $args->{components};
+        _prepare_data_records($data, $these_data_records, $args);
     }
     else {
         croak "Cannot locate file '$args->{file}'"
             unless (-f $args->{file});
-        $data{file} = delete $args->{file};
+        $data->{file} = delete $args->{file};
 
         # We've now handled all the Parse::File::Taxonomy::Path-specific options.
         # Any remaining options are assumed to be intended for Text::CSV::new().
@@ -168,101 +172,108 @@ sub new {
         $args->{binary} = 1;
         my $csv = Text::CSV->new ( $args )
             or croak "Cannot use CSV: ".Text::CSV->error_diag ();
-        open my $IN, "<", $data{file}
-            or croak "Unable to open '$data{file}' for reading";
+        open my $IN, "<", $data->{file}
+            or croak "Unable to open '$data->{file}' for reading";
         my $header_ref = $csv->getline($IN);
 
-        # AAA start of validations which we have to replicate in the
-        # 'components' interface
-        croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data{file}'"
-            if $data{path_col_idx} > $#{$header_ref};
-
-        my %header_fields_seen;
-        for (@{$header_ref}) {
-            if (exists $header_fields_seen{$_}) {
-                croak "Duplicate field '$_' observed in '$data{file}'";
-            }
-            else {
-                $header_fields_seen{$_}++;
-            }
-        }
-        $data{fields} = $header_ref;
-        my $field_count = scalar(@{$data{fields}});
-        $data{path_col} = $data{fields}->[$data{path_col_idx}];
-
+        _prepare_fields($data, $header_ref);
         my $data_records = $csv->getline_all($IN);
         close $IN or croak "Unable to close after reading";
+        _prepare_data_records($data, $data_records, $args);
+    }
 
-        # BBB
-        # Confirm no duplicate entries in column holding path:
-        # Confirm all rows have same number of columns as header:
-        my @bad_count_records = ();
-        my %paths_seen = ();
-        for my $rec (@{$data_records}) {
-            $paths_seen{$rec->[$data{path_col_idx}]}++;
-            my $this_row_count = scalar(@{$rec});
-            if ($this_row_count != $field_count) {
-                push @bad_count_records,
-                    [ $rec->[$data{path_col_idx}], $this_row_count ];
-            }
+    while (my ($k,$v) = each %{$args}) {
+        $data->{$k} = $v;
+    }
+#say STDERR "AAA:";
+#Data::Dump::pp($data);
+    return bless $data, $class;
+}
+
+sub _prepare_fields {
+    my ($data, $header_ref) = @_;
+    croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data->{file}'"
+        if $data->{path_col_idx} > $#{$header_ref};
+
+    my %header_fields_seen;
+    for (@{$header_ref}) {
+        if (exists $header_fields_seen{$_}) {
+            croak "Duplicate field '$_' observed in '$data->{file}'";
         }
-        my @dupe_paths = ();
-        for my $path (sort keys %paths_seen) {
-            push @dupe_paths, $path if $paths_seen{$path} > 1;
+        else {
+            $header_fields_seen{$_}++;
         }
-        my $error_msg = <<ERROR_MSG_DUPE;
+    }
+    $data->{fields} = $header_ref;
+    $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
+    return $data;
+}
+
+sub _prepare_data_records {
+    # Confirm no duplicate entries in column holding path:
+    # Confirm all rows have same number of columns as header:
+    my ($data, $data_records, $args) = @_;
+    my @bad_count_records = ();
+    my %paths_seen = ();
+    my $field_count = scalar(@{$data->{fields}});
+    for my $rec (@{$data_records}) {
+        $paths_seen{$rec->[$data->{path_col_idx}]}++;
+        my $this_row_count = scalar(@{$rec});
+        if ($this_row_count != $field_count) {
+            push @bad_count_records,
+                [ $rec->[$data->{path_col_idx}], $this_row_count ];
+        }
+    }
+    my @dupe_paths = ();
+    for my $path (sort keys %paths_seen) {
+        push @dupe_paths, $path if $paths_seen{$path} > 1;
+    }
+    my $error_msg = <<ERROR_MSG_DUPE;
 No duplicate entries are permitted in column designated as path.
 The following entries appear the number of times shown:
 ERROR_MSG_DUPE
-        for my $path (@dupe_paths) {
-            $error_msg .= "  $path:" . sprintf("  %6s\n" => $paths_seen{$path});
-        }
-        croak $error_msg if @dupe_paths;
+    for my $path (@dupe_paths) {
+        $error_msg .= "  $path:" . sprintf("  %6s\n" => $paths_seen{$path});
+    }
+    croak $error_msg if @dupe_paths;
 
-        $error_msg = <<ERROR_MSG_WRONG_COUNT;
+    $error_msg = <<ERROR_MSG_WRONG_COUNT;
 Header row had $field_count records.  The following records had different counts:
 ERROR_MSG_WRONG_COUNT
-        for my $rec (@bad_count_records) {
-            $error_msg .= "  $rec->[0]: $rec->[1]\n";
-        }
-        croak $error_msg if @bad_count_records;
+    for my $rec (@bad_count_records) {
+        $error_msg .= "  $rec->[0]: $rec->[1]\n";
+    }
+    croak $error_msg if @bad_count_records;
 
-        # Confirm each node appears in taxonomy:
-        my $path_args = { map { $_ => $args->{$_} } keys %{$args} };
-        $path_args->{sep_char} = $data{path_col_sep};
-        my $path_csv = Text::CSV->new ( $path_args )
-            or croak "Cannot use CSV: ".Text::CSV->error_diag ();
-        my %missing_parents = ();
-        for my $path (sort keys %paths_seen) {
-            my $status  = $path_csv->parse($path);
-            my @columns = $path_csv->fields();
-            if (@columns > 2) {
-                my $parent =
-                    join($path_args->{sep_char} => @columns[0 .. ($#columns - 1)]);
-                unless (exists $paths_seen{$parent}) {
-                    $missing_parents{$path} = $parent;
-                }
+    # Confirm each node appears in taxonomy:
+    my $path_args = { map { $_ => $args->{$_} } keys %{$args} };
+    $path_args->{sep_char} = $data->{path_col_sep};
+    my $path_csv = Text::CSV->new ( $path_args )
+        or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+    my %missing_parents = ();
+    for my $path (sort keys %paths_seen) {
+        my $status  = $path_csv->parse($path);
+        my @columns = $path_csv->fields();
+        if (@columns > 2) {
+            my $parent =
+                join($path_args->{sep_char} => @columns[0 .. ($#columns - 1)]);
+            unless (exists $paths_seen{$parent}) {
+                $missing_parents{$path} = $parent;
             }
         }
-        $error_msg = <<ERROR_MSG_ORPHAN;
+    }
+    $error_msg = <<ERROR_MSG_ORPHAN;
 Each node in the taxonomy must have a parent.
 The following nodes lack the expected parent:
 ERROR_MSG_ORPHAN
-        for my $path (sort keys %missing_parents) {
-            $error_msg .= "  $path:  $missing_parents{$path}\n";
-        }
-        croak $error_msg if scalar(keys %missing_parents);
-        # BBB end of validations
-        $data{data_records} = $data_records;
+    for my $path (sort keys %missing_parents) {
+        $error_msg .= "  $path:  $missing_parents{$path}\n";
     }
+    croak $error_msg if scalar(keys %missing_parents);
+    # BBB end of validations
+    $data->{data_records} = $data_records;
 
-
-    while (my ($k,$v) = each %{$args}) {
-        $data{$k} = $v;
-    }
-say STDERR "AAA:";
-Data::Dump::pp(\%data);
-    return bless \%data, $class;
+    return $data;
 }
 
 =head2 C<fields()>
