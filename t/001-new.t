@@ -260,6 +260,21 @@ my ($obj, $source, $fields, $data_records);
         eval {
             $obj = Parse::File::Taxonomy::Path->new( {
                 components  => {
+                    fields          => 'foo',
+                    data_records    => $data_records,
+                }
+            } );
+        };
+        like($@,
+            qr/Value of 'fields' element must be arrayref/,
+            "'new()' failed: value of 'fields' element must be array ref");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
                     fields          => { hash => ref},
                     data_records    => $data_records,
                 }
