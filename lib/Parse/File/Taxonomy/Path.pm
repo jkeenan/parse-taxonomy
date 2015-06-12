@@ -156,7 +156,7 @@ sub new {
         # consistency with the 'file' interface.  But to do that we first need
         # to impose the same validations that we do for the 'file' interface.
         # We also need to populate 'path_col'.
-        _prepare_fields($data, $args->{components}->{fields});
+        _prepare_fields($data, $args->{components}->{fields}, 1);
         my $these_data_records = $args->{components}->{data_records};
         delete $args->{components};
         _prepare_data_records($data, $these_data_records, $args);
@@ -185,26 +185,40 @@ sub new {
     while (my ($k,$v) = each %{$args}) {
         $data->{$k} = $v;
     }
-#say STDERR "AAA:";
-#Data::Dump::pp($data);
     return bless $data, $class;
 }
 
 sub _prepare_fields {
-    my ($data, $header_ref) = @_;
-    croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data->{file}'"
-        if $data->{path_col_idx} > $#{$header_ref};
+    my ($data, $fields_ref, $components) = @_;
+    if (! $components) {
+        croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data->{file}'"
+            if $data->{path_col_idx} > $#{$fields_ref};
 
-    my %header_fields_seen;
-    for (@{$header_ref}) {
-        if (exists $header_fields_seen{$_}) {
-            croak "Duplicate field '$_' observed in '$data->{file}'";
-        }
-        else {
-            $header_fields_seen{$_}++;
+        my %header_fields_seen;
+        for (@{$fields_ref}) {
+            if (exists $header_fields_seen{$_}) {
+                croak "Duplicate field '$_' observed in '$data->{file}'";
+            }
+            else {
+                $header_fields_seen{$_}++;
+            }
         }
     }
-    $data->{fields} = $header_ref;
+    else {
+        croak "Argument to 'path_col_idx' exceeds index of last field in 'fields' array ref"
+            if $data->{path_col_idx} > $#{$fields_ref};
+
+        my %header_fields_seen;
+        for (@{$fields_ref}) {
+            if (exists $header_fields_seen{$_}) {
+                croak "Duplicate field '$_' observed in 'fields' array ref";
+            }
+            else {
+                $header_fields_seen{$_}++;
+            }
+        }
+    }
+    $data->{fields} = $fields_ref;
     $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
     return $data;
 }

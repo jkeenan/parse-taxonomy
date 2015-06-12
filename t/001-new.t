@@ -321,9 +321,130 @@ my ($obj, $source, $fields, $data_records);
             "'new()' failed: element in array 'data_records' element must be array ref");
     }
 
-    # TODO: Write tests for the failure conditions triggered in
-    # _prepare_fields() and _prepare_data_records() for components interface
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields          => $fields,
+                    data_records    => $data_records,
+                },
+                path_col_idx    => 6,
+            } );
+        };
+        like($@, qr/Argument to 'path_col_idx' exceeds index of last field in 'fields' array ref/,
+            "'new()' died due to 'path_col_idx' higher than last index in 'fields' arrayref");
+    }
 
+    {
+        local $@;
+        my $dupe_field = 'gender';
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields        => [ "path","nationality",$dupe_field,"age",$dupe_field,"id_no" ],
+                    data_records  => $data_records,
+                },
+            } );
+        };
+        like($@, qr/^Duplicate field '$dupe_field' observed in 'fields' array ref/,
+            "'new()' died due to duplicate column name in 'fields' array ref");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields        => $fields,
+                    data_records  => [
+                       ["|Alpha","","","","",""],
+                       ["|Alpha|Epsilon","","","","",""],
+                       ["|Alpha|Epsilon|Kappa","","","","",""],
+                       ["|Alpha|Zeta","","","","",""],
+                       ["|Alpha|Zeta|Lambda","","","","",""],
+                       ["|Alpha|Zeta|Mu","","","","",""],
+                       ["|Beta","","","","",""],
+                       ["|Beta|Eta","","","","",""],
+                       ["|Beta|Theta","","","","",""],
+                       ["|Gamma","","","","",""],
+                       ["|Gamma|Iota","","","","",""],
+                       ["|Gamma|Iota|Nu","","","","",""],
+                       ["|Delta","","","","",""],
+                       ["|Alpha|Epsilon|Kappa","","","","",""],
+                       ["|Gamma|Iota","","","","",""],
+                       ["|Alpha|Epsilon|Kappa","","","","",""],
+                    ],
+                },
+            } );
+        };
+        like($@, qr/^No duplicate entries are permitted in column designated as path/s,
+            "'new()' died due to duplicate values in column designated as 'path'");
+        like($@, qr/\|Alpha\|Epsilon\|Kappa/s,
+            "Duplicate path identified");
+        like($@, qr/\|Gamma\|Iota/s,
+            "Duplicate path identified");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields        => $fields,
+                    data_records  => [
+                      ["|Alpha","","","","","","foo"],
+                      ["|Alpha|Epsilon","","","","bar"],
+                      ["|Alpha|Epsilon|Kappa","","","","",""],
+                      ["|Alpha|Zeta","","","","",""],
+                      ["|Alpha|Zeta|Lambda","","","","",""],
+                      ["|Alpha|Zeta|Mu","","","","",""],
+                      ["|Beta","","","","",""],
+                      ["|Beta|Eta","","","","",""],
+                      ["|Beta|Theta","","","","",""],
+                      ["|Gamma","","","","",""],
+                      ["|Gamma|Iota","","","","",""],
+                      ["|Gamma|Iota|Nu","","","","",""],
+                      ["|Delta","","","","",""],
+                    ],
+                },
+            } );
+        };
+        like($@, qr/^Header row had \d+ records.  The following records had different counts:/s,
+            "'new()' died due to wrong number of columns in one or more rows");
+        like($@, qr/\|Alpha:\s+7/s, "Identified record with too many columns");
+        like($@, qr/\|Alpha\|Epsilon:\s+5/s, "Identified record with too few columns");
+    }
+
+    {
+        local $@;
+        eval {
+            $obj = Parse::File::Taxonomy::Path->new( {
+                components  => {
+                    fields        => $fields,
+                    data_records  => [
+                      ["|Alpha","","","","",""],
+                      ["|Alpha|Epsilon|Kappa","","","","",""],
+                      ["|Alpha|Zeta","","","","",""],
+                      ["|Alpha|Zeta|Lambda","","","","",""],
+                      ["|Alpha|Zeta|Mu","","","","",""],
+                      ["|Beta","","","","",""],
+                      ["|Beta|Eta","","","","",""],
+                      ["|Beta|Theta","","","","",""],
+                      ["|Gamma","","","","",""],
+                      ["|Gamma|Iota|Nu","","","","",""],
+                      ["|Delta","","","","",""],
+                    ],
+                },
+            } );
+        };
+        like($@, qr/^Each node in the taxonomy must have a parent/s,
+            "'new()' died due to entries in column designated as 'path' lacking parents");
+        like($@, qr/\|Alpha\|Epsilon\|Kappa:\s+\|Alpha\|Epsilon/s,
+            "Path lacking parent identified");
+        like($@, qr/\|Gamma\|Iota\|Nu:\s+\|Gamma\|Iota/s,
+            "Duplicate path identified");
+    }
 
     {
         $obj = Parse::File::Taxonomy::Path->new( {
