@@ -429,6 +429,38 @@ my ($obj, $source, $expect, $fields, $data_records);
 
     {
         local $@;
+        $expect = 'my_parent_id';
+        eval {
+            $obj = Parse::File::Taxonomy::Index->new( {
+                components  => {
+                    fields        => $fields,
+                    data_records  => $data_records,
+                },
+                parent_id_col  => $expect,
+            } );
+        };
+        like($@, qr/Could not locate columns in header to match required arguments.*parent_id_col.*$expect/s,
+            "new() died: parent_id_col '$expect' not found in header row");
+    }
+
+    {
+        local $@;
+        $expect = 'my_component_id';
+        eval {
+            $obj = Parse::File::Taxonomy::Index->new( {
+                components  => {
+                    fields        => $fields,
+                    data_records  => $data_records,
+                },
+                component_col  => $expect,
+            } );
+        };
+        like($@, qr/Could not locate columns in header to match required arguments.*component_col.*$expect/s,
+            "new() died: component_col '$expect' not found in header row");
+    }
+
+    {
+        local $@;
         eval {
             $obj = Parse::File::Taxonomy::Index->new( {
                 components  => {
