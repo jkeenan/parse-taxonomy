@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::File::Taxonomy::Path;
-use Test::More tests => 12;
+use Test::More tests => 15;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -709,6 +709,37 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
+    $hashified = $obj->hashify_taxonomy( {
+        key_delim => ' - ',
+        root_str => 'All Suppliers',
+    } );
+    is_deeply($hashified, $expect, "Got expected taxonomy (key_delim and root_str)");
+
+    note("'components' interface");
+    $obj = Parse::File::Taxonomy::Path->new( {
+#        file    => $source,
+        components => {
+            fields          => ["path","vertical","currency_code","wholesale_price","retail_price","is_actionable"],
+            data_records    => [
+              ["|Alpha","Auto","USD","","","0"],
+              ["|Alpha|Epsilon","Auto","USD","","","0"],
+              ["|Alpha|Epsilon|Kappa","Auto","USD","0.50","0.60","1"],
+              ["|Alpha|Zeta","Auto","USD","","","0"],
+              ["|Alpha|Zeta|Lambda","Auto","USD","0.40","0.50","1"],
+              ["|Alpha|Zeta|Mu","Auto","USD","0.40","0.50","0"],
+              ["|Beta","Electronics","JPY","","","0"],
+              ["|Beta|Eta","Electronics","JPY","0.35","0.45","1"],
+              ["|Beta|Theta","Electronics","JPY","0.35","0.45","1"],
+              ["|Gamma","Travel","EUR","","","0"],
+              ["|Gamma|Iota","Travel","EUR","","","0"],
+              ["|Gamma|Iota|Nu","Travel","EUR","0.60","0.75","1"],
+              ["|Delta","Life Insurance","USD","0.25","0.30","1"],
+            ],
+        },
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+
     $hashified = $obj->hashify_taxonomy( {
         key_delim => ' - ',
         root_str => 'All Suppliers',
