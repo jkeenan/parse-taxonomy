@@ -15,6 +15,6 @@ Be able to determine whether a t-b-p is equivalent to a t-b-y.
 III.  Be able to provide as input either a CSV file or a pair of Perl data
 structures representing what you would get if you applied Text::CSV to the
 file.  Namely, an array ref holding the column names, and a ref to an array of
-array refs holding the data records of each row.
+array refs holding the data records of each row.  DONE for 'path' interface.
 
 
