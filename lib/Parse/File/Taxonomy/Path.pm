@@ -669,9 +669,10 @@ taxonomy -- which in turn is the way it was spelled in the incoming file.
 That is, a path in the taxonomy spelled C<|Alpha|Beta|Gamma> will be spelled
 as a key in exactly the same way.
 
-However, since in many cases (including the example above) the root node of the taxonomy will be empty, the
-user may wish to remove the first instance of C<path_col_sep>.  The user would
-do so by setting C<remove_leading_path_col_sep> to a true value.
+However, since in many cases (including the example above) the root node of
+the taxonomy will be empty, the user may wish to remove the first instance of
+C<path_col_sep>.  The user would do so by setting
+C<remove_leading_path_col_sep> to a true value.
 
     $hashref = $self->hashify_taxonomy( {
         remove_leading_path_col_sep => 1,
@@ -765,13 +766,50 @@ sub local_validate {
 
     croak "Argument to local_validate() must be an array ref"
         unless defined $args and ref($args) eq 'ARRAY';
-    foreach my $rule (@{$args}) {
-        croak "Each element in arrayref of arguments to local_validate() must be a code ref"
-            unless ref($rule) eq 'CODE';
-    }
-    # TODO: implementation; documentation
 
-    return 1;
+    my @local_validations = ();
+    for my $rule (@{$args}) {
+        croak "Each element in arrayref of arguments to local_validate() must be a hash ref"
+            unless ref($rule) eq 'HASH';
+        for my $k (qw| description rule |) {
+            croak "Each hashref in arguments to local_validate() must have a '$k' key-value pair"
+                unless exists $rule->{$k};
+        }
+        my $rv = &{$rule->{rule}};
+        push @local_validations, {
+            description => $rule->{description},
+            return => $rv,
+            boolean => !! $rv,
+        };
+    }
+    $self->{local_validations} = \@local_validations;
+    my $success = 1;
+    for my $result (@local_validations) {
+        if (! $result->{boolean}) {
+            $success = 0;
+            last;
+        }
+    }
+    return $success;
+}
+
+sub get_local_validations {
+    my $self = shift;
+    return $self->{local_validations} if exists $self->{local_validations};
+    return;
+}
+
+sub get_field_position {
+    my ($self, $f) = @_;
+    my $fields = $self->fields;
+    my $idx;
+    for (my $i=0; $i<=$#{$fields}; $i++) {
+        if ($fields->[$i] eq $f) {
+            $idx = $i;
+            last;
+        }
+    }
+    return $idx;
 }
 
 1;

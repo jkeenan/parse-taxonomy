@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::File::Taxonomy::Path;
-use Test::More tests => 62;
+use Test::More qw(no_plan); # tests => 62;
 
 my ($obj, $source, $expect);
 
@@ -162,6 +162,15 @@ my ($obj, $source, $expect);
         $node_child_count = $obj->get_child_count($n);
         is($node_child_count, $expect, "Node with $expect descendants -- leaf node -- found");
     }
+
+    {
+        $expect = 4;
+        is($obj->get_field_position('income'), $expect,
+            "'income' found in position $expect as expected");
+        ok(! defined($obj->get_field_position('foo')),
+            "get_field_position() returned undef as expected");
+    }
+
 } 
 
 {
@@ -362,7 +371,6 @@ my ($obj, $source, $expect);
 } 
 
 {
-#    $source = "./t/data/alt_path_col_sep.csv";
     note("'components' interface; alternate path_col_sep");
     $obj = Parse::File::Taxonomy::Path->new( {
         components => {
