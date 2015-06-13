@@ -121,7 +121,7 @@ my ($obj, $source, $fields, $data_records);
         } );
     };
 
-    like($@, qr/^Header row had \d+ records.  The following records had different counts:/s,
+    like($@, qr/^Header row has \d+ records.  The following records had different counts:/s,
         "'new()' died due to wrong number of columns in one or more rows");
     like($@, qr/\|Alpha:\s+7/s, "Identified record with too many columns");
     like($@, qr/\|Alpha\|Epsilon:\s+5/s, "Identified record with too few columns");
@@ -425,7 +425,7 @@ my ($obj, $source, $fields, $data_records);
                 },
             } );
         };
-        like($@, qr/^Header row had \d+ records.  The following records had different counts:/s,
+        like($@, qr/^Header row has \d+ records.  The following records had different counts:/s,
             "'new()' died due to wrong number of columns in one or more rows");
         like($@, qr/\|Alpha:\s+7/s, "Identified record with too many columns");
         like($@, qr/\|Alpha\|Epsilon:\s+5/s, "Identified record with too few columns");
