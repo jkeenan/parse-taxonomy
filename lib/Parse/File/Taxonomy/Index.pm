@@ -5,6 +5,10 @@ use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 our $VERSION = '0.01';
+use Parse::File::Taxonomy::Auxiliary qw(
+    path_check_fields
+    components_check_fields
+);
 #use Data::Dump;
 
 =head1 NAME
@@ -46,6 +50,16 @@ sub new {
     croak "Argument to 'new()' must have either 'file' or 'components' element but not both"
         if ($args->{file} and $args->{components});
 
+    $data->{id_col}           = $args->{id_col}
+                                ? delete $args->{id_col}
+                                : 'id';
+    $data->{parent_id_col}    = $args->{parent_id_col}
+                                ? delete $args->{parent_id_col}
+                                : 'parent_id';
+    $data->{component_col}    = $args->{component_col}
+                                ? delete $args->{component_col}
+                                : 'name';
+
     if ($args->{components}) {
         croak "Value of 'components' element must be hashref"
             unless (ref($args->{components}) and reftype($args->{components}) eq 'HASH');
@@ -60,15 +74,6 @@ sub new {
             croak "Each element in 'data_records' array must be arrayref"
                 unless (ref($row) and reftype($row) eq 'ARRAY');
         }
-        $data->{id_col}           = $args->{id_col}
-                                    ? delete $args->{id_col}
-                                    : 'id';
-        $data->{parent_id_col}    = $args->{parent_id_col}
-                                    ? delete $args->{parent_id_col}
-                                    : 'parent_id';
-        $data->{component_col}    = $args->{component_col}
-                                    ? delete $args->{component_col}
-                                    : 'name';
         _prepare_fields($data, $args->{components}->{fields}, 1);
         my $these_data_records = $args->{components}->{data_records};
         delete $args->{components};
@@ -78,16 +83,6 @@ sub new {
         croak "Cannot locate file '$args->{file}'"
             unless (-f $args->{file});
         $data->{file}             = delete $args->{file};
-        $data->{id_col}           = $args->{id_col}
-                                    ? delete $args->{id_col}
-                                    : 'id';
-        $data->{parent_id_col}    = $args->{parent_id_col}
-                                    ? delete $args->{parent_id_col}
-                                    : 'parent_id';
-        $data->{component_col}    = $args->{component_col}
-                                    ? delete $args->{component_col}
-                                    : 'name';
-
         $args->{binary} = 1;
         my $csv = Text::CSV->new ( $args )
             or croak "Cannot use CSV: ".Text::CSV->error_diag ();
@@ -110,63 +105,37 @@ sub new {
 sub _prepare_fields {
     my ($data, $fields_ref, $components) = @_;
     if (! $components) {
-        my %header_fields_seen;
-        for (@{$fields_ref}) {
-            if (exists $header_fields_seen{$_}) {
-                croak "Duplicate field '$_' observed in '$data->{file}'";
-            }
-            else {
-                $header_fields_seen{$_}++;
-            }
-        }
-        my %col2idx = map { $fields_ref->[$_] => $_ } (0 .. $#{$fields_ref});
-        my %missing_columns = ();
-        my %main_columns = map { $_ => 1 } ( qw| id_col parent_id_col component_col | );
-        for my $c ( keys %main_columns ) {
-            if (! exists $col2idx{$data->{$c}}) {
-                $missing_columns{$c} = $data->{$c};
-            }
-        }
-        my $error_msg = "Could not locate columns in header to match required arguments:";
-        for my $c (sort keys %missing_columns) {
-            $error_msg .= "\n  $c: $missing_columns{$c}";
-        }
-        croak $error_msg if scalar keys %missing_columns;
-        $data->{fields} = $fields_ref;
-        for my $c (keys %main_columns) {
-            $data->{$c.'_idx'} = $col2idx{$data->{$c}};
-        }
+        path_check_fields($data, $fields_ref);
+        _check_required_columns($data, $fields_ref);
     }
     else { # 'components' interface
-        my %header_fields_seen;
-        for (@{$fields_ref}) {
-            if (exists $header_fields_seen{$_}) {
-                croak "Duplicate field '$_' observed in 'fields' array ref";
-            }
-            else {
-                $header_fields_seen{$_}++;
-            }
-        }
-        my %col2idx = map { $fields_ref->[$_] => $_ } (0 .. $#{$fields_ref});
-        my %missing_columns = ();
-        my %main_columns = map { $_ => 1 } ( qw| id_col parent_id_col component_col | );
-        for my $c ( keys %main_columns ) {
-            if (! exists $col2idx{$data->{$c}}) {
-                $missing_columns{$c} = $data->{$c};
-            }
-        }
-        my $error_msg = "Could not locate columns in header to match required arguments:";
-        for my $c (sort keys %missing_columns) {
-            $error_msg .= "\n  $c: $missing_columns{$c}";
-        }
-        croak $error_msg if scalar keys %missing_columns;
-        $data->{fields} = $fields_ref;
-        for my $c (keys %main_columns) {
-            $data->{$c.'_idx'} = $col2idx{$data->{$c}};
-        }
+        components_check_fields($data, $fields_ref);
+        _check_required_columns($data, $fields_ref);
     }
     $data->{fields} = $fields_ref;
     $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
+    return $data;
+}
+
+sub _check_required_columns {
+    my ($data, $fields_ref) = @_;
+    my %col2idx = map { $fields_ref->[$_] => $_ } (0 .. $#{$fields_ref});
+    my %missing_columns = ();
+    my %main_columns = map { $_ => 1 } ( qw| id_col parent_id_col component_col | );
+    for my $c ( keys %main_columns ) {
+        if (! exists $col2idx{$data->{$c}}) {
+            $missing_columns{$c} = $data->{$c};
+        }
+    }
+    my $error_msg = "Could not locate columns in header to match required arguments:";
+    for my $c (sort keys %missing_columns) {
+        $error_msg .= "\n  $c: $missing_columns{$c}";
+    }
+    croak $error_msg if scalar keys %missing_columns;
+    $data->{fields} = $fields_ref;
+    for my $c (keys %main_columns) {
+        $data->{$c.'_idx'} = $col2idx{$data->{$c}};
+    }
     return $data;
 }
 

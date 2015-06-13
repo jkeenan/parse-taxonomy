@@ -5,6 +5,10 @@ use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 our $VERSION = '0.02';
+use Parse::File::Taxonomy::Auxiliary qw(
+    path_check_fields
+    components_check_fields
+);
 use Data::Dump;
 
 =head1 NAME
@@ -191,36 +195,26 @@ sub new {
 sub _prepare_fields {
     my ($data, $fields_ref, $components) = @_;
     if (! $components) {
-        croak "Argument to 'path_col_idx' exceeds index of last field in header row in '$data->{file}'"
-            if $data->{path_col_idx} > $#{$fields_ref};
-
-        my %header_fields_seen;
-        for (@{$fields_ref}) {
-            if (exists $header_fields_seen{$_}) {
-                croak "Duplicate field '$_' observed in '$data->{file}'";
-            }
-            else {
-                $header_fields_seen{$_}++;
-            }
-        }
+        _check_path_col_idx($data, $fields_ref, 0);
+        path_check_fields($data, $fields_ref);
     }
     else {
-        croak "Argument to 'path_col_idx' exceeds index of last field in 'fields' array ref"
-            if $data->{path_col_idx} > $#{$fields_ref};
-
-        my %header_fields_seen;
-        for (@{$fields_ref}) {
-            if (exists $header_fields_seen{$_}) {
-                croak "Duplicate field '$_' observed in 'fields' array ref";
-            }
-            else {
-                $header_fields_seen{$_}++;
-            }
-        }
+        _check_path_col_idx($data, $fields_ref, 1);
+        components_check_fields($data, $fields_ref);
     }
     $data->{fields} = $fields_ref;
     $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
     return $data;
+}
+
+sub _check_path_col_idx {
+    my ($data, $fields_ref, $components) = @_;
+    my $error_msg = "Argument to 'path_col_idx' exceeds index of last field in ";
+    $error_msg .= $components
+        ? "'fields' array ref"
+        : "header row in '$data->{file}'";
+
+    croak $error_msg if $data->{path_col_idx} > $#{$fields_ref};
 }
 
 sub _prepare_data_records {
@@ -252,7 +246,7 @@ ERROR_MSG_DUPE
     croak $error_msg if @dupe_paths;
 
     $error_msg = <<ERROR_MSG_WRONG_COUNT;
-Header row had $field_count records.  The following records had different counts:
+Header row has $field_count records.  The following records had different counts:
 ERROR_MSG_WRONG_COUNT
     for my $rec (@bad_count_records) {
         $error_msg .= "  $rec->[0]: $rec->[1]\n";
