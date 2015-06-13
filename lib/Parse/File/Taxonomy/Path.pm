@@ -48,20 +48,28 @@ Parse::File::Taxonomy constructor.
 
 =item * Arguments
 
+=over 4
+
+Single hash reference.  There are two possible interfaces.
+
+=item 1 C<file> interface
+
     $source = "./t/data/alpha.csv";
     $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
+        path_col_idx    => 0,
+        path_col_sep    => '|',
+        %TextCSVoptions,
     } );
 
-Single hash reference.  Elements in that hash are keyed on:
+Elements in the hash reference are keyed on:
 
 =over 4
 
 =item * C<file>
 
-Absolute or relative path to the incoming taxonomy file.  Currently
-B<required> (but this may change if we implement ability to use a list of CSV
-strings instead of a file).
+Absolute or relative path to the incoming taxonomy file.  
+B<Required> for this interface.
 
 =item * C<path_col_idx>
 
@@ -82,6 +90,30 @@ be passed through to that module's constructor.  On the recommendation of the
 Text::CSV documentation, C<binary> is always set to a true value.
 
 =back
+
+=item 2 C<components> interface
+
+    $obj = Parse::File::Taxonomy::Path->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $data_records,
+        }
+    } );
+
+Elements in this hash are keyed on:
+
+=over 4
+
+=item * C<components>
+
+The value of this element is a hash reference with two keys, C<fields> and
+C<data_records>.  C<fields> is a reference to an array holding the field or
+column names for the data set.  C<data_records> is a reference to an array of
+array references, each of the latter arrayrefs holding one record or row from
+the data set.
+
+=back
+
 
 =item * Return Value
 
@@ -581,6 +613,48 @@ sub fields_and_data_records_path_components {
     return \@all_rows;
 }
 
+=head2 C<get_field_position()>
+
+=over 4
+
+=item * Purpose
+
+Identify the index position of a given field within the header row.
+
+=item * Arguments
+
+    $index = $obj->get_field_position('income');
+
+Takes a single string holding the name of one of the fields (column names).
+
+=item * Return Value
+
+Integer representing the index position (counting from C<0>) of the field
+provided as argument.  Throws exception if the argument is not actually a
+field.
+
+=back
+
+=cut
+
+sub get_field_position {
+    my ($self, $f) = @_;
+    my $fields = $self->fields;
+    my $idx;
+    for (my $i=0; $i<=$#{$fields}; $i++) {
+        if ($fields->[$i] eq $f) {
+            $idx = $i;
+            last;
+        }
+    }
+    if (defined($idx)) {
+        return $idx;
+    }
+    else {
+        croak "'$f' not a field in this taxonomy";
+    }
+}
+
 =head2 C<child_counts()>
 
 =over 4
@@ -767,19 +841,6 @@ sub hashify_taxonomy {
         $hashified{$rowkey} = $rowdata;
     }
     return \%hashified;
-}
-
-sub get_field_position {
-    my ($self, $f) = @_;
-    my $fields = $self->fields;
-    my $idx;
-    for (my $i=0; $i<=$#{$fields}; $i++) {
-        if ($fields->[$i] eq $f) {
-            $idx = $i;
-            last;
-        }
-    }
-    return $idx;
 }
 
 1;

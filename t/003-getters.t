@@ -167,10 +167,12 @@ my ($obj, $source, $expect);
         $expect = 4;
         is($obj->get_field_position('income'), $expect,
             "'income' found in position $expect as expected");
-        ok(! defined($obj->get_field_position('foo')),
-            "get_field_position() returned undef as expected");
+        local $@;
+        my $bad_field = 'foo';
+        eval { $obj->get_field_position($bad_field); };
+        like($@, qr/'$bad_field' not a field in this taxonomy/,
+            "get_field_position() threw exception due to non-existent field");
     }
-
 } 
 
 {
