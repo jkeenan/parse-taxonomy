@@ -51,8 +51,8 @@ B<Diagram 1:>
 
 For the purpose of this module, a B<taxonomy file> is a CSV file in which (a)
 certain columns hold data from which the position of each record within the
-taxonomy can be derived; and (b) in which each node in the tree (other than
-the root node) is uniquely represented by a record within the file.
+taxonomy can be derived; and (b) each node in the tree (other than the root
+node) is uniquely represented by a record within the file.
 
 =head3 CSV
 
@@ -80,7 +80,7 @@ quote either all columns:
 
     "path","nationality","gender","age","income","id_no"
 
-or, at the very least, all columns which can hold
+... or, at the very least, all columns which can hold
 data other than pure integers or floating-point numbers:
 
     "path","nationality","gender",age,income,id_no
@@ -98,9 +98,9 @@ the root node to a given node is what differentiates various types of taxonomy
 files from one another.  In Parse-File-Taxonomy we identify two different
 flavors of taxonomy files and provide a class for the construction of each.
 
-=head3 Taxonomy by path
+=head3 Taxonomy-by-path
 
-A B<taxonomy by path> is one in which a single column -- which we will refer
+A B<taxonomy-by-path> is one in which a single column -- which we will refer
 to as the B<path column> -- will represent the path from the root to the given
 record as a series of strings joined by separator characters.
 Within that path column the value corresponding to the root node need
@@ -129,7 +129,7 @@ Let us further supposed that the column holding taxonomy paths was, not
 surprisingly, called C<path> and that the separator within the C<path> column
 was a pipe (C<|>) character.  Let us further suppose that for now we are not
 concerned with the data in any columns other than C<path> so that, for purpose
-of illustration, they will hold empty (albeit quoted) string.
+of illustration, they will hold empty (albeit quoted) strings.
 
 Then the taxonomy file describing the tree in Diagram 2 would look like this:
 
@@ -151,7 +151,7 @@ Then the taxonomy file describing the tree in Diagram 2 would look like this:
 Note that while in the C<|Gamma> branch we ultimately have only one leaf node,
 C<|Gamma|Iota|Nu>, we require separate records in the taxonomy file for
 C<|Gamma> and C<|Gamma|Iota>.  To put this another way, the existence of a
-C<Gamma|Iota|Nu> leaf must not be taken to "auto-vivify" C<|Gamma> and
+C<Gamma|Iota|Nu> leaf must not be assumed to "auto-vivify" C<|Gamma> and
 C<|Gamma|Iota> nodes.  Each non-root node must be explicitly represented in
 the taxonomy file for the file to be considered valid.
 
@@ -194,13 +194,13 @@ representing this tree would look like this:
     "|Gamma|Iota|Delta","","","","",""
     "|Delta","","","","",""
 
-=head3 Taxonomy by index
+=head3 Taxonomy-by-index
 
-A B<taxonomy by index> is one in which the data in which each record has a
-column with a unique identifier (B<id>) and another column holding the
-unique identifier (B<parent_id>) of the record representing the next higher node in the
-hierarchy.  The record must also a column which holds a datum that is unique
-among all records having the same parent node.
+A B<taxonomy-by-index> is one in which the data in which each record has a
+column with a unique identifier (B<id>) and another column holding the unique
+identifier of the record representing the next higher node in the hierarchy
+(B<parent_id>).  The record must also a column which holds a datum that is
+unique among all records having the same parent node.
 
 Let's make this clearer by rewriting the taxonomy-by-path above for Example 3
 as a taxonomy-by-index.
@@ -261,24 +261,13 @@ valid taxonomy according to the description provided above.  The arguments
 needed for such a constructor will be found in the documentation of the
 subclass.
 
-TODO:  C<Parse::File::Taxonomy->new() should also be able to accept a
-reference to an array of CSV records already held in memory.
-
-TODO:  What would it mean for C<Parse::File::Taxonomy->new() to accept a
-filehandle as an argument, rather than a file?  Would that be difficult to
-implement?
-
-TODO:  The user of this library, however, must be permitted to write
-B<additional user-specified validation rules> which will be applied to a
-taxonomy by means of a C<local_validate()> method called on a
-Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
-user may choose not to proceed further even though the taxonomy meets the
-basic validation criteria implemented in the constructor.  This method will
-take a reference to an array of subroutines references as its argument.  Each
-such code reference will be a user-defined rule which the taxonomy must obey.
-The method will apply each code reference to the taxonomy in sequence and will
-return with a true value if and only if all the individual criteria return
-true as well.
+The constructor of a C<Parse::File::Taxonomy> subclass may, if desired, accept
+a different set of arguments.  Suppose you have already read a CSV file and
+parsed it into one array reference holding its header row -- a list of its
+columns -- and a second array reference, this one being an array of arrays
+where each element holds the data in one record in the CSV file.  You have the
+same C<components> needed to validate the taxonomy that you would get by
+parsing the CSV file.
 
 =cut
 

@@ -19,12 +19,22 @@ Parse::File::Taxonomy::Path - Validate a file for use as a path-based taxonomy
 
     use Parse::File::Taxonomy::Path;
 
+    # 'file' interface: reads a CSV file for you
+
     $source = "./t/data/alpha.csv";
     $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
 
-    $hashified_taxonomy = $obj->hashify_taxonomy();
+    # 'components' interface:  as if you've already read a 
+    # CSV file and now have Perl array references to header and data rows
+
+    $obj = Parse::File::Taxonomy::Path->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $data_records,
+        }
+    } );
 
 =head1 METHODS
 
@@ -309,8 +319,6 @@ Read-only.
 
 =back
 
-=cut
-
 # Implemented in lib/Parse/File/Taxonomy.pm
 
 =head2 C<path_col_idx()>
@@ -439,7 +447,7 @@ or (b) use C<fields_and_data_records()>.
 
 =back
 
-=cut
+# Implemented in lib/Parse/File/Taxonomy.pm
 
 =head2 C<fields_and_data_records()>
 
@@ -499,9 +507,9 @@ found in the incoming taxonomy file in their order in that file.
 
 =item * Comment
 
-Does not contain any information about the fields in the taxonomy, so you
-should probably either (a) use in conjunction with C<fields()> method above;
-or (b) use C<fields_and_data_records_path_components()>.
+Does not contain any information about the fields in the taxonomy, so you may
+wish to use this method either (a) use in conjunction with C<fields()> method
+above; or (b) use C<fields_and_data_records_path_components()>.
 
 =back
 
@@ -759,44 +767,6 @@ sub hashify_taxonomy {
         $hashified{$rowkey} = $rowdata;
     }
     return \%hashified;
-}
-
-sub local_validate {
-    my ($self, $args) = @_;
-
-    croak "Argument to local_validate() must be an array ref"
-        unless defined $args and ref($args) eq 'ARRAY';
-
-    my @local_validations = ();
-    for my $rule (@{$args}) {
-        croak "Each element in arrayref of arguments to local_validate() must be a hash ref"
-            unless ref($rule) eq 'HASH';
-        for my $k (qw| description rule |) {
-            croak "Each hashref in arguments to local_validate() must have a '$k' key-value pair"
-                unless exists $rule->{$k};
-        }
-        my $rv = &{$rule->{rule}};
-        push @local_validations, {
-            description => $rule->{description},
-            return => $rv,
-            boolean => !! $rv,
-        };
-    }
-    $self->{local_validations} = \@local_validations;
-    my $success = 1;
-    for my $result (@local_validations) {
-        if (! $result->{boolean}) {
-            $success = 0;
-            last;
-        }
-    }
-    return $success;
-}
-
-sub get_local_validations {
-    my $self = shift;
-    return $self->{local_validations} if exists $self->{local_validations};
-    return;
 }
 
 sub get_field_position {

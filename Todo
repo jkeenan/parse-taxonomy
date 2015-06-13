@@ -1,20 +1,22 @@
 TODO list for Perl module Parse::File::Taxonomy
 
-I.  Think about unifying PF::Taxonomy and PF::ExtractTaxonomy.  They're really
-two different ways of describing the same structured data.  In the former --
-which might be described as "taxonomy-by-path" -- the structure is described
-by the contents of delimited strings in one designated column in each row.  In the latter
--- which might be described as "taxonomy-by-indexing" -- the structure is
-described by (a) the primary key column; (b) the parent column; and (c) one
-data column from which a taxonomy-by-path could be generated.
-
 II.  Objectives:  Take a file in either format and be able to confirm that it
 is a conformant taxonomy.  Be able to apply additional local validation rules.
 Be able to determine whether a t-b-p is equivalent to a t-b-y.
 
-III.  Be able to provide as input either a CSV file or a pair of Perl data
-structures representing what you would get if you applied Text::CSV to the
-file.  Namely, an array ref holding the column names, and a ref to an array of
-array refs holding the data records of each row.  DONE for 'path' interface.
+IV.  What would it mean for a Parse::File::Taxonomy subclass to accept a
+filehandle as an argument, rather than a file?  Would that be difficult to
+implement?
 
+V.  The user of this library, however, must be permitted to write
+B<additional user-specified validation rules> which will be applied to a
+taxonomy by means of a C<local_validate()> method called on a
+Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
+user may choose not to proceed further even though the taxonomy meets the
+basic validation criteria implemented in the constructor.  This method will
+take a reference to an array of subroutines references as its argument.  Each
+such code reference will be a user-defined rule which the taxonomy must obey.
+The method will apply each code reference to the taxonomy in sequence and will
+return with a true value if and only if all the individual criteria return
+true as well.  FUNCTIONALITY OVERKILL; removed.
 
