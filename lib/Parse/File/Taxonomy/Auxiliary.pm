@@ -2,7 +2,7 @@ package Parse::File::Taxonomy::Auxiliary;
 use strict;
 use Carp;
 our ($VERSION, @ISA, @EXPORT_OK);
-$VERSION = '0.01';
+$VERSION = '0.02';
 @ISA = qw( Exporter );
 @EXPORT_OK = qw(
     path_check_fields
