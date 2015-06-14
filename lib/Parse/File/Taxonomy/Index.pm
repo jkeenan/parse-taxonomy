@@ -440,8 +440,6 @@ sub pathify_as_array_ref {
         push @this_path, $hashed_data{$id}{component};
         my $parent_id = $hashed_data{$id}{parent_id};
         if (length($parent_id)) {
-##        croak "Value $parent_id is not numeric" unless $parent_id =~ m/^\d+$/;
-##        croak "Could not locate a row keyed on $parent_id" unless exists $hashed_data->{$parent_id};
             &{$code}($parent_id);
         }
         else {
