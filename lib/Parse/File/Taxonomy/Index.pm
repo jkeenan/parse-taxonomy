@@ -113,7 +113,6 @@ sub _prepare_fields {
         _check_required_columns($data, $fields_ref);
     }
     $data->{fields} = $fields_ref;
-    $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
     return $data;
 }
 
@@ -337,5 +336,50 @@ field.
 =cut
 
 # Implemented in lib/Parse/File/Taxonomy.pm
+
+sub id_col_idx {
+    my $self = shift;
+    return $self->{id_col_idx};
+}
+
+sub id_col {
+    my $self = shift;
+    return $self->{id_col};
+}
+
+sub parent_id_col_idx {
+    my $self = shift;
+    return $self->{parent_id_col_idx};
+}
+
+sub parent_id_col {
+    my $self = shift;
+    return $self->{parent_id_col};
+}
+
+sub component_col_idx {
+    my $self = shift;
+    return $self->{component_col_idx};
+}
+
+sub component_col {
+    my $self = shift;
+    return $self->{component_col};
+}
+
+sub pathify_as_string {
+    my $self = shift;
+    my $rewritten; # array ref
+
+    return $rewritten;
+}
+
+sub pathify_as_array_ref {
+    my $self = shift;
+    my $rewritten; # array ref
+
+    return $rewritten;
+}
+
 
 1;

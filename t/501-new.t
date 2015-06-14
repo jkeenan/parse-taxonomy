@@ -46,16 +46,6 @@ my ($obj, $source, $expect, $fields, $data_records);
         "'new()' died to lack of either 'file' or 'components' element in hashref passed as argument");
 }
 
-#{
-#    $source = "./t/data/epsilon.csv";
-#    local $@;
-#    eval {
-#        $obj = Parse::File::Taxonomy::Index->new( { } );
-#    };
-#    like($@, qr/^Argument to 'new\(\)' must have 'file' element/,
-#        "new() died to lack of 'file' element in hashref passed as argument");
-#}
-
 {
     $source = "./t/data/nonexistent.csv";
     local $@;
