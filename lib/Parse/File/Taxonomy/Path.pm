@@ -48,9 +48,9 @@ Parse::File::Taxonomy constructor.
 
 =item * Arguments
 
-=over 4
-
 Single hash reference.  There are two possible interfaces.
+
+=over 4
 
 =item 1 C<file> interface
 
@@ -106,14 +106,24 @@ Elements in this hash are keyed on:
 
 =item * C<components>
 
-The value of this element is a hash reference with two keys, C<fields> and
+This element is B<required> for the 
+C<components> interface. The value of this element is a hash reference with two keys, C<fields> and
 C<data_records>.  C<fields> is a reference to an array holding the field or
 column names for the data set.  C<data_records> is a reference to an array of
 array references, each of the latter arrayrefs holding one record or row from
 the data set.
 
+=item * C<path_col_idx>
+
+Same as in C<file> interface above.
+
+=item * C<path_col_sep>
+
+Same as in C<file> interface above.
+
 =back
 
+=back
 
 =item * Return Value
 
@@ -129,7 +139,7 @@ C<new()> will throw an exception under any of the following conditions:
 
 =item * Argument to C<new()> is not a hash reference.
 
-=item * Unable to locate the file which is the value of the C<file> element.
+=item * In the C<file> interface, unable to locate the file which is the value of the C<file> element.
 
 =item * Argument to C<path_col_idx> element is not an integer.
 

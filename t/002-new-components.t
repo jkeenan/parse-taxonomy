@@ -15,19 +15,19 @@ my ($obj, $source, $fields, $data_records);
 note("'components' interface to 'new()'");
 $fields = ["path", "nationality", "gender", "age", "income", "id_no"];
 $data_records = [
-  [",Alpha", "", "", "", "", ""],
-  [",Alpha,Epsilon", "", "", "", "", ""],
-  [",Alpha,Epsilon,Kappa", "", "", "", "", ""],
-  [",Alpha,Zeta", "", "", "", "", ""],
-  [",Alpha,Zeta,Lambda", "", "", "", "", ""],
-  [",Alpha,Zeta,Mu", "", "", "", "", ""],
-  [",Beta", "", "", "", "", ""],
-  [",Beta,Eta", "", "", "", "", ""],
-  [",Beta,Theta", "", "", "", "", ""],
-  [",Gamma", "", "", "", "", ""],
-  [",Gamma,Iota", "", "", "", "", ""],
-  [",Gamma,Iota,Nu", "", "", "", "", ""],
-  [",Delta", "", "", "", "", ""],
+    ["|Alpha", "", "", "", "", ""],
+    ["|Alpha|Epsilon", "", "", "", "", ""],
+    ["|Alpha|Epsilon|Kappa", "", "", "", "", ""],
+    ["|Alpha|Zeta", "", "", "", "", ""],
+    ["|Alpha|Zeta|Lambda", "", "", "", "", ""],
+    ["|Alpha|Zeta|Mu", "", "", "", "", ""],
+    ["|Beta", "", "", "", "", ""],
+    ["|Beta|Eta", "", "", "", "", ""],
+    ["|Beta|Theta", "", "", "", "", ""],
+    ["|Gamma", "", "", "", "", ""],
+    ["|Gamma|Iota", "", "", "", "", ""],
+    ["|Gamma|Iota|Nu", "", "", "", "", ""],
+    ["|Delta", "", "", "", "", ""],
 ];
 
 {
@@ -316,3 +316,33 @@ $data_records = [
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy::Path');
 }
+
+{
+    my $fields = ["id_no", "path", "nationality", "gender", "age", "income"];
+    my $data_records = [
+        ["",",Alpha", "", "", "", ""],
+        ["",",Alpha,Epsilon", "", "", "", ""],
+        ["",",Alpha,Epsilon,Kappa", "", "", "", ""],
+        ["",",Alpha,Zeta", "", "", "", ""],
+        ["",",Alpha,Zeta,Lambda", "", "", "", ""],
+        ["",",Alpha,Zeta,Mu", "", "", "", ""],
+        ["",",Beta", "", "", "", ""],
+        ["",",Beta,Eta", "", "", "", ""],
+        ["",",Beta,Theta", "", "", "", ""],
+        ["",",Gamma", "", "", "", ""],
+        ["",",Gamma,Iota", "", "", "", ""],
+        ["",",Gamma,Iota,Nu", "", "", "", ""],
+        ["",",Delta", "", "", "", ""],
+    ];
+    my $obj = Parse::File::Taxonomy::Path->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $data_records,
+        },
+        path_col_idx => 1,
+        path_col_sep => ',',
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+}
+
