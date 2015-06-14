@@ -281,6 +281,33 @@ sub data_records {
     return $self->{data_records};
 }
 
+sub fields_and_data_records {
+    my $self = shift;
+    my @all_rows = $self->fields;
+    for my $row (@{$self->data_records}) {
+        push @all_rows, $row;
+    }
+    return \@all_rows;
+}
+
+sub get_field_position {
+    my ($self, $f) = @_;
+    my $fields = $self->fields;
+    my $idx;
+    for (my $i=0; $i<=$#{$fields}; $i++) {
+        if ($fields->[$i] eq $f) {
+            $idx = $i;
+            last;
+        }
+    }
+    if (defined($idx)) {
+        return $idx;
+    }
+    else {
+        croak "'$f' not a field in this taxonomy";
+    }
+}
+
 1;
 
 # vim: formatoptions=crqot

@@ -7,10 +7,11 @@ use utf8;
 
 use lib ('./lib');
 use Parse::File::Taxonomy::Index;
-use Test::More tests => 12;
+use Test::More qw(no_plan); # tests => 12;
 use Data::Dump;
 
 my ($obj, $source, $expect);
+my ($exp_fields, $exp_data_records);
 
 {
     $source = "./t/data/delta.csv";
@@ -21,8 +22,39 @@ my ($obj, $source, $expect);
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy::Index');
 
-    $expect = ["id","parent_id","name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
-    is_deeply($obj->fields, $expect, "Got expected columns");
+    $exp_fields = ["id","parent_id","name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
+    is_deeply($obj->fields, $exp_fields, "Got expected columns");
+    $exp_data_records = [
+        [1, "", "Alpha", "Auto", "USD", "", "", 0],
+        [3, 1, "Epsilon", "Auto", "USD", "", "", 0],
+        [4, 3, "Kappa", "Auto", "USD", "0.50", "0.60", 1],
+        [5, 1, "Zeta", "Auto", "USD", "", "", 0],
+        [6, 5, "Lambda", "Auto", "USD", "0.40", "0.50", 1],
+        [7, 5, "Mu", "Auto", "USD", "0.40", "0.50", 0],
+        [2, "", "Beta", "Electronics", "JPY", "", "", 0],
+        [8, 2, "Eta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [9, 2, "Theta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [10, "", "Gamma", "Travel", "EUR", "", "", 0],
+        [11, 10, "Iota", "Travel", "EUR", "", "", 0],
+        [12, 11, "Nu", "Travel", "EUR", "0.60", 0.75, 1],
+        [13, "", "Delta", "Life Insurance", "USD", 0.25, "0.30", 1],
+    ];
+    is_deeply($obj->data_records, $exp_data_records, "Got expected data records");
+
+    $expect = [
+        $exp_fields,
+        @{$exp_data_records},
+    ];
+    is_deeply($obj->fields_and_data_records, $expect, "Got expected fields and data records");
+
+    $expect = 4;
+    is($obj->get_field_position('currency_code'), $expect,
+        "'income' found in position $expect as expected");
+    local $@;
+    my $bad_field = 'foo';
+    eval { $obj->get_field_position($bad_field); };
+    like($@, qr/'$bad_field' not a field in this taxonomy/,
+        "get_field_position() threw exception due to non-existent field");
 }
 
 {
@@ -37,8 +69,29 @@ my ($obj, $source, $expect);
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy::Index');
 
-    $expect = ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
-    is_deeply($obj->fields, $expect, "Got expected columns");
+    $exp_fields = ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
+    is_deeply($obj->fields, $exp_fields, "Got expected columns");
+    $exp_data_records = [
+        [1, "", "Alpha", "Auto", "USD", "", "", 0],
+        [3, 1, "Epsilon", "Auto", "USD", "", "", 0],
+        [4, 3, "Kappa", "Auto", "USD", "0.50", "0.60", 1],
+        [5, 1, "Zeta", "Auto", "USD", "", "", 0],
+        [6, 5, "Lambda", "Auto", "USD", "0.40", "0.50", 1],
+        [7, 5, "Mu", "Auto", "USD", "0.40", "0.50", 0],
+        [2, "", "Beta", "Electronics", "JPY", "", "", 0],
+        [8, 2, "Eta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [9, 2, "Theta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [10, "", "Gamma", "Travel", "EUR", "", "", 0],
+        [11, 10, "Iota", "Travel", "EUR", "", "", 0],
+        [12, 11, "Nu", "Travel", "EUR", "0.60", 0.75, 1],
+        [13, "", "Delta", "Life Insurance", "USD", 0.25, "0.30", 1],
+    ];
+    is_deeply($obj->data_records, $exp_data_records, "Got expected data records");
+    $expect = [
+        $exp_fields,
+        @{$exp_data_records},
+    ];
+    is_deeply($obj->fields_and_data_records, $expect, "Got expected fields and data records");
 }
 
 {
@@ -72,10 +125,8 @@ my ($obj, $source, $expect);
 }
 
 {
-#    $source = "./t/data/zeta.csv";
     note("'components' interface; user-supplied column names");
     $obj = Parse::File::Taxonomy::Index->new( {
-#        file                => $source,
         components => {
             fields => ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"],
 

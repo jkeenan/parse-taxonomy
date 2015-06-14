@@ -517,14 +517,7 @@ in that file.
 
 =cut
 
-sub fields_and_data_records {
-    my $self = shift;
-    my @all_rows = $self->fields;
-    for my $row (@{$self->data_records}) {
-        push @all_rows, $row;
-    }
-    return \@all_rows;
-}
+# Implemented in lib/Parse/File/Taxonomy.pm
 
 =head2 C<data_records_path_components()>
 
@@ -647,23 +640,7 @@ field.
 
 =cut
 
-sub get_field_position {
-    my ($self, $f) = @_;
-    my $fields = $self->fields;
-    my $idx;
-    for (my $i=0; $i<=$#{$fields}; $i++) {
-        if ($fields->[$i] eq $f) {
-            $idx = $i;
-            last;
-        }
-    }
-    if (defined($idx)) {
-        return $idx;
-    }
-    else {
-        croak "'$f' not a field in this taxonomy";
-    }
-}
+# Implemented in lib/Parse/File/Taxonomy.pm
 
 =head2 C<child_counts()>
 

@@ -247,6 +247,93 @@ Read-only.
 
 =back
 
+# Implemented in lib/Parse/File/Taxonomy.pm
+
+=head2 C<data_records()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its data rows as a Perl
+data structure.
+
+=item * Arguments
+
+    $data_records = $self->data_records;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The array will hold the data records
+found in the incoming taxonomy file in their order in that file.
+
+=item * Comment
+
+Does not contain any information about the fields in the taxonomy, so you
+should probably either (a) use in conjunction with C<fields()> method above;
+or (b) use C<fields_and_data_records()>.
+
+=back
+
+# Implemented in lib/Parse/File/Taxonomy.pm
+
+=cut
+
+=head2 C<data_records_path_components()>
+
+=over 4
+
+=item * Purpose
+
+Once the taxonomy has been validated, get a list of its data rows as a Perl
+data structure.  In each element of this list, the path is now represented as
+an array reference rather than a string.
+
+=item * Arguments
+
+    $data_records_path_components = $self->data_records_path_components;
+
+None.
+
+=item * Return Value
+
+Reference to array of array references.  The array will hold the data records
+found in the incoming taxonomy file in their order in that file.
+
+=item * Comment
+
+Does not contain any information about the fields in the taxonomy, so you may
+wish to use this method either (a) use in conjunction with C<fields()> method
+above; or (b) use C<fields_and_data_records_path_components()>.
+
+=back
+
+=cut
+
+=head2 C<get_field_position()>
+
+=over 4
+
+=item * Purpose
+
+Identify the index position of a given field within the header row.
+
+=item * Arguments
+
+    $index = $obj->get_field_position('income');
+
+Takes a single string holding the name of one of the fields (column names).
+
+=item * Return Value
+
+Integer representing the index position (counting from C<0>) of the field
+provided as argument.  Throws exception if the argument is not actually a
+field.
+
+=back
+
 =cut
 
 # Implemented in lib/Parse/File/Taxonomy.pm
