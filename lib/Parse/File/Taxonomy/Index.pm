@@ -144,10 +144,22 @@ sub _prepare_data_records {
     # Confirm all rows have same number of columns as header. DONE
     my $error_msg = '';
     my $field_count = scalar(@{$data->{fields}});
+    my @non_numeric_id_records = ();
     my %ids_seen = ();
     my @bad_count_records = ();
     my @nameless_component_records = ();
     for my $rec (@{$data_records}) {
+        if ($rec->[$data->{id_col_idx}] !~ m/^\d+$/) {
+            push @non_numeric_id_records, [ $rec->[$data->{id_col_idx}], '' ];
+        }
+        if (length($rec->[$data->{parent_id_col_idx}]) and
+            $rec->[$data->{parent_id_col_idx}] !~ m/^\d+$/
+        ) {
+            push @non_numeric_id_records, [
+                $rec->[$data->{id_col_idx}],
+                $rec->[$data->{parent_id_col_idx}]
+            ];
+        }
         $ids_seen{$rec->[$data->{id_col_idx}]}++;
         my $this_row_count = scalar(@{$rec});
         if ($this_row_count != $field_count) {
@@ -158,6 +170,15 @@ sub _prepare_data_records {
             push @nameless_component_records, $rec->[$data->{id_col_idx}];
         }
     }
+    $error_msg = <<NON_NUMERIC_IDS;
+Non-numeric entries are not permitted in the '$data->{id_col}' or '$data->{parent_id_col}' columns.
+The following records each violate this restriction one or two times:
+NON_NUMERIC_IDS
+    for my $rec (@non_numeric_id_records) {
+        $error_msg .= "  $data->{id_col}: $rec->[0]\t$data->{parent_id_col}: $rec->[1]\n";
+    }
+    croak $error_msg if @non_numeric_id_records;
+
     my @dupe_ids = ();
     for my $id (sort keys %ids_seen) {
         push @dupe_ids, $id if $ids_seen{$id} > 1;

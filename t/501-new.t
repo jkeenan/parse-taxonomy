@@ -113,6 +113,23 @@ my ($obj, $source, $expect, $fields, $data_records);
 }
 
 {
+    $source = "./t/data/non_numeric_ids.csv";
+    local $@;
+    eval {
+        $obj = Parse::File::Taxonomy::Index->new( {
+            file    => $source,
+        } );
+    };
+
+    like($@, qr/^Non-numeric entries are not permitted in the 'id' or 'parent_id' columns/s,
+        "new() died due to non-numeric values in column designated as 'id_col' or 'parent_id_col'");
+    like($@, qr/id:\s+3\tparent_id:\s+foo/s, "Column had bad parent_id value");
+    like($@, qr/id:\s+bar\tparent_id:/s, "Column had bad id value");
+    like($@, qr/id:\s+hello\tparent_id:\s+goodbye/s, "Column had bad id value");
+    like($@, qr/id:\s+hello\tparent_id:\s+goodbye/s, "Column had bad parent_id value");
+}
+
+{
     $source = "./t/data/duplicate_id.csv";
     local $@;
     eval {
