@@ -28,6 +28,7 @@ t/data/duplicate_path.csv
 t/data/epsilon.csv
 t/data/ids_missing_parents.csv
 t/data/missing_parents.csv
+t/data/nameless_component.csv
 t/data/sibling_same_name.csv
 t/data/wrong_row_count.csv
 t/data/zeta.csv

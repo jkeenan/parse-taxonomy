@@ -12,6 +12,7 @@ my @dummy = qw(
     duplicate_id.csv
     epsilon.csv
     ids_missing_parents.csv
+    nameless_component.csv
     sibling_same_name.csv
     zeta.csv
 );

@@ -142,9 +142,11 @@ sub _prepare_data_records {
     my ($data, $data_records, $args) = @_;
     # Confirm no duplicate entries in 'id_col'. DONE
     # Confirm all rows have same number of columns as header. DONE
+    my $error_msg = '';
     my $field_count = scalar(@{$data->{fields}});
-    my @bad_count_records = ();
     my %ids_seen = ();
+    my @bad_count_records = ();
+    my @nameless_component_records = ();
     for my $rec (@{$data_records}) {
         $ids_seen{$rec->[$data->{id_col_idx}]}++;
         my $this_row_count = scalar(@{$rec});
@@ -152,12 +154,15 @@ sub _prepare_data_records {
             push @bad_count_records,
                 [ $rec->[$data->{id_col_idx}], $this_row_count ];
         }
+        if (! length($rec->[$data->{component_col_idx}])) {
+            push @nameless_component_records, $rec->[$data->{id_col_idx}];
+        }
     }
     my @dupe_ids = ();
     for my $id (sort keys %ids_seen) {
         push @dupe_ids, $id if $ids_seen{$id} > 1;
     }
-    my $error_msg = <<ERROR_MSG_DUPE;
+    $error_msg = <<ERROR_MSG_DUPE;
 No duplicate entries are permitted in the '$data->{id_col}'column.
 The following entries appear the number of times shown:
 ERROR_MSG_DUPE
@@ -175,6 +180,16 @@ ERROR_MSG_WRONG_COUNT
         $error_msg .= "  $rec->[0]: $rec->[1]\n";
     }
     croak $error_msg if @bad_count_records;
+
+    $error_msg = <<NAMELESS_COMPONENT;
+Each data record must have a non-empty string in its 'component' column.
+The following records (identified by the value in their '$data->{id_col}' columns)
+lack valid components:
+NAMELESS_COMPONENT
+    for my $rec (@nameless_component_records) {
+        $error_msg .= "  id: $rec\n";
+    }
+    croak $error_msg if @nameless_component_records;
 
     my %ids_missing_parents = ();
     for my $rec (@{$data_records}) {
@@ -401,9 +416,8 @@ sub pathify_as_array_ref {
     my $code;
     $code = sub {
         my $id = shift;
-        my $name        = $hashed_data{$id}{component};
-        my $parent_id   = $hashed_data{$id}{parent_id};
-        push @this_path, $name if defined $name;
+        push @this_path, $hashed_data{$id}{component};
+        my $parent_id = $hashed_data{$id}{parent_id};
         if (length($parent_id)) {
 ##        croak "Value $parent_id is not numeric" unless $parent_id =~ m/^\d+$/;
 ##        croak "Could not locate a row keyed on $parent_id" unless exists $hashed_data->{$parent_id};

@@ -144,6 +144,22 @@ my ($obj, $source, $expect, $fields, $data_records);
 }
 
 {
+    $source = "./t/data/nameless_component.csv";
+    local $@;
+    eval {
+        $obj = Parse::File::Taxonomy::Index->new( {
+            file    => $source,
+        } );
+    };
+
+    like($@, qr/^Each data record must have a non-empty string in its 'component' column/s,
+        "new() died due to empty strings in 'component' column in one or more rows");
+    like($@, qr/id:\s4/s, "Identified record with empty component column");
+    like($@, qr/id:\s2/s, "Identified record with empty component column");
+    like($@, qr/id:\s10/s, "Identified record with empty component column");
+}
+
+{
     $source = "t/data/ids_missing_parents.csv";
     local $@;
     eval {
