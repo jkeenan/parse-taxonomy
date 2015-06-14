@@ -376,65 +376,57 @@ sub pathify_as_string {
 
 sub pathify_as_array_ref {
     my $self = shift;
-    my @rewritten = (); # array ref
-    my @rewritten_fields = ( 'path' );
-    for my $f (@{$self->fields}) {
+    my @rewritten = ();
+    my @fields_in  = @{$self->fields};
+    my @fields_out = ( 'path' );
+    for my $f (@fields_in) {
         unless (
             ($f eq $self->id_col) or
             ($f eq $self->parent_id_col) or
             ($f eq $self->component_col)
         ) {
-            push @rewritten_fields, $f;
+            push @fields_out, $f;
         }
     }
-say STDERR "FFF:";
-Data::Dump::pp(\@rewritten_fields);
-    push @rewritten, \@rewritten_fields;
+    push @rewritten, \@fields_out;
 
-    my %hashed_data =  map { $_->[$self->id_col_idx] => $_ } @{$self->data_records};   
-say STDERR "GGG:";
-Data::Dump::pp(\%hashed_data);
+    my %colsin2idx  = map { $fields_in[$_]  => $_ } (0 .. $#fields_in);
+
+    my %hashed_data =  map { $_->[$self->id_col_idx] => {
+        parent_id       => $_->[$self->parent_id_col_idx],
+        component       => $_->[$self->component_col_idx],
+    } } @{$self->data_records};
 
     my @this_path = ();
     my $code;
     $code = sub {
         my $id = shift;
-        my $name        = $hashed_data{$id}->[$self->component_col_idx];
-        my $parent_id   = $hashed_data{$id}->[$self->parent_id_col_idx];
+        my $name        = $hashed_data{$id}{component};
+        my $parent_id   = $hashed_data{$id}{parent_id};
         push @this_path, $name if defined $name;
         if (length($parent_id)) {
-#        croak "Value $parent_id is not numeric" unless $parent_id =~ m/^\d+$/;
-#        croak "Could not locate a row keyed on $parent_id" unless exists $hashed_data->{$parent_id};
+##        croak "Value $parent_id is not numeric" unless $parent_id =~ m/^\d+$/;
+##        croak "Could not locate a row keyed on $parent_id" unless exists $hashed_data->{$parent_id};
             &{$code}($parent_id);
+        }
+        else {
+            push @this_path, '';
         }
         return;
     };
-#    for my $r (@{$self->data_records}) {
-#        my @tree = ($r->[$self->component_col_idx]);
-#        if (length($r->[$self->parent_id_col_idx])) {
-#            push @tree, $hashed_data{$r->[$self->parent_id_col_idx]}->[$self->component_col_idx];
-#        }
-#say STDERR "HHH:";
-#Data::Dump::pp(\@tree);
-#
-#    }
-
-    for my $id (keys %hashed_data) {
+    for my $rec (@{$self->data_records}) {
         my @new_record;
-        &{$code}($id);
+        &{$code}($rec->[$self->id_col_idx]);
         my $path_as_array_ref = [ reverse @this_path ];
         push @new_record, $path_as_array_ref;
-        for my $i (1 .. $#rewritten_fields) {
-            push @new_record, $hashed_data{$id}[$i];
+        for my $f (grep { $_ ne 'path' } @fields_out) {
+            push @new_record, $rec->[$colsin2idx{$f}];
         }
-#        $data->{$id}->{full_path}   = join('|' => ('', @{$data->{$id}->{path}}));
+##        $data->{$id}->{full_path}   = join('|' => ('', @{$data->{$id}->{path}}));
         push @rewritten, \@new_record;
         @this_path = ();
     }
-say STDERR "HHH:";
-Data::Dump::pp(\@rewritten);
     return \@rewritten;
-#    return 1;
 }
 
 

@@ -1,8 +1,9 @@
 TODO list for Perl module Parse::File::Taxonomy
 
 II.  Objectives:  Take a file in either format and be able to confirm that it
-is a conformant taxonomy.  Be able to apply additional local validation rules.
-Be able to determine whether a t-b-p is equivalent to a t-b-y.
+is a conformant taxonomy.  Be able to determine whether a t-b-p is equivalent
+to a t-b-y.  IN PROGRESS: Implemented for simplest case, i.e., data with main
+columns in expected positions.
 
 IV.  What would it mean for a Parse::File::Taxonomy subclass to accept a
 filehandle as an argument, rather than a file?  Would that be difficult to
