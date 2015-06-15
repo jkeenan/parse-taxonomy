@@ -43,10 +43,10 @@ my $path_data_records = [
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::File::Taxonomy::Index');
 
-    my $rv = $obj->pathify_as_array_ref;
-    ok($rv, "pathify_as_array_ref() returned true value");
-    ok(ref($rv), "pathify_as_array_ref() returned reference");
-    is(reftype($rv), 'ARRAY', "pathify_as_array_ref() returned array reference");
+    my $rv = $obj->pathify;
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
 
     $exp_fields = [
         "path",
@@ -128,10 +128,47 @@ my $path_data_records = [
     $expect = 'my_name';
     is($obj->component_col, $expect, "Got expected name of 'component' column");
 
-    my $rv = $obj->pathify_as_array_ref;
-    ok($rv, "pathify_as_array_ref() returned true value");
-    ok(ref($rv), "pathify_as_array_ref() returned reference");
-    is(reftype($rv), 'ARRAY', "pathify_as_array_ref() returned array reference");
+    my $rv;
+    {
+        local $@;
+        eval {
+            $rv = $obj->pathify( path_col => 'my_path' );
+        };
+        like($@, qr/Argument to pathify\(\) must be hash ref/,
+            "pathify() died due to argument other than hash reference");
+    }
+
+    {
+        local $@;
+        eval {
+            $rv = $obj->pathify( [ path_col => 'my_path' ] );
+        };
+        like($@, qr/Argument to pathify\(\) must be hash ref/,
+            "pathify() died due to argument other than hash reference");
+    }
+
+    {
+        local $@;
+        eval {
+            $rv = $obj->pathify( { foo => 'bar' } );
+        };
+        like($@, qr/'foo' is not a recognized key for pathify\(\) argument hashref/,
+            "pathify() died due to invalid key in argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $rv = $obj->pathify( { path_col_sep => ',' } );
+        };
+        like($@, qr/Supplying a value for key 'path_col_step' is only valid when also supplying true value for 'as_string'/,
+            "pathify() died due to absence of 'as_string' when supplying 'path_col_sep'");
+    }
+
+    $rv = $obj->pathify;
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
 
     $exp_fields = [
         "path",
@@ -162,6 +199,124 @@ my $path_data_records = [
     my $path_fadrpc = $path_obj->fields_and_data_records_path_components;
     is_deeply($path_fadrpc, $rv,
         "taxonomy-by-index and taxonomy-by-path are equivalent");
+
+    $rv = $obj->pathify( { path_col => 'my_path' } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $exp_fields = [
+        "my_path",
+        "vertical",
+        "currency_code",
+        "wholesale_price",
+        "retail_price",
+        "is_actionable",
+    ];
+    is_deeply($rv->[0], $exp_fields, "Got expected columns");
+    $expect = 1;
+    for my $i (1 .. $#{$rv}) {
+        if (reftype($rv->[$i]->[0]) ne 'ARRAY') {
+            $expect = 0;
+            last;
+        }
+    }
+    ok($expect, "Each data record has array ref in first column");
+
+    my ($path_col_name, $expect_data_records);
+    $path_col_name = 'my_path';
+
+    $rv = $obj->pathify( {
+        path_col    => $path_col_name,
+        as_string   => 1,
+    } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $exp_fields = [
+        "my_path",
+        "vertical",
+        "currency_code",
+        "wholesale_price",
+        "retail_price",
+        "is_actionable",
+    ];
+    is_deeply($rv->[0], $exp_fields, "Got expected columns");
+    $expect = 1;
+    for my $i (1 .. $#{$rv}) {
+        if (ref($rv->[$i]->[0])) {
+            $expect = 0;
+            last;
+        }
+    }
+    ok($expect, "Each data record has non-ref in first column");
+    $expect_data_records = [
+        ["|Alpha", "Auto", "USD", "", "", 0],
+        ["|Alpha|Epsilon", "Auto", "USD", "", "", 0],
+        ["|Alpha|Epsilon|Kappa", "Auto", "USD", "0.50", "0.60", 1],
+        ["|Alpha|Zeta", "Auto", "USD", "", "", 0],
+        ["|Alpha|Zeta|Lambda", "Auto", "USD", "0.40", "0.50", 1],
+        ["|Alpha|Zeta|Mu", "Auto", "USD", "0.40", "0.50", 0],
+        ["|Beta", "Electronics", "JPY", "", "", 0],
+        ["|Beta|Eta", "Electronics", "JPY", 0.35, 0.45, 1],
+        ["|Beta|Theta", "Electronics", "JPY", 0.35, 0.45, 1],
+        ["|Gamma", "Travel", "EUR", "", "", 0],
+        ["|Gamma|Iota", "Travel", "EUR", "", "", 0],
+        ["|Gamma|Iota|Nu", "Travel", "EUR", "0.60", 0.75, 1],
+        ["|Delta", "Life Insurance", "USD", 0.25, "0.30", 1],
+    ];
+    is_deeply(
+        [ @{$rv}[1..$#{$rv}] ],
+        $expect_data_records,
+        "pathify() called with 'as_string' but no 'path_col_sep' returned pipe-separated string in '$path_col_name' column");
+
+    $rv = $obj->pathify( {
+        path_col        => $path_col_name,
+        as_string       => 1,
+        path_col_sep    => ' - ',
+    } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $exp_fields = [
+        "my_path",
+        "vertical",
+        "currency_code",
+        "wholesale_price",
+        "retail_price",
+        "is_actionable",
+    ];
+    is_deeply($rv->[0], $exp_fields, "Got expected columns");
+    $expect = 1;
+    for my $i (1 .. $#{$rv}) {
+        if (ref($rv->[$i]->[0])) {
+            $expect = 0;
+            last;
+        }
+    }
+    ok($expect, "Each data record has non-ref in first column");
+    $expect_data_records = [
+        [" - Alpha", "Auto", "USD", "", "", 0],
+        [" - Alpha - Epsilon", "Auto", "USD", "", "", 0],
+        [" - Alpha - Epsilon - Kappa", "Auto", "USD", "0.50", "0.60", 1],
+        [" - Alpha - Zeta", "Auto", "USD", "", "", 0],
+        [" - Alpha - Zeta - Lambda", "Auto", "USD", "0.40", "0.50", 1],
+        [" - Alpha - Zeta - Mu", "Auto", "USD", "0.40", "0.50", 0],
+        [" - Beta", "Electronics", "JPY", "", "", 0],
+        [" - Beta - Eta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [" - Beta - Theta", "Electronics", "JPY", 0.35, 0.45, 1],
+        [" - Gamma", "Travel", "EUR", "", "", 0],
+        [" - Gamma - Iota", "Travel", "EUR", "", "", 0],
+        [" - Gamma - Iota - Nu", "Travel", "EUR", "0.60", 0.75, 1],
+        [" - Delta", "Life Insurance", "USD", 0.25, "0.30", 1],
+    ];
+    is_deeply(
+        [ @{$rv}[1..$#{$rv}] ],
+        $expect_data_records,
+        "pathify() called with 'as_string' and with 'path_col_sep' returned other-than-pipe-separated string in '$path_col_name' column");
+
 }
 
 {
@@ -212,10 +367,10 @@ my $path_data_records = [
     $expect = 'name';
     is($obj->component_col, $expect, "Got expected name of 'component' column");
 
-    my $rv = $obj->pathify_as_array_ref;
-    ok($rv, "pathify_as_array_ref() returned true value");
-    ok(ref($rv), "pathify_as_array_ref() returned reference");
-    is(reftype($rv), 'ARRAY', "pathify_as_array_ref() returned array reference");
+    my $rv = $obj->pathify;
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
 
     $exp_fields = [
         "path",
@@ -299,10 +454,10 @@ my $path_data_records = [
     $expect = 'my_name';
     is($obj->component_col, $expect, "Got expected name of 'component' column");
 
-    my $rv = $obj->pathify_as_array_ref;
-    ok($rv, "pathify_as_array_ref() returned true value");
-    ok(ref($rv), "pathify_as_array_ref() returned reference");
-    is(reftype($rv), 'ARRAY', "pathify_as_array_ref() returned array reference");
+    my $rv = $obj->pathify;
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
 
     $exp_fields = [
         "path",

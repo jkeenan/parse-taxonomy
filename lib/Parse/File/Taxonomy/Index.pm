@@ -403,18 +403,29 @@ sub component_col {
     return $self->{component_col};
 }
 
-sub pathify_as_string {
-    my $self = shift;
-    my $rewritten; # array ref
+sub pathify {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        unless (ref($args) and (reftype($args) eq 'HASH')) {
+            croak "Argument to pathify() must be hash ref";
+        }
+        my %permissible_args = map { $_ => 1 } ( qw| path_col as_string path_col_sep | );
+        for my $k (keys %{$args}) {
+            croak "'$k' is not a recognized key for pathify() argument hashref"
+                unless $permissible_args{$k};
+        }
+        if ($args->{path_col_sep} and not $args->{as_string}) {
+            croak "Supplying a value for key 'path_col_step' is only valid when also supplying true value for 'as_string'";
+        }
+    }
+    $args->{path_col} = defined($args->{path_col}) ? $args->{path_col} : 'path';
+    if ($args->{as_string}) {
+        $args->{path_col_sep} = defined($args->{path_col_sep}) ? $args->{path_col_sep} : '|';
+    }
 
-    return $rewritten;
-}
-
-sub pathify_as_array_ref {
-    my $self = shift;
     my @rewritten = ();
     my @fields_in  = @{$self->fields};
-    my @fields_out = ( 'path' );
+    my @fields_out = ( $args->{path_col} );
     for my $f (@fields_in) {
         unless (
             ($f eq $self->id_col) or
@@ -451,11 +462,16 @@ sub pathify_as_array_ref {
         my @new_record;
         &{$code}($rec->[$self->id_col_idx]);
         my $path_as_array_ref = [ reverse @this_path ];
-        push @new_record, $path_as_array_ref;
-        for my $f (grep { $_ ne 'path' } @fields_out) {
+        if ($args->{as_string}) {
+            push @new_record,
+                join($args->{path_col_sep} => @{$path_as_array_ref});
+        }
+        else {
+            push @new_record, $path_as_array_ref;
+        }
+        for my $f (grep { $_ ne $args->{path_col} } @fields_out) {
             push @new_record, $rec->[$colsin2idx{$f}];
         }
-##        $data->{$id}->{full_path}   = join('|' => ('', @{$data->{$id}->{path}}));
         push @rewritten, \@new_record;
         @this_path = ();
     }
