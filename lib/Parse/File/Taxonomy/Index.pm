@@ -26,18 +26,147 @@ Parse::File::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV 
 
 =cut
 
-# Arguments needed for validation of incoming file:
-# file              # path to incoming file
-# id_col            # default 'id'
-# parent_id_col     # default 'parent_id'
-# component_col     # default 'name'
-#
-# Arguments needed to create outgoing file:
-# outfile           # path to outgoing file; location must be writable
-# path_col          # default 'full_path'
-#                       # cannot be used if there exists an incoming column
-#                       named 'full_path'
-# path_col_idx      # integer; default 0
+=head2 C<new()>
+
+=over 4
+
+=item * Purpose
+
+Parse::File::Taxonomy::Index constructor.
+
+=item * Arguments
+
+Single hash reference.  There are two possible interfaces: C<file> and C<components>.
+
+=over 4
+
+=item 1 C<file> interface
+
+    $source = "./t/data/delta.csv";
+    $obj = Parse::File::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+
+Elements in the hash reference are keyed on:
+
+=over 4
+
+=item * C<file>
+
+Absolute or relative path to the incoming taxonomy file.  
+B<Required> for this interface.
+
+=item * C<id_col>
+
+The name of the column in the header row under which each data record's unique ID id found.  Defaults to C<id>.
+
+=item * C<parent_id_col>
+
+The name of the column in the header row under which each data record's parent
+ID can be found.  (Will be empty in the case of top-level nodes, as they have
+no parent.  Defaults to C<parent_id>.
+
+=item * C<component_col>
+
+The name of the column in the header row under which in each data record there
+is a found a string which differentiates that record from all other records
+with the same parent ID.  Defaults to C<name>.
+
+=item * Text::CSV options
+
+Any other options which could normally be passed to C<Text::CSV->new()> will
+be passed through to that module's constructor.  On the recommendation of the
+Text::CSV documentation, C<binary> is always set to a true value.
+
+=back
+
+=item 2 C<components> interface
+
+    $obj = Parse::File::Taxonomy::Index->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $data_records,
+        }
+    } );
+
+Elements in this hash are keyed on:
+
+=over 4
+
+=item * C<components>
+
+This element is B<required> for the C<components> interface. The value of this
+element is a hash reference with two keys, C<fields> and C<data_records>.
+C<fields> is a reference to an array holding the field or column names for the
+data set.  C<data_records> is a reference to an array of array references,
+each of the latter arrayrefs holding one record or row from the data set.
+
+=back
+
+=back
+
+=item * Return Value
+
+Parse::File::Taxonomy::Index object.
+
+=item * Exceptions
+
+C<new()> will throw an exception under any of the following conditions:
+
+=over 4
+
+=item * Argument to C<new()> is not a reference.
+
+=item * Argument to C<new()> is not a hash reference.
+
+=item * Argument to C<new()> must have either 'file' or 'components' element but not both.
+
+=item * Lack columns in header row to match requirements.
+
+=item * Non-numeric entry in C<id> or C<parent_id> column.
+
+=item * Duplicate entries in C<id> column.
+
+=item * Number of fields in a data record does not match number in header row.
+
+=item * Empty string in a C<component> column of a record.
+
+=item * Unable to locate a record whose C<id> is the C<parent_id> of a different record.
+
+=item * No records with same C<parent_id> may share value of C<component> column.
+
+=item * C<file> interface
+
+=over 4
+
+=item * In the C<file> interface, unable to locate the file which is the value of the C<file> element.
+
+=item * The same field is found more than once in the header row of the
+incoming taxonomy file.
+
+=item * Unable to open or close the incoming taxonomy file for reading.
+
+=back
+
+=item * C<components> interface
+
+=over 4
+
+=item * In the C<components> interface, C<components> element must be a hash reference with C<fields> and C<data_records> elements.
+
+=item * C<fields> element must be array reference.
+
+=item * C<data_records> element must be reference to array of array references.
+
+=item * No duplicate fields in C<fields> element's array reference.
+
+=back
+
+=back
+
+=back
+
+=cut
 
 sub new {
     my ($class, $args) = @_;
@@ -478,5 +607,6 @@ sub pathify {
     return \@rewritten;
 }
 
-
 1;
+
+# vim: formatoptions=crqot

@@ -26,6 +26,7 @@ t/data/duplicate_header_field.csv
 t/data/duplicate_id.csv
 t/data/duplicate_path.csv
 t/data/epsilon.csv
+t/data/eta.csv
 t/data/ids_missing_parents.csv
 t/data/missing_parents.csv
 t/data/nameless_component.csv

@@ -250,6 +250,33 @@ my ($obj, $source, $expect, $fields, $data_records);
 }
 
 {
+    note("Non-standard names and positions for main columns");
+    $source = "./t/data/eta.csv";
+    note($source);
+    $obj = Parse::File::Taxonomy::Index->new( {
+        file                => $source,
+        id_col              => 'my_id',
+        parent_id_col       => 'my_parent_id',
+        component_col       => 'my_name',
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+
+    # Tests of default values: replace once we have accessors
+    $expect = $source;
+    is($obj->{file}, $expect, "file: $expect");
+
+    $expect = 'my_id';
+    is($obj->{id_col}, $expect, "id_col: $expect");
+
+    $expect = 'my_parent_id';
+    is($obj->{parent_id_col}, $expect, "parent_id_col: $expect");
+
+    $expect = 'my_name';
+    is($obj->{component_col}, $expect, "component_col: $expect");
+}
+
+{
     note("'components' interface to 'new()'");
     $fields = ["id","parent_id","name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
     $data_records = [

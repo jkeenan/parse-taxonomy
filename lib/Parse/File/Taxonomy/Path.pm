@@ -44,11 +44,11 @@ Parse::File::Taxonomy::Path - Validate a file for use as a path-based taxonomy
 
 =item * Purpose
 
-Parse::File::Taxonomy constructor.
+Parse::File::Taxonomy::Path constructor.
 
 =item * Arguments
 
-Single hash reference.  There are two possible interfaces.
+Single hash reference.  There are two possible interfaces: C<file> and C<components>.
 
 =over 4
 

@@ -58,3 +58,4 @@ sub _check_fields {
 
 1;
 
+# vim: formatoptions=crqot
