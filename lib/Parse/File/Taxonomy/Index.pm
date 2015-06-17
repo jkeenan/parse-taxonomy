@@ -26,6 +26,8 @@ Parse::File::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV 
 
 =cut
 
+=head1 METHODS
+
 =head2 C<new()>
 
 =over 4
@@ -53,22 +55,23 @@ Elements in the hash reference are keyed on:
 
 =item * C<file>
 
-Absolute or relative path to the incoming taxonomy file.  
+Absolute or relative path to the incoming taxonomy file.
 B<Required> for this interface.
 
 =item * C<id_col>
 
-The name of the column in the header row under which each data record's unique ID id found.  Defaults to C<id>.
+The name of the column in the header row under which each data record's unique
+ID can be found.  Defaults to C<id>.
 
 =item * C<parent_id_col>
 
 The name of the column in the header row under which each data record's parent
 ID can be found.  (Will be empty in the case of top-level nodes, as they have
-no parent.  Defaults to C<parent_id>.
+no parent.)  Defaults to C<parent_id>.
 
 =item * C<component_col>
 
-The name of the column in the header row under which in each data record there
+The name of the column in the header row under which, in each data record, there
 is a found a string which differentiates that record from all other records
 with the same parent ID.  Defaults to C<name>.
 
@@ -445,37 +448,6 @@ or (b) use C<fields_and_data_records()>.
 
 =cut
 
-=head2 C<data_records_path_components()>
-
-=over 4
-
-=item * Purpose
-
-Once the taxonomy has been validated, get a list of its data rows as a Perl
-data structure.  In each element of this list, the path is now represented as
-an array reference rather than a string.
-
-=item * Arguments
-
-    $data_records_path_components = $self->data_records_path_components;
-
-None.
-
-=item * Return Value
-
-Reference to array of array references.  The array will hold the data records
-found in the incoming taxonomy file in their order in that file.
-
-=item * Comment
-
-Does not contain any information about the fields in the taxonomy, so you may
-wish to use this method either (a) use in conjunction with C<fields()> method
-above; or (b) use C<fields_and_data_records_path_components()>.
-
-=back
-
-=cut
-
 =head2 C<get_field_position()>
 
 =over 4
@@ -501,6 +473,28 @@ field.
 =cut
 
 # Implemented in lib/Parse/File/Taxonomy.pm
+
+=head2 Accessors
+
+The following methods provide information about key columns in a
+Parse::File::Taxonomy::Path object.  The key columns are those which hold the
+ID, parent ID and component information.  They take no arguments.  The methods
+whose names end in C<_idx> return integers, as they return the index position
+of the column in the header row.  The other methods return strings.
+
+    $index_of_id_column = $self->id_col_idx;
+
+    $name_of_id_column = $self->id_col;
+
+    $index_of_parent_id_column = $self->parent_id_col_idx;
+
+    $name_of_parent_id_column = $self->parent_id_col;
+
+    $index_of_component_column = $self->component_col_idx;
+
+    $name_of_component_column = $self->component_col;
+
+=cut
 
 sub id_col_idx {
     my $self = shift;
@@ -531,6 +525,163 @@ sub component_col {
     my $self = shift;
     return $self->{component_col};
 }
+
+=head2 C<pathify()>
+
+=over 4
+
+=item * Purpose
+
+Generate a new Perl data structure which holds the same information as a
+Parse::File::Taxonomy::Index object but which expresses the route from the
+root node to a given branch or leaf node as either a separator-delimited
+string (as in the C<path> column of a Parse::File::Taxonomy::Path object) or
+as an array reference holding the list of names which delineate that route.
+
+Another way of expressing this:  Transform a taxonomy-by-index to a
+taxonomy-by-path.
+
+Example:  Suppose we have a CSV file which serves as a taxonomy-by-index for
+this data:
+
+    "id","parent_id","name","is_actionable"
+    "1","","Alpha","0"
+    "2","","Beta","0"
+    "3","1","Epsilon","0"
+    "4","3","Kappa","1"
+    "5","1","Zeta","0"
+    "6","5","Lambda","1"
+    "7","5","Mu","0"
+    "8","2","Eta","1"
+    "9","2","Theta","1"
+
+Instead of having the route from the root node to a given node be represented
+B<implicitly> by following C<parent_id>s up the tree, suppose we want that
+route to be represented by a string.  Assuming that we work with default
+column names, that would mean representing the information currently spread
+out among the C<id>, C<parent_id> and C<name> columns in a single C<path>
+column which, by default, would hold an array reference.
+
+    $source = "./t/data/theta.csv";
+    $obj = Parse::File::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+
+    $taxonomy_with_path_as_array = $obj->pathify;
+
+Yielding:
+
+    [
+      ["path", "is_actionable"],
+      [["", "Alpha"], 0],
+      [["", "Beta"], 0],
+      [["", "Alpha", "Epsilon"], 0],
+      [["", "Alpha", "Epsilon", "Kappa"], 1],
+      [["", "Alpha", "Zeta"], 0],
+      [["", "Alpha", "Zeta", "Lambda"], 1],
+      [["", "Alpha", "Zeta", "Mu"], 0],
+      [["", "Beta", "Eta"], 1],
+      [["", "Beta", "Theta"], 1],
+    ]
+
+If we wanted the path information represented as a string rather than an array
+reference, we would say:
+
+    $taxonomy_with_path_as_string = $obj->pathify( { as_string => 1 } );
+
+Yielding:
+
+    [
+      ["path", "is_actionable"],
+      ["|Alpha", 0],
+      ["|Beta", 0],
+      ["|Alpha|Epsilon", 0],
+      ["|Alpha|Epsilon|Kappa", 1],
+      ["|Alpha|Zeta", 0],
+      ["|Alpha|Zeta|Lambda", 1],
+      ["|Alpha|Zeta|Mu", 0],
+      ["|Beta|Eta", 1],
+      ["|Beta|Theta", 1],
+    ]
+
+If we are providing a true value to the C<as_string> key, we also get to
+choose what character to use as the separator in the C<path> column.
+
+    $taxonomy_with_path_as_string_different_path_col_sep =
+        $obj->pathify( {
+            as_string       => 1,
+            path_col_sep    => '~~',
+         } );
+
+Yields:
+
+    [
+      ["path", "is_actionable"],
+      ["~~Alpha", 0],
+      ["~~Beta", 0],
+      ["~~Alpha~~Epsilon", 0],
+      ["~~Alpha~~Epsilon~~Kappa", 1],
+      ["~~Alpha~~Zeta", 0],
+      ["~~Alpha~~Zeta~~Lambda", 1],
+      ["~~Alpha~~Zeta~~Mu", 0],
+      ["~~Beta~~Eta", 1],
+      ["~~Beta~~Theta", 1],
+    ]
+
+Finally, should we want the C<path> column in the returned arrayref to be
+named something other than I<path>, we can provide a value to the C<path_col>
+key.
+
+    [
+      ["foo", "is_actionable"],
+      [["", "Alpha"], 0],
+      [["", "Beta"], 0],
+      [["", "Alpha", "Epsilon"], 0],
+      [["", "Alpha", "Epsilon", "Kappa"], 1],
+      [["", "Alpha", "Zeta"], 0],
+      [["", "Alpha", "Zeta", "Lambda"], 1],
+      [["", "Alpha", "Zeta", "Mu"], 0],
+      [["", "Beta", "Eta"], 1],
+      [["", "Beta", "Theta"], 1],
+    ]
+
+item * Arguments
+
+Optional single hash reference.  If provided, the following keys may be used:
+
+=over 4
+
+=item * C<path_col>
+
+User-supplied name for column holding path information in the returned array
+reference.  Defaults to C<path>.
+
+=item * C<as_string>
+
+Boolean.  If supplied with a true value, path information will be represented
+as a separator-delimited string rather than an array reference.
+
+=item * C<path_col_sep>
+
+User-supplied string to be used to separate the parts of the route when
+C<as_string> is called with a true value.  Not meaningful unless C<as_string>
+is true.
+
+=back
+
+=item * Return Value
+
+Reference to an array of array references.  The first element in the array
+will be a reference to an array of field names.  Each succeeding element will
+be a reference to an array holding data for one record in the original
+taxonomy.  The path data will be represented, by default, as an array
+reference built up from the component (C<name>) column in the original
+taxonomy, but if C<as_string> is selected, the path data in all non-header
+elements will be a separator-delimited string.
+
+=back
+
+=cut
 
 sub pathify {
     my ($self, $args) = @_;

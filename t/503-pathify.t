@@ -490,3 +490,34 @@ my $path_data_records = [
         "taxonomy-by-index and taxonomy-by-path are equivalent");
 }
 
+{
+    $source = "./t/data/theta.csv";
+    note($source);
+    $obj = Parse::File::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+
+    my $rv;
+    $rv = $obj->pathify;
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $rv = $obj->pathify( { as_string => 1 } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $rv = $obj->pathify( { as_string => 1, path_col_sep => '~~' } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+    $rv = $obj->pathify( { path_col => 'foo' } );
+    ok($rv, "pathify() returned true value");
+    ok(ref($rv), "pathify() returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() returned array reference");
+
+}

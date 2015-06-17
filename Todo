@@ -1,23 +1,15 @@
 TODO list for Perl module Parse::File::Taxonomy
 
 II.  Objectives:  Take a file in either format and be able to confirm that it
-is a conformant taxonomy.  Be able to determine whether a t-b-p is equivalent
-to a t-b-y.  IN PROGRESS: Implemented for simplest case, i.e., data with main
-columns in expected positions.
+is a conformant taxonomy.  Be able to determine whether a taxonomy-by-path is equivalent
+to a taxonomy-by-index, and vice versa.  IN PROGRESS: Tested but not
+documented, for index-to-path case.
 
 IV.  What would it mean for a Parse::File::Taxonomy subclass to accept a
 filehandle as an argument, rather than a file?  Would that be difficult to
 implement?
 
-V.  The user of this library, however, must be permitted to write
-B<additional user-specified validation rules> which will be applied to a
-taxonomy by means of a C<local_validate()> method called on a
-Parse::File::Taxonomy object.  Should the file fail to meet those rules, the
-user may choose not to proceed further even though the taxonomy meets the
-basic validation criteria implemented in the constructor.  This method will
-take a reference to an array of subroutines references as its argument.  Each
-such code reference will be a user-defined rule which the taxonomy must obey.
-The method will apply each code reference to the taxonomy in sequence and will
-return with a true value if and only if all the individual criteria return
-true as well.  FUNCTIONALITY OVERKILL; removed.
+VI.  Documentation of components interface to Parse::File::Taxonomy::Index.
 
+VII.  Am using "component" is more than one way in this library.  Probably
+confusing; simplify.

@@ -8,7 +8,6 @@ use Test::More tests => 1;
 my @dummy = qw(
     epsilon.csv
     delta.csv
-    nonexistent.csv
     duplicate_header_field.csv
     non_numeric_ids.csv
     duplicate_id.csv
@@ -18,6 +17,7 @@ my @dummy = qw(
     sibling_same_name.csv
     zeta.csv
     eta.csv
+    theta.csv
 );
 
 my %seen_bad;
