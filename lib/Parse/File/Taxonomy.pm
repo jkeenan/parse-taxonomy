@@ -10,6 +10,11 @@ our $VERSION = '0.02';
 
 Parse::File::Taxonomy - Validate a file for use as a taxonomy
 
+=head1 VERSION
+
+This document refers to version 0.02 of List::Compare.  This version was
+released May 30 2015.
+
 =head1 SYNOPSIS
 
     use Parse::File::Taxonomy;
@@ -309,5 +314,55 @@ sub get_field_position {
 }
 
 1;
+
+=head1 BUGS
+
+There are no bug reports outstanding on Parse::File::Taxonomy as of the most recent
+CPAN upload date of this distribution.
+
+=head1 SUPPORT
+
+Please report any bugs by mail to C<bug-Parse-File-Taxonomy@rt.cpan.org>
+or through the web interface at L<http://rt.cpan.org>.
+
+=head1 AUTHOR
+
+James E. Keenan (jkeenan@cpan.org).  When sending correspondence, please
+include 'Parse::File::Taxonomy' or 'Parse-File-Taxonomy' in your subject line.
+
+Creation date:  May 24 2015.  Last modification date:  May 29 2015.
+
+Development repository: L<https://github.com/jkeenan/parse-file-taxonomy>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-15 James E. Keenan.  United States.  All rights reserved.
+This is free software and may be distributed under the same terms as Perl
+itself.
+
+=head1 DISCLAIMER OF WARRANTY
+
+BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE ''AS IS'' WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+=cut
 
 # vim: formatoptions=crqot

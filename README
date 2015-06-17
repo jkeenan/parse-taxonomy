@@ -1,20 +1,42 @@
 README for Perl extension Parse-File-Taxonomy
 
-    use Parse::File::Taxonomy;
+    use Parse::File::Taxonomy::Path;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy->new( {
+    $obj = Parse::File::Taxonomy::Path->new( {
         file    => $source,
     } );
 
     $hashified_taxonomy = $obj->hashify_taxonomy();
 
-More documentation in lib/Parse/File/Taxonomy.pm.  Once installed, say:
+and:
+
+    use Parse::File::Taxonomy::Index;
+
+    $source = "./t/data/alpha.csv";
+    $obj = Parse::File::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+
+    $pathified_taxonomy = $obj->pathify_taxonomy();
+
+More documentation in lib/Parse/File/Taxonomy.pm,
+lib/Parse/File/Taxonomy/Path.pm and lib/Parse/File/Taxonomy/Index.pm.
+Once installed, say:
 
     perldoc Parse::File::Taxonomy
 
 You should be able to use this set of instructions to install the module...
 
+This document refers to version 0.02 of List::Compare.  This version was
+released May 29 2015.
+
+To install this module on your system, place the tarball archive file in a
+temporary directory and call the following:
+
+    gunzip List-Compare-0.02.tar.gz
+    tar xf List-Compare-0.02.tar
+    cd List-Compare-0.02
     perl Makefile.PL
     make
     make test
