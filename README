@@ -28,15 +28,15 @@ Once installed, say:
 
 You should be able to use this set of instructions to install the module...
 
-This document refers to version 0.02 of List::Compare.  This version was
-released May 29 2015.
+This document refers to version 0.03 of Parse-File-Taxonomy.  This version was
+released June 16 2015.
 
 To install this module on your system, place the tarball archive file in a
 temporary directory and call the following:
 
-    gunzip List-Compare-0.02.tar.gz
-    tar xf List-Compare-0.02.tar
-    cd List-Compare-0.02
+    gunzip Parse-File-Taxonomy-0.03.tar.gz
+    tar xf Parse-File-Taxonomy-0.03.tar
+    cd Parse-File-Taxonomy-0.03
     perl Makefile.PL
     make
     make test
