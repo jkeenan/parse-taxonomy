@@ -6,3 +6,6 @@ Revision history for Perl module Parse::File::Taxonomy
 0.02 Sat May 30 14:32:34 EDT 2015
     - first CPAN release
 
+0.03 Tue Jun 16 21:38:16 EDT 2015
+    - Introduce Parse::File::Taxonomy::Path and
+      Parse::File::Taxonomy::Index
