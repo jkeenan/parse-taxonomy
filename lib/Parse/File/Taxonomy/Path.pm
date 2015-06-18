@@ -4,12 +4,12 @@ use parent qw( Parse::File::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use Parse::File::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
 );
-use Data::Dump;
+#use Data::Dump;
 
 =head1 NAME
 

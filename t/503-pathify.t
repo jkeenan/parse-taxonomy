@@ -10,7 +10,7 @@ use Parse::File::Taxonomy::Index;
 use Parse::File::Taxonomy::Path;
 use Test::More qw(no_plan); # tests => 12;
 use Scalar::Util qw( reftype );
-use Data::Dump;
+#use Data::Dump;
 
 my ($obj, $source, $expect);
 my ($exp_fields, $exp_data_records);
