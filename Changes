@@ -9,3 +9,6 @@ Revision history for Perl module Parse::File::Taxonomy
 0.03 Tue Jun 16 21:38:16 EDT 2015
     - Introduce Parse::File::Taxonomy::Path and
       Parse::File::Taxonomy::Index
+
+0.04 Wed Jun 17 22:36:32 EDT 2015
+    - Correct bad module import in 0.03.
