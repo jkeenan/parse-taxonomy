@@ -26,7 +26,6 @@ learn/
 research/
 superseded/
 svndiff/
-^Todo
 ^.cvsignore
 ^init
 ^results
@@ -36,3 +35,4 @@ svndiff/
 nytprof/
 nytprof.out
 .version_info.pl
+taxonomy_out.csv

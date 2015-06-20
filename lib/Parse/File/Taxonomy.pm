@@ -8,7 +8,7 @@ our $VERSION = '0.04';
 
 =head1 NAME
 
-Parse::File::Taxonomy - Validate a file for use as a taxonomy
+Parse::File::Taxonomy - Validate hierarchical data stored in CSV format
 
 =head1 VERSION
 
@@ -95,7 +95,7 @@ data other than pure integers or floating-point numbers:
 To qualify as a taxonomy file, it is not sufficient for a file to be in CSV
 format.  In each non-header record in that file, there must be one or more
 columns which hold data capable of exactly specifying the record's position in
-the taxonomy, I<i.e.,> the route or B<path> from the root node to the node
+the taxonomy, I<i.e.,> the route from the root node to the node
 being represented by that record.
 
 The precise way in which certain columns are used to determine the path from
@@ -106,7 +106,8 @@ flavors of taxonomy files and provide a class for the construction of each.
 =head3 Taxonomy-by-path
 
 A B<taxonomy-by-path> is one in which a single column -- which we will refer
-to as the B<path column> -- will represent the path from the root to the given
+to as the B<path column> -- serves as a B<materialized path>.  A materialized
+path represents the route from the root to the given
 record as a series of strings joined by separator characters.
 Within that path column the value corresponding to the root node need
 not be specified, I<i.e.,> may be represented by an empty string.

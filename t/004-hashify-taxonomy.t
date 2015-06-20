@@ -1,5 +1,5 @@
 # perl
-# t/003-hashify-taxonomy.t
+# t/004-hashify-taxonomy.t
 use strict;
 use warnings;
 use Carp;
@@ -25,7 +25,7 @@ my ($obj, $source, $expect, $hashified);
             key_delim => q{ - },
         );
     };
-    like($@, qr/^Argument to 'new\(\)' must be hashref/,
+    like($@, qr/^Argument to 'hashify_taxonomy\(\)' must be hashref/,
         "'hashify_taxonomy()' died to lack of hashref as argument; was just a key-value pair");
 
     local $@;
@@ -34,7 +34,7 @@ my ($obj, $source, $expect, $hashified);
             key_delim => q{ - },
         ] );
     };
-    like($@, qr/^Argument to 'new\(\)' must be hashref/,
+    like($@, qr/^Argument to 'hashify_taxonomy\(\)' must be hashref/,
         "'hashify_taxonomy()' died to lack of hashref as argument; was arrayref");
 }
 

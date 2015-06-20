@@ -4,6 +4,8 @@ use parent qw( Parse::File::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
+use List::Util qw( max );
+use Cwd;
 our $VERSION = '0.04';
 use Parse::File::Taxonomy::Auxiliary qw(
     path_check_fields
@@ -802,7 +804,7 @@ number of non-header records in the taxonomy.
 sub hashify_taxonomy {
     my ($self, $args) = @_;
     if (defined $args) {
-        croak "Argument to 'new()' must be hashref"
+        croak "Argument to 'hashify_taxonomy()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
     }
     my %hashified = ();
@@ -828,6 +830,115 @@ sub hashify_taxonomy {
         $hashified{$rowkey} = $rowdata;
     }
     return \%hashified;
+}
+
+sub indexify {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'indexify()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+    }
+    # TODO:  Account for possibility that one of the columns in the object may
+    # be named 'name'.
+    # TODO:  Allow for results columns 'id', 'parent_id' and 'name' to be
+    # named differently.
+
+    my $fields = $self->fields();
+    my $drpc = $self->data_records_path_components();
+
+    my $path_col_idx = $self->path_col_idx();
+    my %col2idx = map { $fields->[$_] => $_  } (0..$#{$fields});
+    my %non_path_col2idx = map { $fields->[$_] => $_  }
+        grep { $_ != $path_col_idx }
+        (0..$#{$fields});
+    my %idx2col = map { $_ => $fields->[$_] } (0..$#{$fields});
+    my %non_path_idx2col = map { $_ => $fields->[$_] }
+        grep { $_ != $path_col_idx }
+        (0..$#{$fields});
+
+    my @components_by_row =
+        map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] }  @{$drpc};
+    my $max_components = max( map { scalar(@{$_}) } @components_by_row);
+    my $serial = 0;  # TODO: make argument
+    my @indexified = ();
+    my %depth_name_id = ();
+    for my $depth (1..$max_components) {
+        for (my $r = 0; $r <= $#components_by_row; $r++) {
+            if (scalar(@{$components_by_row[$r]}) == $depth) {
+                my %rowdata = map { $_ => $drpc->[$r]->[$non_path_col2idx{$_}] }
+                    keys %non_path_col2idx;
+                @{$drpc->[$r] };
+                my $name = $drpc->[$r]->[$path_col_idx]->[$depth];
+                my $parent_of_name = $drpc->[$r]->[$path_col_idx]->[$depth-1];
+                my $parent_id = defined($depth_name_id{$depth-1}{$parent_of_name})
+                    ? $depth_name_id{$depth-1}{$parent_of_name}
+                    : '';
+                my %rowhash = (
+                    id => ++$serial,
+                    parent_id => $parent_id,
+                    name => $name,
+                    %rowdata,
+                );
+                $depth_name_id{$depth}{$name} = $rowhash{id};
+                push @indexified, \%rowhash;
+            }
+        }
+    }
+
+    return \@indexified;
+}
+
+sub write_indexified_to_csv {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'indexify()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+        croak "Argument to 'indexify()' must have 'indexified' element"
+            unless exists $args->{indexified};
+        croak "Argument 'indexified' must be array reference"
+            unless (ref($args->{indexified}) and
+                reftype($args->{indexified}) eq 'ARRAY');
+    }
+    else {
+        croak "write_indexified_to_csv() must be supplied with hashref"
+    }
+    my $indexified = $args->{indexified};
+    delete $args->{indexified};
+
+    my $columns_in = $self->fields;
+    my @non_path_columns_in =
+        map { $columns_in->[$_]  }  grep { $_ != $self->{path_col_idx} }  (0..$#{$columns_in});
+        #
+    # TODO: Allow other names, order
+    my @columns_out = ('id', 'parent_id', 'name');
+    push @columns_out, @non_path_columns_in;
+
+    my $cwd = cwd();
+    my $csvfile = $args->{csvfile} || "$cwd/taxonomy.csv";
+    delete $args->{csvfile};
+
+    # By this point, we should have processed all args other than those
+    # intended for Text::CSV and assigned their contents to variables as
+    # needed.
+
+    my $csv_args = { binary => 1 };
+    while (my ($k,$v) = each %{$args}) {
+        $csv_args->{$k} = $v;
+    }
+    my $csv = Text::CSV->new($csv_args);
+    open my $OUT, ">:encoding(utf8)", $csvfile
+        or croak "Unable to open $csvfile for writing";
+    $csv->eol($csv_args->{eol} || "\n");
+    $csv->print($OUT, [@columns_out]);
+    for my $rec (@{$indexified}) {
+        $csv->print(
+            $OUT,
+            [ map { $rec->{$columns_out[$_]} } (0..$#columns_out) ]
+        );
+    }
+    close $OUT or croak "Unable to close $csvfile after writing";
+
+    return $csvfile;
 }
 
 1;
