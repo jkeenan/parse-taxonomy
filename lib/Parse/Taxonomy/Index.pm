@@ -4,7 +4,7 @@ use parent qw( Parse::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
