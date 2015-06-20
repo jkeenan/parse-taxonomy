@@ -157,6 +157,9 @@ incoming taxonomy file.
 =item * In the column designated as the "path" column, the same value is
 observed more than once.
 
+=item * C<id>, C<parent_id> and C<name> are reserved.  One or more columns is
+named with a reserved term.
+
 =item * A non-parent node's parent node cannot be located in the incoming taxonomy file.
 
 =item * A data row has a number of fields different from the number of fields
@@ -256,6 +259,16 @@ sub _prepare_fields {
         _check_path_col_idx($data, $fields_ref, 1);
         components_check_fields($data, $fields_ref);
     }
+
+    my %fields_seen = map { $_ => 1 } @{$fields_ref};
+    my @bad_fields = ();
+    for my $reserved ( qw| id parent_id name | ) {
+        push @bad_fields, $reserved if $fields_seen{$reserved};
+    }
+    my $msg = "Bad column names: <@bad_fields>.  These are reserved for subroutine 'indexify()' ";
+    $msg .= "and for interaction with Parse::File::Taxonomy::Index; please rename";
+    croak $msg if @bad_fields;
+
     $data->{fields} = $fields_ref;
     $data->{path_col} = $data->{fields}->[$data->{path_col_idx}];
     return $data;

@@ -97,6 +97,20 @@ my ($obj, $source, $fields, $data_records);
 }
 
 {
+    $source = "./t/data/reserved_field_names.csv";
+    local $@;
+    eval {
+        $obj = Parse::File::Taxonomy::Path->new( {
+            file    => $source,
+        } );
+    };
+    for my $reserved ( qw| id parent_id name | ) {
+        like($@, qr/^Bad column names: <.*\b$reserved\b.*>/,
+            "'new()' died due to column named with reserved term '$reserved'");
+    }
+}
+
+{
     $source = "./t/data/duplicate_path.csv";
     local $@;
     eval {

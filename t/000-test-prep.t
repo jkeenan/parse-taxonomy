@@ -9,6 +9,7 @@ my @dummy = qw(
     alpha.csv
     alt_path_col_sep.csv
     beta.csv
+    reserved_field_names.csv
     duplicate_field.csv
     duplicate_path.csv
     missing_parents.csv

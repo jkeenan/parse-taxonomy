@@ -215,6 +215,22 @@ $data_records = [
     local $@;
     eval {
         $obj = Parse::File::Taxonomy::Path->new( {
+            components => {
+                fields        => [ "path","nationality","gender","id","parent_id","name" ],
+                data_records  => $data_records,
+            }
+        } );
+    };
+    for my $reserved ( qw| id parent_id name | ) {
+        like($@, qr/^Bad column names: <.*\b$reserved\b.*>/,
+            "'new()' died due to column named with reserved term '$reserved'");
+    }
+}
+
+{
+    local $@;
+    eval {
+        $obj = Parse::File::Taxonomy::Path->new( {
             components  => {
                 fields        => $fields,
                 data_records  => [

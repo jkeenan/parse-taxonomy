@@ -34,6 +34,7 @@ t/data/ids_missing_parents.csv
 t/data/missing_parents.csv
 t/data/nameless_component.csv
 t/data/non_numeric_ids.csv
+t/data/reserved_field_names.csv
 t/data/sibling_same_name.csv
 t/data/theta.csv
 t/data/wrong_row_count.csv
