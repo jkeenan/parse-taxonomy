@@ -1,11 +1,11 @@
-package Parse::File::Taxonomy::Index;
+package Parse::Taxonomy::Index;
 use strict;
-use parent qw( Parse::File::Taxonomy );
+use parent qw( Parse::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 our $VERSION = '0.04';
-use Parse::File::Taxonomy::Auxiliary qw(
+use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
 );
@@ -13,14 +13,14 @@ use Parse::File::Taxonomy::Auxiliary qw(
 
 =head1 NAME
 
-Parse::File::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV file
+Parse::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV file
 
 =head1 SYNOPSIS
 
-    use Parse::File::Taxonomy::Index;
+    use Parse::Taxonomy::Index;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
 
@@ -34,7 +34,7 @@ Parse::File::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV 
 
 =item * Purpose
 
-Parse::File::Taxonomy::Index constructor.
+Parse::Taxonomy::Index constructor.
 
 =item * Arguments
 
@@ -45,7 +45,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/delta.csv";
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
 
@@ -85,7 +85,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -110,7 +110,7 @@ each of the latter arrayrefs holding one record or row from the data set.
 
 =item * Return Value
 
-Parse::File::Taxonomy::Index object.
+Parse::Taxonomy::Index object.
 
 =item * Exceptions
 
@@ -414,7 +414,7 @@ Read-only.
 
 =back
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<data_records()>
 
@@ -444,7 +444,7 @@ or (b) use C<fields_and_data_records()>.
 
 =back
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =cut
 
@@ -472,12 +472,12 @@ field.
 
 =cut
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 Accessors
 
 The following methods provide information about key columns in a
-Parse::File::Taxonomy::Path object.  The key columns are those which hold the
+Parse::Taxonomy::Path object.  The key columns are those which hold the
 ID, parent ID and component information.  They take no arguments.  The methods
 whose names end in C<_idx> return integers, as they return the index position
 of the column in the header row.  The other methods return strings.
@@ -533,9 +533,9 @@ sub component_col {
 =item * Purpose
 
 Generate a new Perl data structure which holds the same information as a
-Parse::File::Taxonomy::Index object but which expresses the route from the
+Parse::Taxonomy::Index object but which expresses the route from the
 root node to a given branch or leaf node as either a separator-delimited
-string (as in the C<path> column of a Parse::File::Taxonomy::Path object) or
+string (as in the C<path> column of a Parse::Taxonomy::Path object) or
 as an array reference holding the list of names which delineate that route.
 
 Another way of expressing this:  Transform a taxonomy-by-index to a
@@ -563,7 +563,7 @@ out among the C<id>, C<parent_id> and C<name> columns in a single C<path>
 column which, by default, would hold an array reference.
 
     $source = "./t/data/theta.csv";
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
 

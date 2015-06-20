@@ -1,13 +1,13 @@
-package Parse::File::Taxonomy::Path;
+package Parse::Taxonomy::Path;
 use strict;
-use parent qw( Parse::File::Taxonomy );
+use parent qw( Parse::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 use List::Util qw( max );
 use Cwd;
 our $VERSION = '0.04';
-use Parse::File::Taxonomy::Auxiliary qw(
+use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
 );
@@ -15,23 +15,23 @@ use Parse::File::Taxonomy::Auxiliary qw(
 
 =head1 NAME
 
-Parse::File::Taxonomy::Path - Validate a file for use as a path-based taxonomy
+Parse::Taxonomy::Path - Validate a file for use as a path-based taxonomy
 
 =head1 SYNOPSIS
 
-    use Parse::File::Taxonomy::Path;
+    use Parse::Taxonomy::Path;
 
     # 'file' interface: reads a CSV file for you
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
 
     # 'components' interface:  as if you've already read a 
     # CSV file and now have Perl array references to header and data rows
 
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -46,7 +46,7 @@ Parse::File::Taxonomy::Path - Validate a file for use as a path-based taxonomy
 
 =item * Purpose
 
-Parse::File::Taxonomy::Path constructor.
+Parse::Taxonomy::Path constructor.
 
 =item * Arguments
 
@@ -57,7 +57,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
         path_col_idx    => 0,
         path_col_sep    => '|',
@@ -95,7 +95,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -129,7 +129,7 @@ Same as in C<file> interface above.
 
 =item * Return Value
 
-Parse::File::Taxonomy::Path object.
+Parse::Taxonomy::Path object.
 
 =item * Comment
 
@@ -227,7 +227,7 @@ sub new {
             unless (-f $args->{file});
         $data->{file} = delete $args->{file};
 
-        # We've now handled all the Parse::File::Taxonomy::Path-specific options.
+        # We've now handled all the Parse::Taxonomy::Path-specific options.
         # Any remaining options are assumed to be intended for Text::CSV::new().
 
         $args->{binary} = 1;
@@ -266,7 +266,7 @@ sub _prepare_fields {
         push @bad_fields, $reserved if $fields_seen{$reserved};
     }
     my $msg = "Bad column names: <@bad_fields>.  These are reserved for subroutine 'indexify()' ";
-    $msg .= "and for interaction with Parse::File::Taxonomy::Index; please rename";
+    $msg .= "and for interaction with Parse::Taxonomy::Index; please rename";
     croak $msg if @bad_fields;
 
     $data->{fields} = $fields_ref;
@@ -376,7 +376,7 @@ Read-only.
 
 =back
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<path_col_idx()>
 
@@ -504,7 +504,7 @@ or (b) use C<fields_and_data_records()>.
 
 =back
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<fields_and_data_records()>
 
@@ -532,7 +532,7 @@ in that file.
 
 =cut
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<data_records_path_components()>
 
@@ -655,7 +655,7 @@ field.
 
 =cut
 
-# Implemented in lib/Parse/File/Taxonomy.pm
+# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<child_counts()>
 
@@ -728,7 +728,7 @@ sub get_child_count {
     return $child_counts->{$node};
 }
 
-=head2 C<hashify_taxonomy()>
+=head2 C<hashify()>
 
 =over 4
 
@@ -739,7 +739,7 @@ the path column.
 
 =item * Arguments
 
-    $hashref = $self->hashify_taxonomy();
+    $hashref = $self->hashify();
 
 Takes an optional hashref holding a list of any of the following elements:
 
@@ -747,7 +747,7 @@ Takes an optional hashref holding a list of any of the following elements:
 
 =item * C<remove_leading_path_col_sep>
 
-Boolean, defaulting to C<0>.  By default, C<hashify_taxonomy()> will spell the
+Boolean, defaulting to C<0>.  By default, C<hashify()> will spell the
 key of the hash exactly as the value of the path column is spelled in the
 taxonomy -- which in turn is the way it was spelled in the incoming file.
 That is, a path in the taxonomy spelled C<|Alpha|Beta|Gamma> will be spelled
@@ -758,7 +758,7 @@ the taxonomy will be empty, the user may wish to remove the first instance of
 C<path_col_sep>.  The user would do so by setting
 C<remove_leading_path_col_sep> to a true value.
 
-    $hashref = $self->hashify_taxonomy( {
+    $hashref = $self->hashify( {
         remove_leading_path_col_sep => 1,
     } );
 
@@ -775,7 +775,7 @@ value found in the incoming CSV file (which by default will be the pipe
 character (C<|>) and which may be overridden with the C<path_col_sep> argument
 to C<new()>.
 
-    $hashref = $self->hashify_taxonomy( {
+    $hashref = $self->hashify( {
         key_delim   => q{ - },
     } );
 
@@ -794,7 +794,7 @@ Suppose the user wished to have C<All Suppliers> be the text for the root
 node.  Suppose further that the user wanted to use the string C< - > as the
 delimiter within the key.
 
-    $hashref = $self->hashify_taxonomy( {
+    $hashref = $self->hashify( {
         root_str    => q{All Suppliers},
         key_delim   => q{ - },
     } );
@@ -814,10 +814,10 @@ number of non-header records in the taxonomy.
 
 =cut
 
-sub hashify_taxonomy {
+sub hashify {
     my ($self, $args) = @_;
     if (defined $args) {
-        croak "Argument to 'hashify_taxonomy()' must be hashref"
+        croak "Argument to 'hashify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
     }
     my %hashified = ();

@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy::Index;
+use Parse::Taxonomy::Index;
 use Test::More qw(no_plan); # tests => 12;
 #use Data::Dump;
 
@@ -16,11 +16,11 @@ my ($exp_fields, $exp_data_records);
 {
     $source = "./t/data/delta.csv";
     note($source);
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     $exp_fields = ["id","parent_id","name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
@@ -73,14 +73,14 @@ my ($exp_fields, $exp_data_records);
 {
     $source = "./t/data/zeta.csv";
     note($source);
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
         component_col       => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     $exp_fields = ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
@@ -138,14 +138,14 @@ my ($exp_fields, $exp_data_records);
         ["12","11","Nu","Travel","EUR","0.60","0.75","1"],
         ["13","","Delta","Life Insurance","USD","0.25","0.30","1"],
     ];
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         components => {
             fields => $exp_fields,
             data_records => $exp_data_records,
         },
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
     is_deeply($obj->data_records, $exp_data_records, "Got expected data records");
@@ -187,7 +187,7 @@ my ($exp_fields, $exp_data_records);
         ["12","11","Nu","Travel","EUR","0.60","0.75","1"],
         ["13","","Delta","Life Insurance","USD","0.25","0.30","1"],
     ];
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         components => {
             fields => $exp_fields,
             data_records => $exp_data_records,
@@ -197,7 +197,7 @@ my ($exp_fields, $exp_data_records);
         component_col       => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
     is_deeply($obj->data_records, $exp_data_records, "Got expected data records");

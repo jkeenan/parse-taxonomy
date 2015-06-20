@@ -6,45 +6,45 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy::Path;
+use Parse::Taxonomy::Path;
 use Test::More tests => 15;
 
 my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
     local $@;
     eval {
-        $hashified = $obj->hashify_taxonomy(
+        $hashified = $obj->hashify(
             key_delim => q{ - },
         );
     };
-    like($@, qr/^Argument to 'hashify_taxonomy\(\)' must be hashref/,
-        "'hashify_taxonomy()' died to lack of hashref as argument; was just a key-value pair");
+    like($@, qr/^Argument to 'hashify\(\)' must be hashref/,
+        "'hashify()' died to lack of hashref as argument; was just a key-value pair");
 
     local $@;
     eval {
-        $hashified = $obj->hashify_taxonomy( [
+        $hashified = $obj->hashify( [
             key_delim => q{ - },
         ] );
     };
-    like($@, qr/^Argument to 'hashify_taxonomy\(\)' must be hashref/,
-        "'hashify_taxonomy()' died to lack of hashref as argument; was arrayref");
+    like($@, qr/^Argument to 'hashify\(\)' must be hashref/,
+        "'hashify()' died to lack of hashref as argument; was arrayref");
 }
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
     $expect = {
         "|Alpha" => {
@@ -152,7 +152,7 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy();
+    $hashified = $obj->hashify();
     is_deeply($hashified, $expect, "Got expected hashified taxonomy (no args)");
 
     $expect = {
@@ -261,7 +261,7 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         remove_leading_path_col_sep => 1,
     } );
     is_deeply($hashified, $expect,
@@ -373,7 +373,7 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         key_delim => '/',
     } );
     is_deeply($hashified, $expect, "Got expected hashified taxonomy (key_delim)");
@@ -484,7 +484,7 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         remove_leading_path_col_sep => 1,
         key_delim => q{ - },
     } );
@@ -597,7 +597,7 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         root_str => 'All Suppliers',
     } );
     is_deeply($hashified, $expect,
@@ -709,14 +709,14 @@ my ($obj, $source, $expect, $hashified);
                     wholesale_price => 0.25,
                   },
     };
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         key_delim => ' - ',
         root_str => 'All Suppliers',
     } );
     is_deeply($hashified, $expect, "Got expected taxonomy (key_delim and root_str)");
 
     note("'components' interface");
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
 #        file    => $source,
         components => {
             fields          => ["path","vertical","currency_code","wholesale_price","retail_price","is_actionable"],
@@ -738,9 +738,9 @@ my ($obj, $source, $expect, $hashified);
         },
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
-    $hashified = $obj->hashify_taxonomy( {
+    $hashified = $obj->hashify( {
         key_delim => ' - ',
         root_str => 'All Suppliers',
     } );

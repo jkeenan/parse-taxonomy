@@ -1,4 +1,4 @@
-package Parse::File::Taxonomy::Auxiliary;
+package Parse::Taxonomy::Auxiliary;
 use strict;
 use Carp;
 our ($VERSION, @ISA, @EXPORT_OK);
@@ -11,11 +11,11 @@ $VERSION = '0.04';
 
 =head1 NAME
 
-Parse::File::Taxonomy::Auxiliary - Utility subroutines for Parse::File::Taxonomy
+Parse::Taxonomy::Auxiliary - Utility subroutines for Parse::Taxonomy
 
 =head1 SYNOPSIS
 
-    use Parse::File::Taxonomy::Auxiliary qw(
+    use Parse::Taxonomy::Auxiliary qw(
         path_check_fields
         components_check_fields
     );

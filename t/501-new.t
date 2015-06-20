@@ -1,12 +1,12 @@
 # perl
-# t/501-new.t - Tests of Parse::File::Taxonomy::Index constructor
+# t/501-new.t - Tests of Parse::Taxonomy::Index constructor
 use strict;
 use warnings;
 use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy::Index;
+use Parse::Taxonomy::Index;
 use Test::More qw(no_plan); # tests => 20;
 #use Data::Dump;
 
@@ -16,7 +16,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/epsilon.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new(
+        $obj = Parse::Taxonomy::Index->new(
             file    => $source,
         );
     };
@@ -28,7 +28,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/epsilon.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( [
+        $obj = Parse::Taxonomy::Index->new( [
             file    => $source,
         ] );
     };
@@ -40,7 +40,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/delta.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( { } );
+        $obj = Parse::Taxonomy::Index->new( { } );
     };
     like($@, qr/^Argument to 'new\(\)' must have either 'file' or 'components' element/,
         "'new()' died to lack of either 'file' or 'components' element in hashref passed as argument");
@@ -50,7 +50,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/nonexistent.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -62,7 +62,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/duplicate_header_field.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -75,7 +75,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     local $@;
     $expect = 'my_id';
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
             id_col  => $expect,
         } );
@@ -89,7 +89,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     local $@;
     $expect = 'my_parent_id';
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
             parent_id_col  => $expect,
         } );
@@ -103,7 +103,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     local $@;
     $expect = 'my_name';
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
             component_col  => $expect,
         } );
@@ -116,7 +116,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/non_numeric_ids.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -133,7 +133,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/duplicate_id.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -148,7 +148,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/bad_row_count.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -164,7 +164,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "./t/data/nameless_component.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -180,7 +180,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "t/data/ids_missing_parents.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -192,7 +192,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     $source = "t/data/sibling_same_name.csv";
     local $@;
     eval {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             file    => $source,
         } );
     };
@@ -203,11 +203,11 @@ my ($obj, $source, $expect, $fields, $data_records);
 {
     $source = "./t/data/delta.csv";
     note($source);
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     # Tests of default values: replace once we have accessors
     $expect = $source;
@@ -226,14 +226,14 @@ my ($obj, $source, $expect, $fields, $data_records);
 {
     $source = "./t/data/zeta.csv";
     note($source);
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
         component_col       => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     # Tests of default values: replace once we have accessors
     $expect = $source;
@@ -253,14 +253,14 @@ my ($obj, $source, $expect, $fields, $data_records);
     note("Non-standard names and positions for main columns");
     $source = "./t/data/eta.csv";
     note($source);
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
         component_col       => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::Index');
 
     # Tests of default values: replace once we have accessors
     $expect = $source;
@@ -299,7 +299,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         local $@;
         $source = "./t/data/delta.csv";
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 file        => $source,
                 components  => {
                     fields          => $fields,
@@ -315,7 +315,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => [
                     fields          => $fields,
                     data_records    => $data_records,
@@ -330,7 +330,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => 'foo',
             } );
         };
@@ -342,7 +342,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     data_records    => $data_records,
                 }
@@ -355,7 +355,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields    => $fields,
                 }
@@ -368,7 +368,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields          => 'foo',
                     data_records    => $data_records,
@@ -383,7 +383,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields          => { hash => ref},
                     data_records    => $data_records,
@@ -398,7 +398,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields          => $fields,
                     data_records    => { my => $data_records },
@@ -413,7 +413,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields          => $fields,
                     data_records    => [
@@ -431,7 +431,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields          => $fields,
                     data_records    => [
@@ -450,7 +450,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         local $@;
         my $dupe_field = 'vertical';
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => ["id","parent_id","name",$dupe_field,$dupe_field,"wholesale_price","retail_price","is_actionable"],
                     data_records  => $data_records,
@@ -465,7 +465,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         local $@;
         $expect = 'my_id';
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => $data_records,
@@ -481,7 +481,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         local $@;
         $expect = 'my_parent_id';
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => $data_records,
@@ -497,7 +497,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         local $@;
         $expect = 'my_component_id';
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => $data_records,
@@ -512,7 +512,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => [
@@ -543,7 +543,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => [
@@ -575,7 +575,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => [
@@ -603,7 +603,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     {
         local $@;
         eval {
-            $obj = Parse::File::Taxonomy::Index->new( {
+            $obj = Parse::Taxonomy::Index->new( {
                 components  => {
                     fields        => $fields,
                     data_records  => [
@@ -629,14 +629,14 @@ my ($obj, $source, $expect, $fields, $data_records);
     }
 
     {
-        $obj = Parse::File::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::Index->new( {
             components  => {
                 fields          => $fields,
                 data_records    => $data_records,
             }
         } );
         ok(defined $obj, "new() returned defined value");
-        isa_ok($obj, 'Parse::File::Taxonomy::Index');
+        isa_ok($obj, 'Parse::Taxonomy::Index');
     }
 
 }

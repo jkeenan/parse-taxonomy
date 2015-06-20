@@ -4,9 +4,9 @@ require 5.006;
 my $mm_ver = ExtUtils::MakeMaker->VERSION;
 
 WriteMakefile(
-    NAME            => 'Parse::File::Taxonomy',
-    VERSION_FROM    => 'lib/Parse/File/Taxonomy.pm',
-    ABSTRACT_FROM   => 'lib/Parse/File/Taxonomy.pm',
+    NAME            => 'Parse::Taxonomy',
+    VERSION_FROM    => 'lib/Parse/Taxonomy.pm',
+    ABSTRACT_FROM   => 'lib/Parse/Taxonomy.pm',
     AUTHOR          => 'James E Keenan (jkeenan@cpan.org>)',
     ( $mm_ver < 6.63_03 ? 'BUILD_REQUIRES' : 'TEST_REQUIRES' )
                     =>  {
@@ -16,14 +16,14 @@ WriteMakefile(
         'meta-spec' => { version => 2 },
         dynamic_config => 1,
         resources => {
-            homepage => 'http://thenceforward.net/perl/modules/Parse-File-Taxonomy/',
+            homepage => 'http://thenceforward.net/perl/modules/Parse-Taxonomy/',
             repository => {
-                url => 'https://github.com/jkeenan/parse-file-taxonomy.git',
-                web => 'https://github.com/jkeenan/parse-file-taxonomy',
+                url => 'https://github.com/jkeenan/parse-taxonomy.git',
+                web => 'https://github.com/jkeenan/parse-taxonomy',
                 type => 'git',
             },
             bugtracker => {
-                web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Parse-File-Taxonomy',
+                web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Parse-Taxonomy',
             },
         },
     })),

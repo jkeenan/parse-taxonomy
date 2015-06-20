@@ -1,6 +1,6 @@
 # perl
 # t/500-test-prep.t - verify presence of files needed for testing of
-# Parse::File::Taxonomy::Index
+# Parse::Taxonomy::Index
 use strict;
 use warnings;
 use Test::More tests => 1;

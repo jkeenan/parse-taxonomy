@@ -1,6 +1,6 @@
 # perl
 # t/000-test-prep.t - verify presence of files needed for testing of
-# Parse::File::Taxonomy::Path
+# Parse::Taxonomy::Path
 use strict;
 use warnings;
 use Test::More tests => 1;

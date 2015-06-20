@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::File::Taxonomy::Path;
+use Parse::Taxonomy::Path;
 use Test::More qw(no_plan); # tests => 15;
 #use Data::Dump;
 
@@ -14,11 +14,11 @@ my ($obj, $source, $expect, $indexified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
     local $@;
     # TODO: Change key_delim to something meaningful
@@ -43,11 +43,11 @@ my ($obj, $source, $expect, $indexified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::File::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
     $indexified = $obj->indexify();
     ok($indexified, "'indexify() returned true value");

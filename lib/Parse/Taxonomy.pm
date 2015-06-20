@@ -1,4 +1,4 @@
-package Parse::File::Taxonomy;
+package Parse::Taxonomy;
 use strict;
 use Carp;
 use Text::CSV;
@@ -8,23 +8,23 @@ our $VERSION = '0.04';
 
 =head1 NAME
 
-Parse::File::Taxonomy - Validate hierarchical data stored in CSV format
+Parse::Taxonomy - Validate hierarchical data stored in CSV format
 
 =head1 VERSION
 
-This document refers to version 0.04 of Parse::File::Taxonomy.  This version was
+This document refers to version 0.04 of Parse::Taxonomy.  This version was
 released May 30 2015.
 
 =head1 SYNOPSIS
 
-    use Parse::File::Taxonomy;
+    use Parse::Taxonomy;
 
 =head1 DESCRIPTION
 
-This module is the base class for the Parse-File-Taxonomy extension to the
+This module is the base class for the Parse-Taxonomy extension to the
 Perl 5 programming language.  You will not instantiate objects of this class;
 rather, you will instantiate objects of subclasses, of which
-Parse::File::Taxonomy::Path will be the first.
+Parse::Taxonomy::Path will be the first.
 
 B<This is an ALPHA release.>
 
@@ -100,7 +100,7 @@ being represented by that record.
 
 The precise way in which certain columns are used to determine the path from
 the root node to a given node is what differentiates various types of taxonomy
-files from one another.  In Parse-File-Taxonomy we identify two different
+files from one another.  In Parse-Taxonomy we identify two different
 flavors of taxonomy files and provide a class for the construction of each.
 
 =head3 Taxonomy-by-path
@@ -260,14 +260,14 @@ describe these two taxonomies as B<equivalent> to each other.
 
 =head2 Taxonomy Validation
 
-Each C<Parse::File::Taxonomy> subclass will have a constructor, C<new()>,
+Each C<Parse::Taxonomy> subclass will have a constructor, C<new()>,
 which will probe a taxonomy file
 provided to it as an argument to determine whether it can be considered a
 valid taxonomy according to the description provided above.  The arguments
 needed for such a constructor will be found in the documentation of the
 subclass.
 
-The constructor of a C<Parse::File::Taxonomy> subclass may, if desired, accept
+The constructor of a C<Parse::Taxonomy> subclass may, if desired, accept
 a different set of arguments.  Suppose you have already read a CSV file and
 parsed it into one array reference holding its header row -- a list of its
 columns -- and a second array reference, this one being an array of arrays
@@ -318,22 +318,22 @@ sub get_field_position {
 
 =head1 BUGS
 
-There are no bug reports outstanding on Parse::File::Taxonomy as of the most recent
+There are no bug reports outstanding on Parse::Taxonomy as of the most recent
 CPAN upload date of this distribution.
 
 =head1 SUPPORT
 
-Please report any bugs by mail to C<bug-Parse-File-Taxonomy@rt.cpan.org>
+Please report any bugs by mail to C<bug-Parse-Taxonomy@rt.cpan.org>
 or through the web interface at L<http://rt.cpan.org>.
 
 =head1 AUTHOR
 
 James E. Keenan (jkeenan@cpan.org).  When sending correspondence, please
-include 'Parse::File::Taxonomy' or 'Parse-File-Taxonomy' in your subject line.
+include 'Parse::Taxonomy' or 'Parse-Taxonomy' in your subject line.
 
 Creation date:  May 24 2015.  Last modification date:  June 17 2015.
 
-Development repository: L<https://github.com/jkeenan/parse-file-taxonomy>
+Development repository: L<https://github.com/jkeenan/parse-taxonomy>
 
 =head1 COPYRIGHT
 
