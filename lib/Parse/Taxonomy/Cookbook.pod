@@ -88,13 +88,109 @@ with the same C<parent_id> have the same C<name>.
 
 =head3 Problem
 
+You have a taxonomy file from which you have successfully created a
+Parse::Taxonomy::Path object.  From that you know that it is valid with
+respect to the requirements for a taxonomy imposed by this library.  But you
+have additional business requirements which a taxonomy must fulfill before you
+can use the taxonomy in production.
+
+Suppose that you have a taxonomy file with this data:
+
+    $> cat local_requirement.csv
+    "path","is_actionable"
+    "|Alpha","0"
+    "|Beta","0"
+    "|Alpha|Epsilon","0"
+    "|Alpha|Epsilon|Kappa","1"
+    "|Alpha|Zeta","0"
+    "|Alpha|Zeta|Lambda","1"
+    "|Alpha|Zeta|Mu","0"
+    "|Beta|Eta","1"
+    "|Beta|Theta","1"
+    "|Beta|Iota","0"
+
+Suppose further that you have a business requirement that all nodes which are
+"pure" leaf nodes -- all nodes which have no children of their own -- have a true value for C<is_actionable>.
+
 =head3 Solution
+
+Use Parse::Taxonomy:::Path accessor methods to get at the data in the taxonomy
+and write your own functions to conduct local validations.
+
+In this case:
+
+    $obj = Parse::Taxonomy::Path->new( {
+        file    => 'local_requirement.csv',
+    } );
+    $hashified       = $obj->hashify();
+    $child_counts    = $obj->child_counts();
+
+Use C<hashify()> to turn the taxonomy into a hash.  Use C<child_counts()> to
+get the number of children each node has.  Then iterate over the hash checking
+whether an element has no children and, if so, whether the node's
+C<is_actionable> setting is true.
+
+    @non_actionable_leaf_nodes = ();
+    for my $node (keys %{$hashified}) {
+        if (
+            ($child_counts->{$node} == 0) &&
+            (! $hashified->{$node}->{is_actionable})
+        ) {
+            push @non_actionable_leaf_nodes, $node;
+        }
+    }
+    warn "leaf node '$_' is non-actionable"
+        for @non_actionable_leaf_nodes;
+
+Output will resemble:
+
+    leaf node '|Alpha|Zeta|Mu' is non-actionable at ...
+    leaf node '|Beta|Iota' is non-actionable at ...
+
+You can then decide how to handle this per your business requirements.
 
 =head2 Convert a taxonomy-by-path to a taxonomy-by-index
 
 =head3 Problem
 
+You have a file which holds a validated taxonomy-by-path and you want to
+create a file which holds the equivalent taxonomy-by-index.
+
+Suppose you have a file with this data:
+
+    "path","is_actionable"
+    "|Alpha","0"
+    "|Beta","0"
+    "|Alpha|Epsilon","0"
+    "|Alpha|Epsilon|Kappa","1"
+    "|Alpha|Zeta","0"
+    "|Alpha|Zeta|Lambda","1"
+    "|Alpha|Zeta|Mu","1"
+    "|Beta|Eta","1"
+    "|Beta|Theta","1"
+    "|Beta|Iota","1"
+
 =head3 Solution
+
+Use the C<indexify()> and C<write_indexified_to_csv()> methods.
+
+    $indexified = $obj->indexify();
+    $file_taxonomy_by_index = $obj->write_indexified_to_csv($indexified);
+
+The file's whose path is stored in C<$file_taxonomy_by_index> will look like
+this:
+
+    id,parent_id,name,is_actionable
+    1,,Alpha,0
+    2,,Beta,0
+    3,1,Epsilon,0
+    4,1,Zeta,0
+    5,2,Eta,1
+    6,2,Theta,1
+    7,2,Iota,1
+    8,3,Kappa,1
+    9,4,Lambda,1
+    10,4,Mu,1
 
 =head2 Convert a taxonomy-by-index to a taxonomy-by-path
 

@@ -173,6 +173,7 @@ my ($obj, $source, $expect);
         like($@, qr/'$bad_field' not a field in this taxonomy/,
             "get_field_position() threw exception due to non-existent field");
     }
+
 } 
 
 {

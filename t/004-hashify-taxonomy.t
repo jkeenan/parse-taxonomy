@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::Path;
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -746,4 +746,38 @@ my ($obj, $source, $expect, $hashified);
     } );
     is_deeply($hashified, $expect, "Got expected taxonomy (key_delim and root_str)");
 }
+use Data::Dump;
+{
+    note("Example of local validation");
+    my $obj = Parse::Taxonomy::Path->new( {
+        file    => 't/data/iota.csv',
+    } );
+    my $hashified       = $obj->hashify();
+    my $child_counts    = $obj->child_counts();
+    my @non_actionable_leaf_nodes = ();
+    for my $node (keys %{$hashified}) {
+        if (
+            ($child_counts->{$node} == 0) &&
+            (! $hashified->{$node}->{is_actionable})
+        ) {
+            push @non_actionable_leaf_nodes, $node;
+        }
+    }
+    #warn "leaf node '$_' is non-actionable"
+    #    for @non_actionable_leaf_nodes;
+    ok(scalar(@non_actionable_leaf_nodes),
+        "leaf nodes which are non-actionable were identified");
 
+    my %non_actionable_leaf_nodes = 
+        map { $_ => {
+            child_count => $child_counts->{$_},
+            is_actionable => $hashified->{$_}->{is_actionable},
+        } }
+        grep {
+            ($child_counts->{$_} == 0) &&
+            (! $hashified->{$_}->{is_actionable})
+        }
+        keys %{$hashified};
+    ok(scalar(keys %non_actionable_leaf_nodes),
+        "leaf nodes which are non-actionable were identified");
+}
