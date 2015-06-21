@@ -195,4 +195,24 @@ my ($obj, $source, $expect, $indexified);
 
 }
 
+{
+    # A small taxonomy-by-path
+    $source = "./t/data/iota.csv";
+    note($source);
+    $obj = Parse::Taxonomy::Path->new( {
+        file                => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::Path');
 
+    note("indexify()");
+    $indexified = $obj->indexify();
+    ok($indexified, "'indexify() returned true value");
+
+    note("write_indexified_to_csv()");
+    my $csv_file;
+    $csv_file = $obj->write_indexified_to_csv( {
+       indexified => $indexified,
+       csvfile => './t/data/taxonomy_out3.csv',
+    } );
+}

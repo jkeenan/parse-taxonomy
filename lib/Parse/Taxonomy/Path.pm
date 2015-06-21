@@ -845,14 +845,50 @@ sub hashify {
     return \%hashified;
 }
 
+=head2 C<indexify()>
+
+=over 4
+
+=item * Purpose
+
+Transform a taxonomy-by-path into a taxonomy-by-index.
+
+=item * Arguments
+
+    $indexified = $obj->indexify();
+
+    $indexified = $obj->indexify( { serial => 500 } );
+
+Optional single hash reference.
+
+At this time the only key supported for that
+hash is C<serial>, which defaults to C<0>.  C<serial> must be a non-negative
+integer and sets the "floor" above which new unique IDs will be assigned to
+the C<id> column.  Hence, if C<serial> is set to C<500>, the value assigned to
+the C<id> column of the first record to be processed will be C<501>.
+
+=item * Return Value
+
+Reference to an array of hash references.  Each element represents one node in
+the taxonomy.  Each element will have key-value pairs for C<id>, C<parent_id>
+and C<name> which will hold the indexification of the materialized path in the
+original taxonomy-by-path.  Each element will, as well, have KVPs for the
+non-materialized-path fields in the records in the original taxonomy-by-path.
+
+=item * Comment
+
+See documentation for C<write_indexified_to_csv()> for example.
+
+=back
+
+=cut
+
 sub indexify {
     my ($self, $args) = @_;
     if (defined $args) {
         croak "Argument to 'indexify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
     }
-    # TODO:  Allow for results columns 'id', 'parent_id' and 'name' to be
-    # named differently.
 
     my $fields = $self->fields();
     my $drpc = $self->data_records_path_components();
@@ -899,6 +935,84 @@ sub indexify {
     return \@indexified;
 }
 
+=head2 C<write_indexified_to_csv()>
+
+=over 4
+
+=item * Purpose
+
+Create a CSV-formatted file holding the data returned by C<indexify()>.
+
+=item * Arguments
+
+    $csv_file = $obj->write_indexified_to_csv( {
+       indexified => $indexified,                   # output of indexify()
+       csvfile => './t/data/taxonomy_out3.csv',
+    } );
+
+Single hash reference.  That hash is keyed on:
+
+=over 4
+
+=item * C<indexified>
+
+B<Required:>  Its value must be the arrayref of hash references returned by
+the C<indexify()> method.
+
+=item * C<csvfile>
+
+Optional.  Path to location where a CSV-formatted text file holding the
+taxonomy-by-index will be written.  Defaults to a file called
+F<taxonomy_out.csv> in the current working directory.
+
+=item * Text::CSV options
+
+You can also pass through any key-value pairs normally accepted by
+F<Text::CSV>.
+
+=back
+
+=item * Return Value
+
+Returns path to CSV-formatted text file just created.
+
+=item * Example
+
+Suppose we have a CSV-formatted file holding the following taxonomy-by-path:
+
+    "path","is_actionable"
+    "|Alpha","0"
+    "|Beta","0"
+    "|Alpha|Epsilon","0"
+    "|Alpha|Epsilon|Kappa","1"
+    "|Alpha|Zeta","0"
+    "|Alpha|Zeta|Lambda","1"
+    "|Alpha|Zeta|Mu","0"
+    "|Beta|Eta","1"
+    "|Beta|Theta","1"
+
+After running this file through C<new()>, C<indexify()> and
+C<write_indexified_to_csv()> we will have a new CSV-formatted file holding
+this taxonomy-by-index:
+
+    id,parent_id,name,is_actionable
+    1,,Alpha,0
+    2,,Beta,0
+    3,1,Epsilon,0
+    4,1,Zeta,0
+    5,2,Eta,1
+    6,2,Theta,1
+    7,3,Kappa,1
+    8,4,Lambda,1
+    9,4,Mu,0
+
+Note that the C<path> column has been replaced by the C<id>, C<parent_id> and
+C<name> columns.
+
+=back
+
+=cut
+
 sub write_indexified_to_csv {
     my ($self, $args) = @_;
     if (defined $args) {
@@ -918,7 +1032,9 @@ sub write_indexified_to_csv {
 
     my $columns_in = $self->fields;
     my @non_path_columns_in =
-        map { $columns_in->[$_]  }  grep { $_ != $self->{path_col_idx} }  (0..$#{$columns_in});
+        map { $columns_in->[$_]  }
+        grep { $_ != $self->{path_col_idx} }
+        (0..$#{$columns_in});
     my @columns_out = (qw| id parent_id name |);
     push @columns_out, @non_path_columns_in;
 
