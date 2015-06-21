@@ -851,8 +851,6 @@ sub indexify {
         croak "Argument to 'indexify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
     }
-    # TODO:  Account for possibility that one of the columns in the object may
-    # be named 'name'.
     # TODO:  Allow for results columns 'id', 'parent_id' and 'name' to be
     # named differently.
 
@@ -872,7 +870,7 @@ sub indexify {
     my @components_by_row =
         map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] }  @{$drpc};
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
-    my $serial = 0;  # TODO: make argument
+    my $serial = $args->{serial} || 0;
     my @indexified = ();
     my %depth_name_id = ();
     for my $depth (1..$max_components) {
@@ -921,13 +919,13 @@ sub write_indexified_to_csv {
     my $columns_in = $self->fields;
     my @non_path_columns_in =
         map { $columns_in->[$_]  }  grep { $_ != $self->{path_col_idx} }  (0..$#{$columns_in});
-        #
-    # TODO: Allow other names, order
-    my @columns_out = ('id', 'parent_id', 'name');
+    my @columns_out = (qw| id parent_id name |);
     push @columns_out, @non_path_columns_in;
 
     my $cwd = cwd();
-    my $csvfile = $args->{csvfile} || "$cwd/taxonomy.csv";
+    my $csvfile = defined($args->{csvfile})
+        ? $args->{csvfile}
+        : "$cwd/taxonomy_out.csv";
     delete $args->{csvfile};
 
     # By this point, we should have processed all args other than those
@@ -941,7 +939,7 @@ sub write_indexified_to_csv {
     my $csv = Text::CSV->new($csv_args);
     open my $OUT, ">:encoding(utf8)", $csvfile
         or croak "Unable to open $csvfile for writing";
-    $csv->eol($csv_args->{eol} || "\n");
+    $csv->eol(defined($csv_args->{eol}) ? $csv_args->{eol} : "\n");
     $csv->print($OUT, [@columns_out]);
     for my $rec (@{$indexified}) {
         $csv->print(
