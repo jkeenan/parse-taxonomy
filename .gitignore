@@ -18,6 +18,7 @@ nytprof.out
 *.o
 *.bs
 Parse-File-Taxonomy-*.tar.gz
+Parse-Taxonomy-*.tar.gz
 /nytprof/
 *.swp
 /t/data/taxonomy_out*.csv

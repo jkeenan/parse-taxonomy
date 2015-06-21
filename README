@@ -1,9 +1,9 @@
-README for Perl extension Parse-File-Taxonomy
+README for Perl extension Parse-Taxonomy
 
-    use Parse::File::Taxonomy::Path;
+    use Parse::Taxonomy::Path;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::Path->new( {
         file    => $source,
     } );
 
@@ -11,32 +11,32 @@ README for Perl extension Parse-File-Taxonomy
 
 and:
 
-    use Parse::File::Taxonomy::Index;
+    use Parse::Taxonomy::Index;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::File::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::Index->new( {
         file    => $source,
     } );
 
     $pathified_taxonomy = $obj->pathify_taxonomy();
 
-More documentation in lib/Parse/File/Taxonomy.pm,
-lib/Parse/File/Taxonomy/Path.pm and lib/Parse/File/Taxonomy/Index.pm.
+More documentation in lib/Parse/Taxonomy.pm,
+lib/Parse/Taxonomy/Path.pm and lib/Parse/Taxonomy/Index.pm.
 Once installed, say:
 
-    perldoc Parse::File::Taxonomy
+    perldoc Parse::Taxonomy
 
 You should be able to use this set of instructions to install the module...
 
-This document refers to version 0.05 of Parse-File-Taxonomy.  This version was
+This document refers to version 0.05 of Parse-Taxonomy.  This version was
 released June 20 2015.
 
 To install this module on your system, place the tarball archive file in a
 temporary directory and call the following:
 
-    gunzip Parse-File-Taxonomy-0.05.tar.gz
-    tar xf Parse-File-Taxonomy-0.05.tar
-    cd Parse-File-Taxonomy-0.05
+    gunzip Parse-Taxonomy-0.05.tar.gz
+    tar xf Parse-Taxonomy-0.05.tar
+    cd Parse-Taxonomy-0.05
     perl Makefile.PL
     make
     make test
