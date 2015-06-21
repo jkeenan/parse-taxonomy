@@ -35,4 +35,4 @@ svndiff/
 nytprof/
 nytprof.out
 .version_info.pl
-taxonomy_out*.csv
+t/data/*taxonomy_out*

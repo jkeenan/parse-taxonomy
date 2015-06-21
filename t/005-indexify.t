@@ -11,7 +11,6 @@ use Test::More qw(no_plan); # tests => 15;
 use List::Util qw( min );
 use Cwd;
 use File::Temp qw/ tempdir /;
-#use Data::Dump;
 
 my ($obj, $source, $expect, $indexified);
 
@@ -164,6 +163,35 @@ my ($obj, $source, $expect, $indexified);
         ok(-f "$tdir/taxonomy_out.csv", "Wrote CSV file in current directory");
         chdir $cwd or croak "Unable to change back to $cwd";
     }
+
+}
+
+{
+    note("Non-siblings can have same name");
+    $source = "./t/data/non_sibling_same_name.csv";
+    note($source);
+    $obj = Parse::Taxonomy::Path->new( {
+        file                => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::Path');
+
+    note("indexify()");
+    my $serial = 420;
+    $indexified = $obj->indexify( { serial => $serial } );
+    ok($indexified, "'indexify() returned true value");
+    my @ids_seen = map { $_->{id} } @{$indexified};
+    my $expect = 421;
+    is(min(@ids_seen), $expect,
+        "Lowest 'id' value is $expect, as serial was set to $serial");
+
+    note("write_indexified_to_csv()");
+    my $csv_file;
+    $csv_file = $obj->write_indexified_to_csv( {
+       indexified => $indexified,
+       csvfile => './t/data/taxonomy_out2.csv',
+       sep_char => '|',
+    } );
 
 }
 

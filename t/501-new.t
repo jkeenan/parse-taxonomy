@@ -8,7 +8,6 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::Index;
 use Test::More qw(no_plan); # tests => 20;
-#use Data::Dump;
 
 my ($obj, $source, $expect, $fields, $data_records);
 

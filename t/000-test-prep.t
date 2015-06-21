@@ -14,6 +14,7 @@ my @dummy = qw(
     duplicate_path.csv
     missing_parents.csv
     wrong_row_count.csv
+    non_sibling_same_name.csv
 );
 
 my %seen_bad;
