@@ -200,6 +200,18 @@ my ($obj, $source, $expect, $fields, $data_records);
 }
 
 {
+    $source = "t/data/small_sibling_same_name.csv";
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::Index->new( {
+            file    => $source,
+        } );
+    };
+    like($@, qr/^No record with a non-null value in the 'parent_id' column/s,
+        "new() died due to parent with children sharing same name");
+}
+
+{
     $source = "./t/data/delta.csv";
     note($source);
     $obj = Parse::Taxonomy::Index->new( {

@@ -2,6 +2,7 @@
 Changes
 lib/Parse/Taxonomy.pm
 lib/Parse/Taxonomy/Auxiliary.pm
+lib/Parse/Taxonomy/Cookbook.pod
 lib/Parse/Taxonomy/Index.pm
 lib/Parse/Taxonomy/Path.pm
 LICENSE
@@ -36,8 +37,10 @@ t/data/missing_parents.csv
 t/data/nameless_component.csv
 t/data/non_numeric_ids.csv
 t/data/non_sibling_same_name.csv
+t/data/path_sibling_same_name.csv
 t/data/reserved_field_names.csv
 t/data/sibling_same_name.csv
+t/data/small_sibling_same_name.csv
 t/data/theta.csv
 t/data/wrong_row_count.csv
 t/data/zeta.csv

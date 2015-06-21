@@ -15,6 +15,7 @@ my @dummy = qw(
     nameless_component.csv
     ids_missing_parents.csv
     sibling_same_name.csv
+    small_sibling_same_name.csv
     zeta.csv
     eta.csv
     theta.csv

@@ -158,6 +158,20 @@ my ($obj, $source, $fields, $data_records);
 }
 
 {
+    $source = "./t/data/path_sibling_same_name.csv";
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::Path->new( {
+            file    => $source,
+        } );
+    };
+    like($@, qr/^No duplicate entries are permitted in column designated as path/s,
+        "'new()' died due to duplicate values in column designated as 'path'");
+    like($@, qr/\|Alpha\|Epsilon\|Kappa/s,
+        "Duplicate path identified");
+}
+
+{
     $source = "./t/data/alpha.csv";
     note($source);
     $obj = Parse::Taxonomy::Path->new( {

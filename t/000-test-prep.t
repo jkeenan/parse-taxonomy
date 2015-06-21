@@ -13,6 +13,7 @@ my @dummy = qw(
     duplicate_field.csv
     duplicate_path.csv
     missing_parents.csv
+    path_sibling_same_name.csv
     wrong_row_count.csv
     non_sibling_same_name.csv
     iota.csv

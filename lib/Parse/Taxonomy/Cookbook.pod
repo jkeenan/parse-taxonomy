@@ -1,0 +1,117 @@
+=head1 NAME
+
+Parse::Taxonomy::Cookbook - cookbook for Parse-Taxonomy
+
+=head1 DESCRIPTION
+
+This file is a cookbook holding usage examples -- recipes -- for various
+F<Parse::Taxonomy> subclasses.
+
+The documentation herein presumes that you have already studied the
+documentation in F<Parse::Taxonomy>, F<Parse::Taxonomy::Path>,
+F<Parse::Taxonomy::Index>, etc.
+
+=head1 RECIPES
+
+=head2 Validate a taxonomy-by-path
+
+=head3 Problem
+
+You have a CSV file which you have been told is a taxonomy-by-path.  You want to
+confirm its validity.
+
+Let's say the file holds these records:
+
+    $> cat ./proposed_taxonomy.csv
+    "path","vertical","is_actionable"
+    "|Alpha","Auto",,"0"
+    "|Alpha|Epsilon|Kappa","Auto","0"
+    "|Alpha|Epsilon|Kappa","Auto","1"
+    "|Alpha|Zeta","Auto","0"
+    "|Alpha|Zeta|Lambda","Auto","1"
+    "|Alpha|Zeta|Mu","Auto","0"
+
+=head3 Solution
+
+Try to create a Parse::Taxonomy::Path object using the C<file> interface.
+
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::Path->new( {
+            file => './proposed_taxonomy.csv',
+        } );
+    };
+    print STDERR "$@\n";
+
+If C<$obj> is created successfully, the taxonomy meets the requirements
+described in F<Parse::Taxonomy>.  This particular file, however, will throw
+an exception.  Examination of the content of C<$@> will show that two records
+have the same materialized path, i.e., the same value in the C<path> column.
+
+=head2 Validate a taxonomy-by-index
+
+=head3 Problem
+
+You have a CSV file which you have been told is a taxonomy-by-index.  You want
+to confirm its validity.
+
+Let's say the file holds these records:
+
+    $> cat ./proposed_taxonomy_by_index.csv
+    "id","parent_id","name","vertical","is_actionable"
+    "1","","Alpha","Auto","0"
+    "2","1","Epsilon","Auto","0"
+    "3","2","Kappa","Auto","1"
+    "4","2","Kappa","Auto","1"
+    "5","1","Zeta","Auto","0"
+    "6","5","Lambda","Auto","1"
+    "7","5","Mu","Auto","1"
+
+=head3 Solution
+
+Try to create a Parse::Taxonomy::Index object using the C<file> interface.
+
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::Index->new( {
+            file => './proposed_taxonomy_by_index.csv',
+        } );
+    };
+    print STDERR "$@\n";
+
+If C<$obj> is created successfully, the taxonomy meets the requirements
+described in F<Parse::Taxonomy>.  This particular file, however, will throw
+an exception.  Examination of the content of C<$@> will show that two records
+with the same C<parent_id> have the same C<name>.
+
+=head2 Apply extra validations to a taxonomy
+
+=head3 Problem
+
+=head3 Solution
+
+=head2 Convert a taxonomy-by-path to a taxonomy-by-index
+
+=head3 Problem
+
+=head3 Solution
+
+=head2 Convert a taxonomy-by-index to a taxonomy-by-path
+
+=head3 Problem
+
+=head3 Solution
+
+=head2 Confirm that two taxonomies are equivalent
+
+=head3 Problem
+
+=head3 Solution
+
+=head2 Predict the result of a data migration between relational database tables
+
+=head3 Problem
+
+=head3 Solution
+
+=cut
