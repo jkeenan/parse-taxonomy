@@ -621,6 +621,7 @@ my $path_data_records = [
     $csv_file = $obj->write_pathified_to_csv( {
         pathified   =>  $pathified,
         csvfile     => './t/data/taxonomy_out6.csv',
+        sep_char => "\t",
     } );
     ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
     ok((-f $csv_file), "'$csv_file' is plain-text file");
