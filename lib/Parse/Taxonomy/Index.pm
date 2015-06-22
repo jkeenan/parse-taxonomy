@@ -4,6 +4,7 @@ use parent qw( Parse::Taxonomy );
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
+use Cwd;
 our $VERSION = '0.06';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
@@ -756,6 +757,141 @@ sub pathify {
         @this_path = ();
     }
     return \@rewritten;
+}
+
+=head2 C<write_pathified_to_csv()>
+
+=over 4
+
+=item * Purpose
+
+Create a CSV-formatted file holding the data returned by C<pathify()>.
+
+=item * Arguments
+
+    $csv_file = $obj->write_pathified_to_csv( {
+       pathified => $pathified,                   # output of pathify()
+       csvfile => './t/data/taxonomy_out5.csv',
+    } );
+
+Single hash reference.  That hash is keyed on:
+
+=over 4
+
+=item * C<pathified>
+
+B<Required:>  Its value must be the arrayref of hash references returned by
+the C<pathify()> method.
+
+=item * C<csvfile>
+
+Optional.  Path to location where a CSV-formatted text file holding the
+taxonomy-by-index will be written.  Defaults to a file called
+F<taxonomy_out.csv> in the current working directory.
+
+=item * Text::CSV options
+
+You can also pass through any key-value pairs normally accepted by
+F<Text::CSV>.
+
+=back
+
+=item * Return Value
+
+Returns path to CSV-formatted text file just created.
+
+=item * Example
+
+Suppose we have a CSV-formatted file holding the following taxonomy-by-index:
+
+    "id","parent_id","name","is_actionable"
+    "1","","Alpha","0"
+    "2","","Beta","0"
+    "3","1","Epsilon","0"
+    "4","3","Kappa","1"
+    "5","1","Zeta","0"
+    "6","5","Lambda","1"
+    "7","5","Mu","0"
+    "8","2","Eta","1"
+    "9","2","Theta","1"
+
+After running this file through C<new()>, C<pathify()> and
+C<write_pathified_to_csv()> we will have a new CSV-formatted file holding
+this taxonomy-by-path:
+TK
+Note that the C<id>, C<parent_id> and C<name> columns have been replaced by the <path> column.
+
+=back
+
+=cut
+
+sub write_pathified_to_csv {
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'pathify()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+        croak "Argument to 'pathify()' must have 'pathified' element"
+            unless exists $args->{pathified};
+        croak "Argument 'pathified' must be array reference"
+            unless (ref($args->{pathified}) and
+                reftype($args->{pathified}) eq 'ARRAY');
+    }
+    else {
+        croak "write_pathified_to_csv() must be supplied with hashref"
+    }
+    my $pathified = $args->{pathified};
+    delete $args->{pathified};
+
+    # Test whether we're working with first element array ref or first element
+    # string
+    my $path_as_string = (! ref($pathified->[1]->[0])) ? 1 : 0;
+
+    my $columns_in = $self->fields;
+    my %path_columns = map {$_ => 1} (
+        $self->{id_col},
+        $self->{parent_id_col},
+        $self->{component_col},
+    );
+    my @non_path_columns_in =
+        map { $columns_in->[$_]  }
+        grep { ! $path_columns{$columns_in->[$_]} }
+        (0..$#{$columns_in});
+    my @columns_out = (qw| path |);
+    push @columns_out, @non_path_columns_in;
+
+    my $cwd = cwd();
+    my $csvfile = defined($args->{csvfile})
+        ? $args->{csvfile}
+        : "$cwd/taxonomy_out.csv";
+    delete $args->{csvfile};
+
+    # By this point, we should have processed all args other than those
+    # intended for Text::CSV and assigned their contents to variables as
+    # needed.
+
+    my $csv_args = { binary => 1 };
+    while (my ($k,$v) = each %{$args}) {
+        $csv_args->{$k} = $v;
+    }
+    my $csv = Text::CSV->new($csv_args);
+    open my $OUT, ">:encoding(utf8)", $csvfile
+        or croak "Unable to open $csvfile for writing";
+    $csv->eol(defined($csv_args->{eol}) ? $csv_args->{eol} : "\n");
+    $csv->print($OUT, [@columns_out]);
+    for my $rec (@{$pathified}[1..$#{$pathified}]) {
+        $csv->print(
+            $OUT,
+            $path_as_string
+                ? $rec
+                : [
+                    join('|' => @{$rec->[$columns_out[0]]}),
+                    @{$rec}[1..$#columns_out]
+                  ]
+        );
+    }
+    close $OUT or croak "Unable to close $csvfile after writing";
+
+    return $csvfile;
 }
 
 1;

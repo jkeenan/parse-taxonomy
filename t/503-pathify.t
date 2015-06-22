@@ -1,5 +1,6 @@
 # perl
-# t/502-getters.t - Tests of methods which get data out of object
+# t/503-pathify.t - Tests of Parse::Taxonomy::Index:::pathify() and
+# write_pathified_to_csv()
 use strict;
 use warnings;
 use Carp;
@@ -519,5 +520,110 @@ my $path_data_records = [
     ok($rv, "pathify() returned true value");
     ok(ref($rv), "pathify() returned reference");
     is(reftype($rv), 'ARRAY', "pathify() returned array reference");
-
 }
+
+{
+    note("pathify() without options");
+    $source = "./t/data/theta.csv";
+    $obj = Parse::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::Index');
+
+    my ($pathified, $csv_file);
+    $pathified = $obj->pathify;
+    ok($pathified, "pathify() returned true value");
+
+    note("write_pathified_to_csv");
+    {
+        local $@;
+        eval { $csv_file = $obj->write_pathified_to_csv(); };
+        like($@, qr/write_pathified_to_csv\(\) must be supplied with hashref/,
+            "write_pathified_to_csv() failed due to lack of argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $csv_file = $obj->write_pathified_to_csv(
+                pathified => $pathified,
+            );
+        };
+        like($@, qr/Argument to 'pathify\(\)' must be hashref/,
+            "write_pathified_to_csv() failed due to non-hashref argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $csv_file = $obj->write_pathified_to_csv( [
+                pathified => $pathified,
+            ] );
+        };
+        like($@, qr/Argument to 'pathify\(\)' must be hashref/,
+            "write_pathified_to_csv() failed due to non-hashref argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $csv_file = $obj->write_pathified_to_csv( {
+                pathified => 'not an array reference',
+            } );
+        };
+        like($@, qr/Argument 'pathified' must be array reference/,
+            "write_pathified_to_csv() failed due to non-reference value for 'pathified'");
+    }
+
+    {
+        local $@;
+        eval {
+            $csv_file = $obj->write_pathified_to_csv( {
+                pathified => {},
+            } );
+        };
+        like($@, qr/Argument 'pathified' must be array reference/,
+            "write_pathified_to_csv() failed due to non-arrayref value for 'pathified'");
+    }
+
+    {
+        local $@;
+        eval {
+            $csv_file = $obj->write_pathified_to_csv( { sep_char => '|' } );
+        };
+        like($@, qr/Argument to 'pathify\(\)' must have 'pathified' element/,
+            "write_pathified_to_csv() failed due to lack of 'pathified' element");
+    }
+
+    $csv_file = $obj->write_pathified_to_csv( {
+        pathified   =>  $pathified,
+        csvfile     => './t/data/taxonomy_out5.csv',
+    } );
+    ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
+    ok((-f $csv_file), "'$csv_file' is plain-text file");
+    ok((-r $csv_file), "'$csv_file' is readable");
+}
+
+{
+    note("pathify() with as-string");
+    $source = "./t/data/theta.csv";
+    $obj = Parse::Taxonomy::Index->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::Index');
+
+    my ($pathified, $csv_file);
+    $pathified = $obj->pathify( { as_string => 1 } );
+    ok($pathified, "pathify() returned true value");
+
+    $csv_file = $obj->write_pathified_to_csv( {
+        pathified   =>  $pathified,
+        csvfile     => './t/data/taxonomy_out6.csv',
+    } );
+    ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
+    ok((-f $csv_file), "'$csv_file' is plain-text file");
+    ok((-r $csv_file), "'$csv_file' is readable");
+}
+
