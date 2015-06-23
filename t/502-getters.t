@@ -65,9 +65,9 @@ my ($exp_fields, $exp_data_records);
     $expect = 'parent_id';
     is($obj->parent_id_col, $expect, "Got expected name of 'parent_id' column");
     $expect = 2;
-    is($obj->component_col_idx, $expect, "Got expected index of 'component' column");
+    is($obj->leaf_col_idx, $expect, "Got expected index of 'leaf' column");
     $expect = 'name';
-    is($obj->component_col, $expect, "Got expected name of 'component' column");
+    is($obj->leaf_col, $expect, "Got expected name of 'leaf' column");
 }
 
 {
@@ -77,7 +77,7 @@ my ($exp_fields, $exp_data_records);
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
-        component_col       => 'my_name',
+        leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::Index');
@@ -115,9 +115,9 @@ my ($exp_fields, $exp_data_records);
     $expect = 'my_parent_id';
     is($obj->parent_id_col, $expect, "Got expected name of 'parent_id' column");
     $expect = 2;
-    is($obj->component_col_idx, $expect, "Got expected index of 'component' column");
+    is($obj->leaf_col_idx, $expect, "Got expected index of 'leaf' column");
     $expect = 'my_name';
-    is($obj->component_col, $expect, "Got expected name of 'component' column");
+    is($obj->leaf_col, $expect, "Got expected name of 'leaf' column");
 }
 
 {
@@ -164,9 +164,9 @@ my ($exp_fields, $exp_data_records);
     $expect = 'parent_id';
     is($obj->parent_id_col, $expect, "Got expected name of 'parent_id' column");
     $expect = 2;
-    is($obj->component_col_idx, $expect, "Got expected index of 'component' column");
+    is($obj->leaf_col_idx, $expect, "Got expected index of 'leaf' column");
     $expect = 'name';
-    is($obj->component_col, $expect, "Got expected name of 'component' column");
+    is($obj->leaf_col, $expect, "Got expected name of 'leaf' column");
 }
 
 {
@@ -194,7 +194,7 @@ my ($exp_fields, $exp_data_records);
         },
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
-        component_col       => 'my_name',
+        leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::Index');
@@ -216,8 +216,8 @@ my ($exp_fields, $exp_data_records);
     $expect = 'my_parent_id';
     is($obj->parent_id_col, $expect, "Got expected name of 'parent_id' column");
     $expect = 2;
-    is($obj->component_col_idx, $expect, "Got expected index of 'component' column");
+    is($obj->leaf_col_idx, $expect, "Got expected index of 'leaf' column");
     $expect = 'my_name';
-    is($obj->component_col, $expect, "Got expected name of 'component' column");
+    is($obj->leaf_col, $expect, "Got expected name of 'leaf' column");
 }
 

@@ -70,7 +70,7 @@ The name of the column in the header row under which each data record's parent
 ID can be found.  (Will be empty in the case of top-level nodes, as they have
 no parent.)  Defaults to C<parent_id>.
 
-=item * C<component_col>
+=item * C<leaf_col>
 
 The name of the column in the header row under which, in each data record, there
 is a found a string which differentiates that record from all other records
@@ -183,14 +183,14 @@ sub new {
     croak "Argument to 'new()' must have either 'file' or 'components' element but not both"
         if ($args->{file} and $args->{components});
 
-    $data->{id_col}           = $args->{id_col}
+    $data->{id_col}         = $args->{id_col}
                                 ? delete $args->{id_col}
                                 : 'id';
-    $data->{parent_id_col}    = $args->{parent_id_col}
+    $data->{parent_id_col}  = $args->{parent_id_col}
                                 ? delete $args->{parent_id_col}
                                 : 'parent_id';
-    $data->{component_col}    = $args->{component_col}
-                                ? delete $args->{component_col}
+    $data->{leaf_col}       = $args->{leaf_col}
+                                ? delete $args->{leaf_col}
                                 : 'name';
 
     if ($args->{components}) {
@@ -253,7 +253,7 @@ sub _check_required_columns {
     my ($data, $fields_ref) = @_;
     my %col2idx = map { $fields_ref->[$_] => $_ } (0 .. $#{$fields_ref});
     my %missing_columns = ();
-    my %main_columns = map { $_ => 1 } ( qw| id_col parent_id_col component_col | );
+    my %main_columns = map { $_ => 1 } ( qw| id_col parent_id_col leaf_col | );
     for my $c ( keys %main_columns ) {
         if (! exists $col2idx{$data->{$c}}) {
             $missing_columns{$c} = $data->{$c};
@@ -299,7 +299,7 @@ sub _prepare_data_records {
             push @bad_count_records,
                 [ $rec->[$data->{id_col_idx}], $this_row_count ];
         }
-        if (! length($rec->[$data->{component_col_idx}])) {
+        if (! length($rec->[$data->{leaf_col_idx}])) {
             push @nameless_component_records, $rec->[$data->{id_col_idx}];
         }
     }
@@ -335,11 +335,11 @@ ERROR_MSG_WRONG_COUNT
     }
     croak $error_msg if @bad_count_records;
 
-    $error_msg = <<NAMELESS_COMPONENT;
-Each data record must have a non-empty string in its 'component' column.
+    $error_msg = <<NAMELESS_LEAF;
+Each data record must have a non-empty string in its 'leaf' column.
 The following records (identified by the value in their '$data->{id_col}' columns)
-lack valid components:
-NAMELESS_COMPONENT
+lack valid leaves:
+NAMELESS_LEAF
     for my $rec (@nameless_component_records) {
         $error_msg .= "  id: $rec\n";
     }
@@ -366,12 +366,12 @@ ERROR_MSG_MISSING_PARENT
     my %families = ();
     for my $rec (@{$data_records}) {
         if (length($rec->[$data->{parent_id_col_idx}])) {
-            $families{$rec->[$data->{parent_id_col_idx}]}{$rec->[$data->{component_col_idx}]}++;
+            $families{$rec->[$data->{parent_id_col_idx}]}{$rec->[$data->{leaf_col_idx}]}++;
         }
     }
     $error_msg = <<ERROR_MSG_SIBLINGS_NAMED_SAME;
 No record with a non-null value in the '$data->{parent_id_col}' column
-may have two children with the same value in the '$data->{component_col}' column.
+may have two children with the same value in the '$data->{leaf_col}' column.
 The following are violations:
 ERROR_MSG_SIBLINGS_NAMED_SAME
 
@@ -379,7 +379,7 @@ ERROR_MSG_SIBLINGS_NAMED_SAME
     for my $k (sort {$a <=> $b} keys %families) {
         for my $l (sort keys %{$families{$k}}) {
             if ($families{$k}{$l} > 1) {
-                $error_msg .= "  $data->{parent_id_col}: $k|$data->{component_col}: $l|count of $data->{component_col}s: $families{$k}{$l}\n";
+                $error_msg .= "  $data->{parent_id_col}: $k|$data->{leaf_col}: $l|count of $data->{leaf_col}s: $families{$k}{$l}\n";
                 $same_names++;
             }
         }
@@ -491,9 +491,9 @@ of the column in the header row.  The other methods return strings.
 
     $name_of_parent_id_column = $self->parent_id_col;
 
-    $index_of_component_column = $self->component_col_idx;
+    $index_of_leaf_column = $self->leaf_col_idx;
 
-    $name_of_component_column = $self->component_col;
+    $name_of_leaf_column = $self->leaf_col;
 
 =cut
 
@@ -517,14 +517,14 @@ sub parent_id_col {
     return $self->{parent_id_col};
 }
 
-sub component_col_idx {
+sub leaf_col_idx {
     my $self = shift;
-    return $self->{component_col_idx};
+    return $self->{leaf_col_idx};
 }
 
-sub component_col {
+sub leaf_col {
     my $self = shift;
-    return $self->{component_col};
+    return $self->{leaf_col};
 }
 
 =head2 C<pathify()>
@@ -711,7 +711,7 @@ sub pathify {
         unless (
             ($f eq $self->id_col) or
             ($f eq $self->parent_id_col) or
-            ($f eq $self->component_col)
+            ($f eq $self->leaf_col)
         ) {
             push @fields_out, $f;
         }
@@ -722,14 +722,14 @@ sub pathify {
 
     my %hashed_data =  map { $_->[$self->id_col_idx] => {
         parent_id       => $_->[$self->parent_id_col_idx],
-        component       => $_->[$self->component_col_idx],
+        leaf       => $_->[$self->leaf_col_idx],
     } } @{$self->data_records};
 
     my @this_path = ();
     my $code;
     $code = sub {
         my $id = shift;
-        push @this_path, $hashed_data{$id}{component};
+        push @this_path, $hashed_data{$id}{leaf};
         my $parent_id = $hashed_data{$id}{parent_id};
         if (length($parent_id)) {
             &{$code}($parent_id);
@@ -850,7 +850,7 @@ sub write_pathified_to_csv {
     my %path_columns = map {$_ => 1} (
         $self->{id_col},
         $self->{parent_id_col},
-        $self->{component_col},
+        $self->{leaf_col},
     );
     my @non_path_columns_in =
         map { $columns_in->[$_]  }

@@ -103,12 +103,12 @@ my ($obj, $source, $expect, $fields, $data_records);
     $expect = 'my_name';
     eval {
         $obj = Parse::Taxonomy::Index->new( {
-            file    => $source,
-            component_col  => $expect,
+            file        => $source,
+            leaf_col    => $expect,
         } );
     };
-    like($@, qr/Could not locate columns in header to match required arguments.*component_col.*$expect/s,
-        "new() died: component_col '$expect' not found in header row");
+    like($@, qr/Could not locate columns in header to match required arguments.*leaf_col.*$expect/s,
+        "new() died: leaf_col '$expect' not found in header row");
 }
 
 {
@@ -160,7 +160,7 @@ my ($obj, $source, $expect, $fields, $data_records);
 }
 
 {
-    $source = "./t/data/nameless_component.csv";
+    $source = "./t/data/nameless_leaf.csv";
     local $@;
     eval {
         $obj = Parse::Taxonomy::Index->new( {
@@ -168,11 +168,11 @@ my ($obj, $source, $expect, $fields, $data_records);
         } );
     };
 
-    like($@, qr/^Each data record must have a non-empty string in its 'component' column/s,
-        "new() died due to empty strings in 'component' column in one or more rows");
-    like($@, qr/id:\s4/s, "Identified record with empty component column");
-    like($@, qr/id:\s2/s, "Identified record with empty component column");
-    like($@, qr/id:\s10/s, "Identified record with empty component column");
+    like($@, qr/^Each data record must have a non-empty string in its 'leaf' column/s,
+        "new() died due to empty strings in 'leaf' column in one or more rows");
+    like($@, qr/id:\s4/s, "Identified record with empty leaf column");
+    like($@, qr/id:\s2/s, "Identified record with empty leaf column");
+    like($@, qr/id:\s10/s, "Identified record with empty leaf column");
 }
 
 {
@@ -231,7 +231,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     is($obj->{parent_id_col}, $expect, "parent_id_col: $expect");
 
     $expect = 'name';
-    is($obj->{component_col}, $expect, "component_col: $expect");
+    is($obj->{leaf_col}, $expect, "leaf_col: $expect");
 }
 
 {
@@ -241,7 +241,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
-        component_col       => 'my_name',
+        leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::Index');
@@ -257,7 +257,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     is($obj->{parent_id_col}, $expect, "parent_id_col: $expect");
 
     $expect = 'my_name';
-    is($obj->{component_col}, $expect, "component_col: $expect");
+    is($obj->{leaf_col}, $expect, "leaf_col: $expect");
 }
 
 {
@@ -268,7 +268,7 @@ my ($obj, $source, $expect, $fields, $data_records);
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
-        component_col       => 'my_name',
+        leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::Index');
@@ -284,7 +284,7 @@ my ($obj, $source, $expect, $fields, $data_records);
     is($obj->{parent_id_col}, $expect, "parent_id_col: $expect");
 
     $expect = 'my_name';
-    is($obj->{component_col}, $expect, "component_col: $expect");
+    is($obj->{leaf_col}, $expect, "leaf_col: $expect");
 }
 
 {
@@ -513,11 +513,11 @@ my ($obj, $source, $expect, $fields, $data_records);
                     fields        => $fields,
                     data_records  => $data_records,
                 },
-                component_col  => $expect,
+                leaf_col  => $expect,
             } );
         };
-        like($@, qr/Could not locate columns in header to match required arguments.*component_col.*$expect/s,
-            "new() died: component_col '$expect' not found in header row");
+        like($@, qr/Could not locate columns in header to match required arguments.*leaf_col.*$expect/s,
+            "new() died: leaf_col '$expect' not found in header row");
     }
 
     {

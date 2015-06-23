@@ -12,7 +12,7 @@ my @dummy = qw(
     non_numeric_ids.csv
     duplicate_id.csv
     bad_row_count.csv
-    nameless_component.csv
+    nameless_leaf.csv
     ids_missing_parents.csv
     sibling_same_name.csv
     small_sibling_same_name.csv
