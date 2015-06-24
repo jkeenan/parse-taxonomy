@@ -884,7 +884,7 @@ sub write_pathified_to_csv {
             $path_as_string
                 ? $rec
                 : [
-                    join('|' => @{$rec->[$columns_out[0]]}),
+                    join('|' => @{$rec->[0]}),
                     @{$rec}[1..$#columns_out]
                   ]
         );

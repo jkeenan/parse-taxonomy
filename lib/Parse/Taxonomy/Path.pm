@@ -914,7 +914,6 @@ sub indexify {
             if (scalar(@{$components_by_row[$r]}) == $depth) {
                 my %rowdata = map { $_ => $drpc->[$r]->[$non_path_col2idx{$_}] }
                     keys %non_path_col2idx;
-                @{$drpc->[$r] };
                 my $name = $drpc->[$r]->[$path_col_idx]->[$depth];
                 my $parent_of_name = $drpc->[$r]->[$path_col_idx]->[$depth-1];
                 my $parent_id = defined($depth_name_id{$depth-1}{$parent_of_name})

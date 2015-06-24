@@ -746,7 +746,7 @@ my ($obj, $source, $expect, $hashified);
     } );
     is_deeply($hashified, $expect, "Got expected taxonomy (key_delim and root_str)");
 }
-use Data::Dump;
+
 {
     note("Example of local validation");
     my $obj = Parse::Taxonomy::Path->new( {
