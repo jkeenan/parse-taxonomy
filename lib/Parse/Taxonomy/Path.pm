@@ -6,7 +6,7 @@ use Text::CSV;
 use Scalar::Util qw( reftype );
 use List::Util qw( max );
 use Cwd;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields

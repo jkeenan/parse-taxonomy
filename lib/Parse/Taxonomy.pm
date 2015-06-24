@@ -3,7 +3,7 @@ use strict;
 use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 #use Data::Dump;
 
 =head1 NAME
@@ -12,8 +12,8 @@ Parse::Taxonomy - Validate hierarchical data stored in CSV format
 
 =head1 VERSION
 
-This document refers to version 0.06 of Parse::Taxonomy.  This version was
-released May 30 2015.
+This document refers to version 0.07 of Parse::Taxonomy.  This version was
+released June 23 2015.
 
 =head1 SYNOPSIS
 
@@ -331,7 +331,7 @@ or through the web interface at L<http://rt.cpan.org>.
 James E. Keenan (jkeenan@cpan.org).  When sending correspondence, please
 include 'Parse::Taxonomy' or 'Parse-Taxonomy' in your subject line.
 
-Creation date:  May 24 2015.  Last modification date:  June 21 2015.
+Creation date:  May 24 2015.  Last modification date:  June 23 2015.
 
 Development repository: L<https://github.com/jkeenan/parse-taxonomy>
 
