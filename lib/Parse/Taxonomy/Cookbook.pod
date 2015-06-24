@@ -254,7 +254,12 @@ That returns a Perl reference to an array of array references:
 
 =head3 Problem
 
-TK
+You have received a plain-text file which holds CSV-formatted records which
+constitute a taxonomy-by-path.  You have inserted those records into an RDBMS
+where the materialized path is represented by "pointers" to records higher up
+in the taxonomy, I<i.e.,> by means of a C<parent_id> column.  You want to
+demonstrate that the taxonomic structure present in the incoming file has been
+correctly represented in the RDBMS.
 
 =head3 Solution
 

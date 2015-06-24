@@ -818,7 +818,18 @@ Suppose we have a CSV-formatted file holding the following taxonomy-by-index:
 After running this file through C<new()>, C<pathify()> and
 C<write_pathified_to_csv()> we will have a new CSV-formatted file holding
 this taxonomy-by-path:
-TK
+
+    path,is_actionable
+    |Alpha,0
+    |Beta,0
+    |Alpha|Epsilon,0
+    |Alpha|Epsilon|Kappa,1
+    |Alpha|Zeta,0
+    |Alpha|Zeta|Lambda,1
+    |Alpha|Zeta|Mu,0
+    |Beta|Eta,1
+    |Beta|Theta,1
+
 Note that the C<id>, C<parent_id> and C<name> columns have been replaced by the <path> column.
 
 =back
