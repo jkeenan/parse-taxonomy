@@ -36,3 +36,4 @@ nytprof/
 nytprof.out
 .version_info.pl
 t/data/*taxonomy_out*
+demo/

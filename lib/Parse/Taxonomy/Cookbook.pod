@@ -255,15 +255,99 @@ That returns a Perl reference to an array of array references:
 =head3 Problem
 
 You have received a plain-text file which holds CSV-formatted records which
-constitute a taxonomy-by-path.  You have inserted those records into an RDBMS
+constitute a taxonomy-by-path.  You passed the file off to the staff member
+with the "Big Data" t-shirt.  Big Data got the records inserted into an RDBMS
 where the materialized path is represented by "pointers" to records higher up
 in the taxonomy, I<i.e.,> by means of a C<parent_id> column.  You want to
 demonstrate that the taxonomic structure present in the incoming file has been
 correctly represented in the RDBMS.
 
+Let's suppose that the data in the incoming taxonomy file looked like this:
+
+    "path","is_actionable"
+    "--Alpha","0"
+    "--Beta","0"
+    "--Alpha--Epsilon","0"
+    "--Alpha--Epsilon--Kappa","1"
+    "--Alpha--Zeta","0"
+    "--Alpha--Zeta--Lambda","1"
+    "--Alpha--Zeta--Mu","0"
+    "--Beta--Eta","1"
+    "--Beta--Theta","1"
+    "--Beta--Iota","0"
+
+Let's further suppose that the data was inserted into the F<greeks> table in
+the F<taxonomy> database:
+
+    taxonomy=# SELECT * FROM greeks;
+     id | parent_id |  name   | is_actionable 
+    ----+-----------+---------+---------------
+      1 |           | Alpha   | f
+      2 |           | Beta    | f
+      3 |         1 | Epsilon | f
+      4 |         3 | Kappa   | t
+      5 |         1 | Zeta    | f
+      6 |         5 | Lambda  | t
+      7 |         5 | Mu      | f
+      8 |         2 | Eta     | t
+      9 |         2 | Theta   | t
+    (9 rows)
+
+How can we demonstrate that the data and the hierarchical structure implicit
+in the table matches that of the original file?
+
 =head3 Solution
 
-TK
+Copy the database table (or the relevant rows) to a plain-text file in CSV
+format.  In the case of PostgreSQL, that would look like this:
+
+    \copy (SELECT * FROM greeks) TO '/path/to/taxonomy/greeks.csv' WITH CSV HEADER
+
+Yielding:
+
+    id,parent_id,name,is_actionable
+    1,,Alpha,f
+    2,,Beta,f
+    3,1,Epsilon,f
+    4,3,Kappa,t
+    5,1,Zeta,f
+    6,5,Lambda,t
+    7,5,Mu,f
+    8,2,Eta,t
+    9,2,Theta,t
+
+Create a Parse::Taxonomy::Index object using F<greeks.csv> as the source:
+
+    $obj = Parse::Taxonomy::Index->new( {
+        file    => '/path/to/taxonomy/greeks.csv',
+    } );
+    
+Call the C<pathify> method on the object.
+
+    $pathified = $obj->pathify;
+
+If we were to dump C<$pathified>, we would see:
+
+    [
+      ["path", "is_actionable"],
+      [["", "Alpha"], "f"],
+      [["", "Beta"], "f"],
+      [["", "Alpha", "Epsilon"], "f"],
+      [["", "Alpha", "Epsilon", "Kappa"], "t"],
+      [["", "Alpha", "Zeta"], "f"],
+      [["", "Alpha", "Zeta", "Lambda"], "t"],
+      [["", "Alpha", "Zeta", "Mu"], "f"],
+      [["", "Beta", "Eta"], "t"],
+      [["", "Beta", "Theta"], "t"],
+    ]
+
+=pod
+
+TK: Need to adjust is_actionable to conform to 1/0 in original file.
+Need to use as input to Parse::Taxonomy::Path, components interface.
+Then return to incoming file, create 2nd Path object, call .... on it.
+
+=cut
 
 =head2 Predict the result of a data migration between relational database tables
 
