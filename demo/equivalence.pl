@@ -11,21 +11,44 @@ use Parse::Taxonomy::Index;
 use Scalar::Util qw( reftype );
 use Test::More qw( no_plan );
 
-my $dir = '/home/jkeenan/gitwork/parse-taxonomy';
-my $taxfile = "$dir/t/data/iota.csv";
 my $csvfile = "/home/jkeenan/learn/perl/pft/greeks.csv";
 
-my ($source, $obj, $pathified);
-$source = $csvfile;
+my $source = $csvfile;
 note($source);
-$obj = Parse::Taxonomy::Index->new( {
+my $ptiobj = Parse::Taxonomy::Index->new( {
     file    => $source,
 } );
-ok(defined $obj, "new() returned defined value");
-isa_ok($obj, 'Parse::Taxonomy::Index');
+ok(defined $ptiobj, "new() returned defined value");
+isa_ok($ptiobj, 'Parse::Taxonomy::Index');
 
-$pathified = $obj->pathify;
+my $pathified = $ptiobj->pathify;
 ok($pathified, "pathify() returned true value");
 ok(ref($pathified), "pathify() returned reference");
 is(reftype($pathified), 'ARRAY', "pathify() returned array reference");
-Data::Dump::pp($pathified);
+
+my $fields = $pathified->[0];
+my @data_records = ();
+for my $rec (@{$pathified}[1..$#{$pathified}]) {
+    my $bool = ($rec->[1] eq 't') ? 1 : 0;
+    push @data_records, [
+        join('|' => @{$rec->[0]}),
+        ($rec->[1] eq 't') ? 1 : 0,
+    ];
+}
+
+my $ptpobj = Parse::Taxonomy::Path->new( {
+    components  => {
+        fields          => $fields,
+        data_records    => \@data_records,
+    },
+} );
+my $fdr1 = $ptpobj->fields_and_data_records_path_components;
+
+my $dir = '/home/jkeenan/gitwork/parse-taxonomy';
+my $taxfile = "$dir/t/data/lambda.csv";
+
+my $tax = Parse::Taxonomy::Path->new( {
+    file => $taxfile,
+} );
+my $fdr2 = $tax->fields_and_data_records_path_components;
+is_deeply($fdr1, $fdr2, "QED");

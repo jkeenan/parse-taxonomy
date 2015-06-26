@@ -19,6 +19,7 @@ my @dummy = qw(
     zeta.csv
     eta.csv
     theta.csv
+    lambda.csv
 );
 
 my %seen_bad;

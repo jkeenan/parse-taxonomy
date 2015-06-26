@@ -274,7 +274,6 @@ Let's suppose that the data in the incoming taxonomy file looked like this:
     "--Alpha--Zeta--Mu","0"
     "--Beta--Eta","1"
     "--Beta--Theta","1"
-    "--Beta--Iota","0"
 
 Let's further suppose that the data was inserted into the F<greeks> table in
 the F<taxonomy> database:
@@ -341,13 +340,15 @@ If we were to dump C<$pathified>, we would see:
       [["", "Beta", "Theta"], "t"],
     ]
 
-=pod
+Now, there's one little tweak needed here.  In the original taxonomy file, the
+C<is_actionable> column held Boolean data which represented C<TRUE> and
+C<FALSE> by C<"1"> and C<"0">, respectively.  When this data was inserted into the database
+(PostgreSQL, in this case), that Boolean data was stored as C<t> or C<f>,
+which was also the way it was stored in the CSV file created by copying data
+from the F<greeks> table.  We will need to rewrite the data in the
+second (C<is_actionable>) column of the elements of C<$pathified> as C<1> or
+C<0> to proceed with our test for equivalence.
 
-TK: Need to adjust is_actionable to conform to 1/0 in original file.
-Need to use as input to Parse::Taxonomy::Path, components interface.
-Then return to incoming file, create 2nd Path object, call .... on it.
-
-=cut
 
 =head2 Predict the result of a data migration between relational database tables
 
