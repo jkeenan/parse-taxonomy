@@ -18,6 +18,7 @@ my @dummy = qw(
     non_sibling_same_name.csv
     iota.csv
     small_path.csv
+    mu.csv
 );
 
 my %seen_bad;

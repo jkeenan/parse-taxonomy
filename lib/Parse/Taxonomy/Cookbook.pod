@@ -264,6 +264,8 @@ correctly represented in the RDBMS.
 
 Let's suppose that the data in the incoming taxonomy file looked like this:
 
+    $> cat mu.csv
+
     "path","is_actionable"
     "--Alpha","0"
     "--Beta","0"
@@ -320,12 +322,14 @@ Create a Parse::Taxonomy::Index object using F<greeks.csv> as the source:
     $obj = Parse::Taxonomy::Index->new( {
         file    => '/path/to/taxonomy/greeks.csv',
     } );
-    
+
 Call the C<pathify> method on the object.
 
     $pathified = $obj->pathify;
 
 If we were to dump C<$pathified>, we would see:
+
+    $Data::Dump::pp($pathified);
 
     [
       ["path", "is_actionable"],
@@ -349,6 +353,73 @@ from the F<greeks> table.  We will need to rewrite the data in the
 second (C<is_actionable>) column of the elements of C<$pathified> as C<1> or
 C<0> to proceed with our test for equivalence.
 
+    $fields = $pathified->[0];
+    @data_records = ();
+    for $rec (@{$pathified}[1..$#{$pathified}]) {
+        $bool = ($rec->[1] eq 't') ? 1 : 0;
+        push @data_records, [
+            join('|' => @{$rec->[0]}),
+            ($rec->[1] eq 't') ? 1 : 0,
+        ];
+    }
+
+We're now in a position to create a B<new> Parse::Taxonomy::Path object based
+on the data extracted from the database via the CSV file.  We'll use the
+C<components> interface to C<Parse::Taxonomy::Path::new()> because our
+taxonomy now lives in the form of Perl data structures suitable for the
+C<components> interface.
+
+    $ptpobj = Parse::Taxonomy::Path->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => \@data_records,
+        },
+    } );
+
+We'll now call the C<fields_and_data_records_path_components()> method on the
+object.  This method returns an array of array references in which the first
+element is an array reference holding the column names and in which, in all
+subsequent elements, the first element is itself a reference to an array
+holding the components of the materialized path.
+
+    $fdr1 = $ptpobj->fields_and_data_records_path_components;
+
+Which, when dumped, gives:
+
+    [
+      ["path", "is_actionable"],
+      [["", "Alpha"], 0],
+      [["", "Beta"], 0],
+      [["", "Alpha", "Epsilon"], 0],
+      [["", "Alpha", "Epsilon", "Kappa"], 1],
+      [["", "Alpha", "Zeta"], 0],
+      [["", "Alpha", "Zeta", "Lambda"], 1],
+      [["", "Alpha", "Zeta", "Mu"], 0],
+      [["", "Beta", "Eta"], 1],
+      [["", "Beta", "Theta"], 1],
+    ]
+
+We now return to the original incoming taxononmy file, which we use as the
+source for a second Parse::Taxonomy::Path object.  Remember that C<--> was
+used to separate the parts of the materialized path in that file.
+
+    $tax = Parse::Taxonomy::Path->new( {
+        file => '/path/to/mu.csv,
+        path_col_sep => '--',
+    } );
+
+We now call the C<fields_and_data_records_path_components()> method on this
+object as well.
+
+    $fdr2 = $tax->fields_and_data_records_path_components;
+
+Finally, we feed C<$fdr1> and C<$fdr2> to C<Test::More::is_deeply()>.
+
+    is_deeply($fdr1, $fdr2, "QED");
+
+If this function returns true -- which it does -- then the taxonomy implicit
+in the F<greeks> table in the database is equivalent to that in the original
+incoming taxonomy file.
 
 =head2 Predict the result of a data migration between relational database tables
 

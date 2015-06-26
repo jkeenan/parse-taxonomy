@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 use 5.10.1;
-use Data::Dumper;$Data::Dumper::Indent=1;
-use Data::Dump;
 use Carp;
 use lib qw( lib );
 use Parse::Taxonomy::Path;
@@ -45,10 +43,11 @@ my $ptpobj = Parse::Taxonomy::Path->new( {
 my $fdr1 = $ptpobj->fields_and_data_records_path_components;
 
 my $dir = '/home/jkeenan/gitwork/parse-taxonomy';
-my $taxfile = "$dir/t/data/lambda.csv";
+my $taxfile = "$dir/t/data/mu.csv";
 
 my $tax = Parse::Taxonomy::Path->new( {
     file => $taxfile,
+    path_col_sep => '--',
 } );
 my $fdr2 = $tax->fields_and_data_records_path_components;
 is_deeply($fdr1, $fdr2, "QED");
