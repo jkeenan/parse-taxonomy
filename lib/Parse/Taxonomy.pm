@@ -335,6 +335,17 @@ Creation date:  May 24 2015.  Last modification date:  June 23 2015.
 
 Development repository: L<https://github.com/jkeenan/parse-taxonomy>
 
+=head1 REFERENCES
+
+L<http://search.cpan.org/dist/DBIx-Class-MaterializedPath/|DBIx-Class-MaterializedPath>
+by Arthur Axel "fREW" Schmidt
+
+L<http://search.cpan.org/dist/DBIx-Tree-MaterializedPath/|DBIx-Tree-MaterializedPath>
+by Larry Leszczynski
+
+L<https://communities.bmc.com/docs/DOC-9902|Trees in SQL: Nested Sets and Materialized Path>
+by Vadim Tropashko
+
 =head1 COPYRIGHT
 
 Copyright (c) 2002-15 James E. Keenan.  United States.  All rights reserved.

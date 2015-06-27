@@ -1,15 +1,8 @@
 TODO list for Perl module Parse::File::Taxonomy
 
-II.  Objectives:  Take a file in either format and be able to confirm that it
-is a conformant taxonomy.  Be able to determine whether a taxonomy-by-path is equivalent
-to a taxonomy-by-index, and vice versa.  IN PROGRESS: Tested but not
-documented, for index-to-path case.
-
-IV.  What would it mean for a Parse::File::Taxonomy subclass to accept a
+What would it mean for a Parse::File::Taxonomy subclass to accept a
 filehandle as an argument, rather than a file?  Would that be difficult to
 implement?
 
-VI.  Documentation of components interface to Parse::File::Taxonomy::Index.
-
-VII.  Am using "component" is more than one way in this library.  Probably
-confusing; simplify.
+Cookbook:  Include recipe for predicting the result of a data migration
+between relational database tables.

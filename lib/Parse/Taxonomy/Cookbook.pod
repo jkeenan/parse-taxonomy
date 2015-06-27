@@ -421,14 +421,4 @@ If this function returns true -- which it does -- then the taxonomy implicit
 in the F<greeks> table in the database is equivalent to that in the original
 incoming taxonomy file.
 
-=head2 Predict the result of a data migration between relational database tables
-
-=head3 Problem
-
-TK
-
-=head3 Solution
-
-TK
-
 =cut
