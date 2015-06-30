@@ -5,7 +5,7 @@ use Carp;
 use Text::CSV;
 use Scalar::Util qw( reftype );
 use Cwd;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields

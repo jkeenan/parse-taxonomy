@@ -25,3 +25,9 @@ Revision history for Perl module Parse::File::Taxonomy
 
 0.08 Sat Jun 27 18:25:12 EDT 2015
     - Add recipes to Cookbook.
+
+0.09 Mon Jun 29 20:44:50 EDT 2015
+    - Change name of packages and one method:
+      Parse::Taxonomy::Path  -> Parse::Taxonomy::MaterializedPath
+      Parse::Taxonomy::Index -> Parse::Taxonomy::AdjacentList
+      indexify()             -> adjacentify()
