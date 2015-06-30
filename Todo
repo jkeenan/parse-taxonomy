@@ -1,6 +1,6 @@
-TODO list for Perl module Parse::File::Taxonomy
+TODO list for Perl module Parse::Taxonomy
 
-What would it mean for a Parse::File::Taxonomy subclass to accept a
+What would it mean for a Parse::Taxonomy subclass to accept a
 filehandle as an argument, rather than a file?  Would that be difficult to
 implement?
 

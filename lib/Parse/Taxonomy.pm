@@ -24,7 +24,7 @@ released June 27 2015.
 This module is the base class for the Parse-Taxonomy extension to the
 Perl 5 programming language.  You will not instantiate objects of this class;
 rather, you will instantiate objects of subclasses, of which
-Parse::Taxonomy::Path will be the first.
+Parse::Taxonomy::MaterializedPath will be the first.
 
 B<This is an ALPHA release.>
 
@@ -103,9 +103,9 @@ the root node to a given node is what differentiates various types of taxonomy
 files from one another.  In Parse-Taxonomy we identify two different
 flavors of taxonomy files and provide a class for the construction of each.
 
-=head3 Taxonomy-by-path
+=head3 Taxonomy-by-materialized-path
 
-A B<taxonomy-by-path> is one in which a single column -- which we will refer
+A B<taxonomy-by-materialized-path> is one in which a single column -- which we will refer
 to as the B<path column> -- serves as a B<materialized path>.  A materialized
 path represents the route from the root to the given
 record as a series of strings joined by separator characters.
@@ -200,16 +200,16 @@ representing this tree would look like this:
     "|Gamma|Iota|Delta","","","","",""
     "|Delta","","","","",""
 
-=head3 Taxonomy-by-index
+=head3 Taxonomy-by-adjacent-list
 
-A B<taxonomy-by-index> is one in which the data in which each record has a
+A B<taxonomy-by-adjacent-list> is one in which the data in which each record has a
 column with a unique identifier (B<id>) and another column holding the unique
 identifier of the record representing the next higher node in the hierarchy
 (B<parent_id>).  The record must also a column which holds a datum that is
 unique among all records having the same parent node.
 
-Let's make this clearer by rewriting the taxonomy-by-path above for Example 3
-as a taxonomy-by-index.
+Let's make this clearer by rewriting the taxonomy-by-materialized-path above for Example 3
+as a taxonomy-by-adjacent-list.
 
     "id","parent_id","name","nationality","gender","age","income","id_no"
     1,,"Alpha","","","","",""
@@ -226,13 +226,13 @@ as a taxonomy-by-index.
     12,11,"Delta","","","","",""
     13,,"Delta","","","","",""
 
-In the above taxonomy-by-index, the records with C<id>s C<1>, C<7>, C<10>, and
+In the above taxonomy-by-adjacent-list, the records with C<id>s C<1>, C<7>, C<10>, and
 C<13> are top-level nodes.   They have no parents, so the value of their
 C<parent_id> column is null or, in Perl terms, an empty string.  The records
 with C<id>s C<2> and C<4> are children of the record with C<id> of C<1>.  The
 record with C<id 3> is, in turn, a child of the record with C<id 2>.
 
-In the above taxonomy-by-index, close inspection will show that no two records
+In the above taxonomy-by-adjacent-list, close inspection will show that no two records
 with the same C<parent_id> share the same C<name>.  The property of
 B<uniqueness of sibling names> means that we can construct a non-indexed
 version of the path from the root to a given node by using the C<parent_id>
@@ -252,10 +252,10 @@ of them and join them into a single string, and you get:
     |Alpha|Epsilon|Kappa
 
 ... which is the value of the C<path> column in the third record in the
-taxonomy-by-path displayed previously.
+taxonomy-by-materialized-path displayed previously.
 
 With correct data, a given hierarchy of data can therefore be represented
-either by a taxonomy-by-path or by a taxonomy-by-index.  We would therefore
+either by a taxonomy-by-materialized-path or by a taxonomy-by-adjacent-list.  We would therefore
 describe these two taxonomies as B<equivalent> to each other.
 
 =head2 Taxonomy Validation

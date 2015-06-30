@@ -4,8 +4,8 @@ use warnings;
 use 5.10.1;
 use Carp;
 use lib qw( lib );
-use Parse::Taxonomy::Path;
-use Parse::Taxonomy::Index;
+use Parse::Taxonomy::MaterializedPath;
+use Parse::Taxonomy::AdjacentList;
 use Scalar::Util qw( reftype );
 use Test::More qw( no_plan );
 
@@ -13,11 +13,11 @@ my $csvfile = "/home/jkeenan/learn/perl/pft/greeks.csv";
 
 my $source = $csvfile;
 note($source);
-my $ptiobj = Parse::Taxonomy::Index->new( {
+my $ptiobj = Parse::Taxonomy::AdjacentList->new( {
     file    => $source,
 } );
 ok(defined $ptiobj, "new() returned defined value");
-isa_ok($ptiobj, 'Parse::Taxonomy::Index');
+isa_ok($ptiobj, 'Parse::Taxonomy::AdjacentList');
 
 my $pathified = $ptiobj->pathify;
 ok($pathified, "pathify() returned true value");
@@ -34,7 +34,7 @@ for my $rec (@{$pathified}[1..$#{$pathified}]) {
     ];
 }
 
-my $ptpobj = Parse::Taxonomy::Path->new( {
+my $ptpobj = Parse::Taxonomy::MaterializedPath->new( {
     components  => {
         fields          => $fields,
         data_records    => \@data_records,
@@ -45,7 +45,7 @@ my $fdr1 = $ptpobj->fields_and_data_records_path_components;
 my $dir = '/home/jkeenan/gitwork/parse-taxonomy';
 my $taxfile = "$dir/t/data/mu.csv";
 
-my $tax = Parse::Taxonomy::Path->new( {
+my $tax = Parse::Taxonomy::MaterializedPath->new( {
     file => $taxfile,
     path_col_sep => '--',
 } );

@@ -1,9 +1,9 @@
 README for Perl extension Parse-Taxonomy
 
-    use Parse::Taxonomy::Path;
+    use Parse::Taxonomy::MaterializedPath;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
 
@@ -11,17 +11,17 @@ README for Perl extension Parse-Taxonomy
 
 and:
 
-    use Parse::Taxonomy::Index;
+    use Parse::Taxonomy::AdjacentList;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
     $pathified_taxonomy = $obj->pathify_taxonomy();
 
 More documentation in lib/Parse/Taxonomy.pm,
-lib/Parse/Taxonomy/Path.pm and lib/Parse/Taxonomy/Index.pm.
+lib/Parse/Taxonomy/MaterializedPath.pm and lib/Parse/Taxonomy/AdjacentList.pm.
 Once installed, say:
 
     perldoc Parse::Taxonomy

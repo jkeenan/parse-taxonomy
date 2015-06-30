@@ -1,5 +1,5 @@
 # perl
-# t/503-pathify.t - Tests of Parse::Taxonomy::Index:::pathify() and
+# t/503-pathify.t - Tests of Parse::Taxonomy::AdjacentList:::pathify() and
 # write_pathified_to_csv()
 use strict;
 use warnings;
@@ -7,8 +7,8 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::Taxonomy::Index;
-use Parse::Taxonomy::Path;
+use Parse::Taxonomy::AdjacentList;
+use Parse::Taxonomy::MaterializedPath;
 use Test::More qw(no_plan); # tests => 12;
 use Scalar::Util qw( reftype );
 #use Data::Dump;
@@ -38,11 +38,11 @@ my $path_data_records = [
 {
     $source = "./t/data/delta.csv";
     note($source);
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     my $rv = $obj->pathify;
     ok($rv, "pathify() returned true value");
@@ -67,30 +67,30 @@ my $path_data_records = [
     }
     ok($expect, "Each data record has array ref in first column");
 
-    my $path_obj = Parse::Taxonomy::Path->new( {
+    my $path_obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => $path_fields,
             data_records    => $path_data_records,
         },
     } );
     ok(defined $path_obj, "new() returned defined value");
-    isa_ok($path_obj, 'Parse::Taxonomy::Path');
+    isa_ok($path_obj, 'Parse::Taxonomy::MaterializedPath');
     my $path_fadrpc = $path_obj->fields_and_data_records_path_components;
     is_deeply($path_fadrpc, $rv,
-        "taxonomy-by-index and taxonomy-by-path are equivalent");
+        "taxonomy-by-adjacent-list and taxonomy-by-materialized-path are equivalent");
 }
 
 {
     $source = "./t/data/zeta.csv";
     note($source);
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file                => $source,
         id_col              => 'my_id',
         parent_id_col       => 'my_parent_id',
         leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     $exp_fields = ["my_id","my_parent_id","my_name","vertical","currency_code","wholesale_price","retail_price","is_actionable"];
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
@@ -189,17 +189,17 @@ my $path_data_records = [
     }
     ok($expect, "Each data record has array ref in first column");
 
-    my $path_obj = Parse::Taxonomy::Path->new( {
+    my $path_obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => $path_fields,
             data_records    => $path_data_records,
         },
     } );
     ok(defined $path_obj, "new() returned defined value");
-    isa_ok($path_obj, 'Parse::Taxonomy::Path');
+    isa_ok($path_obj, 'Parse::Taxonomy::MaterializedPath');
     my $path_fadrpc = $path_obj->fields_and_data_records_path_components;
     is_deeply($path_fadrpc, $rv,
-        "taxonomy-by-index and taxonomy-by-path are equivalent");
+        "taxonomy-by-adjacent-list and taxonomy-by-materialized-path are equivalent");
 
     $rv = $obj->pathify( { path_col => 'my_path' } );
     ok($rv, "pathify() returned true value");
@@ -338,14 +338,14 @@ my $path_data_records = [
         ["12","11","Nu","Travel","EUR","0.60","0.75","1"],
         ["13","","Delta","Life Insurance","USD","0.25","0.30","1"],
     ];
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         components => {
             fields => $exp_fields,
             data_records => $exp_data_records,
         },
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
     is_deeply($obj->data_records, $exp_data_records, "Got expected data records");
@@ -391,17 +391,17 @@ my $path_data_records = [
     }
     ok($expect, "Each data record has array ref in first column");
 
-    my $path_obj = Parse::Taxonomy::Path->new( {
+    my $path_obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => $path_fields,
             data_records    => $path_data_records,
         },
     } );
     ok(defined $path_obj, "new() returned defined value");
-    isa_ok($path_obj, 'Parse::Taxonomy::Path');
+    isa_ok($path_obj, 'Parse::Taxonomy::MaterializedPath');
     my $path_fadrpc = $path_obj->fields_and_data_records_path_components;
     is_deeply($path_fadrpc, $rv,
-        "taxonomy-by-index and taxonomy-by-path are equivalent");
+        "taxonomy-by-adjacent-list and taxonomy-by-materialized-path are equivalent");
 }
 
 {
@@ -422,7 +422,7 @@ my $path_data_records = [
         ["12","11","Nu","Travel","EUR","0.60","0.75","1"],
         ["13","","Delta","Life Insurance","USD","0.25","0.30","1"],
     ];
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         components => {
             fields => $exp_fields,
             data_records => $exp_data_records,
@@ -432,7 +432,7 @@ my $path_data_records = [
         leaf_col            => 'my_name',
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     is_deeply($obj->fields, $exp_fields, "Got expected columns");
     is_deeply($obj->data_records, $exp_data_records, "Got expected data records");
@@ -478,27 +478,27 @@ my $path_data_records = [
     }
     ok($expect, "Each data record has array ref in first column");
 
-    my $path_obj = Parse::Taxonomy::Path->new( {
+    my $path_obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => $path_fields,
             data_records    => $path_data_records,
         },
     } );
     ok(defined $path_obj, "new() returned defined value");
-    isa_ok($path_obj, 'Parse::Taxonomy::Path');
+    isa_ok($path_obj, 'Parse::Taxonomy::MaterializedPath');
     my $path_fadrpc = $path_obj->fields_and_data_records_path_components;
     is_deeply($path_fadrpc, $rv,
-        "taxonomy-by-index and taxonomy-by-path are equivalent");
+        "taxonomy-by-adjacent-list and taxonomy-by-materialized-path are equivalent");
 }
 
 {
     $source = "./t/data/theta.csv";
     note($source);
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     my $rv;
     $rv = $obj->pathify;
@@ -525,11 +525,11 @@ my $path_data_records = [
 {
     note("pathify() without options");
     $source = "./t/data/theta.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     my ($pathified, $csv_file);
     $pathified = $obj->pathify;
@@ -608,11 +608,11 @@ my $path_data_records = [
 {
     note("pathify() with as-string");
     $source = "./t/data/theta.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
     ok(defined $obj, "new() returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Index');
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
 
     my ($pathified, $csv_file);
     $pathified = $obj->pathify( { as_string => 1 } );

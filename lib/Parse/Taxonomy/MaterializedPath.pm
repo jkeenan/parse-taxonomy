@@ -1,4 +1,4 @@
-package Parse::Taxonomy::Path;
+package Parse::Taxonomy::MaterializedPath;
 use strict;
 use parent qw( Parse::Taxonomy );
 use Carp;
@@ -15,23 +15,23 @@ use Parse::Taxonomy::Auxiliary qw(
 
 =head1 NAME
 
-Parse::Taxonomy::Path - Validate a file for use as a path-based taxonomy
+Parse::Taxonomy::MaterializedPath - Validate a file for use as a path-based taxonomy
 
 =head1 SYNOPSIS
 
-    use Parse::Taxonomy::Path;
+    use Parse::Taxonomy::MaterializedPath;
 
     # 'file' interface: reads a CSV file for you
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
 
-    # 'components' interface:  as if you've already read a 
+    # 'components' interface:  as if you've already read a
     # CSV file and now have Perl array references to header and data rows
 
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -46,7 +46,7 @@ Parse::Taxonomy::Path - Validate a file for use as a path-based taxonomy
 
 =item * Purpose
 
-Parse::Taxonomy::Path constructor.
+Parse::Taxonomy::MaterializedPath constructor.
 
 =item * Arguments
 
@@ -57,7 +57,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
         path_col_idx    => 0,
         path_col_sep    => '|',
@@ -70,7 +70,7 @@ Elements in the hash reference are keyed on:
 
 =item * C<file>
 
-Absolute or relative path to the incoming taxonomy file.  
+Absolute or relative path to the incoming taxonomy file.
 B<Required> for this interface.
 
 =item * C<path_col_idx>
@@ -95,7 +95,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -108,7 +108,7 @@ Elements in this hash are keyed on:
 
 =item * C<components>
 
-This element is B<required> for the 
+This element is B<required> for the
 C<components> interface. The value of this element is a hash reference with two keys, C<fields> and
 C<data_records>.  C<fields> is a reference to an array holding the field or
 column names for the data set.  C<data_records> is a reference to an array of
@@ -129,7 +129,7 @@ Same as in C<file> interface above.
 
 =item * Return Value
 
-Parse::Taxonomy::Path object.
+Parse::Taxonomy::MaterializedPath object.
 
 =item * Comment
 
@@ -227,7 +227,7 @@ sub new {
             unless (-f $args->{file});
         $data->{file} = delete $args->{file};
 
-        # We've now handled all the Parse::Taxonomy::Path-specific options.
+        # We've now handled all the Parse::Taxonomy::MaterializedPath-specific options.
         # Any remaining options are assumed to be intended for Text::CSV::new().
 
         $args->{binary} = 1;
@@ -265,8 +265,8 @@ sub _prepare_fields {
     for my $reserved ( qw| id parent_id name | ) {
         push @bad_fields, $reserved if $fields_seen{$reserved};
     }
-    my $msg = "Bad column names: <@bad_fields>.  These are reserved for subroutine 'indexify()' ";
-    $msg .= "and for interaction with Parse::Taxonomy::Index; please rename";
+    my $msg = "Bad column names: <@bad_fields>.  These are reserved for subroutine 'adjacentify()' ";
+    $msg .= "and for interaction with Parse::Taxonomy::AdjacentList; please rename";
     croak $msg if @bad_fields;
 
     $data->{fields} = $fields_ref;
@@ -845,19 +845,19 @@ sub hashify {
     return \%hashified;
 }
 
-=head2 C<indexify()>
+=head2 C<adjacentify()>
 
 =over 4
 
 =item * Purpose
 
-Transform a taxonomy-by-path into a taxonomy-by-index.
+Transform a taxonomy-by-materialized-path into a taxonomy-by-adjacent-list.
 
 =item * Arguments
 
-    $indexified = $obj->indexify();
+    $adjacentified = $obj->adjacentify();
 
-    $indexified = $obj->indexify( { serial => 500 } );
+    $adjacentified = $obj->adjacentify( { serial => 500 } );
 
 Optional single hash reference.
 
@@ -871,22 +871,22 @@ the C<id> column of the first record to be processed will be C<501>.
 
 Reference to an array of hash references.  Each element represents one node in
 the taxonomy.  Each element will have key-value pairs for C<id>, C<parent_id>
-and C<name> which will hold the indexification of the materialized path in the
-original taxonomy-by-path.  Each element will, as well, have KVPs for the
-non-materialized-path fields in the records in the original taxonomy-by-path.
+and C<name> which will hold the adjacentification of the materialized path in the
+original taxonomy-by-materialized-path.  Each element will, as well, have KVPs for the
+non-materialized-path fields in the records in the original taxonomy-by-materialized-path.
 
 =item * Comment
 
-See documentation for C<write_indexified_to_csv()> for example.
+See documentation for C<write_adjacentified_to_csv()> for example.
 
 =back
 
 =cut
 
-sub indexify {
+sub adjacentify {
     my ($self, $args) = @_;
     if (defined $args) {
-        croak "Argument to 'indexify()' must be hashref"
+        croak "Argument to 'adjacentify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
     }
 
@@ -907,7 +907,7 @@ sub indexify {
         map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] }  @{$drpc};
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
     my $serial = $args->{serial} || 0;
-    my @indexified = ();
+    my @adjacentified = ();
     my %depth_name_id = ();
     for my $depth (1..$max_components) {
         for (my $r = 0; $r <= $#components_by_row; $r++) {
@@ -926,26 +926,26 @@ sub indexify {
                     %rowdata,
                 );
                 $depth_name_id{$depth}{$name} = $rowhash{id};
-                push @indexified, \%rowhash;
+                push @adjacentified, \%rowhash;
             }
         }
     }
 
-    return \@indexified;
+    return \@adjacentified;
 }
 
-=head2 C<write_indexified_to_csv()>
+=head2 C<write_adjacentified_to_csv()>
 
 =over 4
 
 =item * Purpose
 
-Create a CSV-formatted file holding the data returned by C<indexify()>.
+Create a CSV-formatted file holding the data returned by C<adjacentify()>.
 
 =item * Arguments
 
-    $csv_file = $obj->write_indexified_to_csv( {
-       indexified => $indexified,                   # output of indexify()
+    $csv_file = $obj->write_adjacentified_to_csv( {
+       adjacentified => $adjacentified,                   # output of adjacentify()
        csvfile => './t/data/taxonomy_out3.csv',
     } );
 
@@ -953,15 +953,15 @@ Single hash reference.  That hash is keyed on:
 
 =over 4
 
-=item * C<indexified>
+=item * C<adjacentified>
 
 B<Required:>  Its value must be the arrayref of hash references returned by
-the C<indexify()> method.
+the C<adjacentify()> method.
 
 =item * C<csvfile>
 
 Optional.  Path to location where a CSV-formatted text file holding the
-taxonomy-by-index will be written.  Defaults to a file called
+taxonomy-by-adjacent-list will be written.  Defaults to a file called
 F<taxonomy_out.csv> in the current working directory.
 
 =item * Text::CSV options
@@ -977,7 +977,7 @@ Returns path to CSV-formatted text file just created.
 
 =item * Example
 
-Suppose we have a CSV-formatted file holding the following taxonomy-by-path:
+Suppose we have a CSV-formatted file holding the following taxonomy-by-materialized-path:
 
     "path","is_actionable"
     "|Alpha","0"
@@ -990,9 +990,9 @@ Suppose we have a CSV-formatted file holding the following taxonomy-by-path:
     "|Beta|Eta","1"
     "|Beta|Theta","1"
 
-After running this file through C<new()>, C<indexify()> and
-C<write_indexified_to_csv()> we will have a new CSV-formatted file holding
-this taxonomy-by-index:
+After running this file through C<new()>, C<adjacentify()> and
+C<write_adjacentified_to_csv()> we will have a new CSV-formatted file holding
+this taxonomy-by-adjacent-list:
 
     id,parent_id,name,is_actionable
     1,,Alpha,0
@@ -1012,22 +1012,22 @@ C<name> columns.
 
 =cut
 
-sub write_indexified_to_csv {
+sub write_adjacentified_to_csv {
     my ($self, $args) = @_;
     if (defined $args) {
-        croak "Argument to 'indexify()' must be hashref"
+        croak "Argument to 'adjacentify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
-        croak "Argument to 'indexify()' must have 'indexified' element"
-            unless exists $args->{indexified};
-        croak "Argument 'indexified' must be array reference"
-            unless (ref($args->{indexified}) and
-                reftype($args->{indexified}) eq 'ARRAY');
+        croak "Argument to 'adjacentify()' must have 'adjacentified' element"
+            unless exists $args->{adjacentified};
+        croak "Argument 'adjacentified' must be array reference"
+            unless (ref($args->{adjacentified}) and
+                reftype($args->{adjacentified}) eq 'ARRAY');
     }
     else {
-        croak "write_indexified_to_csv() must be supplied with hashref"
+        croak "write_adjacentified_to_csv() must be supplied with hashref"
     }
-    my $indexified = $args->{indexified};
-    delete $args->{indexified};
+    my $adjacentified = $args->{adjacentified};
+    delete $args->{adjacentified};
 
     my $columns_in = $self->fields;
     my @non_path_columns_in =
@@ -1056,7 +1056,7 @@ sub write_indexified_to_csv {
         or croak "Unable to open $csvfile for writing";
     $csv->eol(defined($csv_args->{eol}) ? $csv_args->{eol} : "\n");
     $csv->print($OUT, [@columns_out]);
-    for my $rec (@{$indexified}) {
+    for my $rec (@{$adjacentified}) {
         $csv->print(
             $OUT,
             [ map { $rec->{$columns_out[$_]} } (0..$#columns_out) ]

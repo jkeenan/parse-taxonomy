@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::Taxonomy::Path;
+use Parse::Taxonomy::MaterializedPath;
 use Test::More qw(no_plan); # tests => 20;
 use Scalar::Util qw( reftype );
 
@@ -34,7 +34,7 @@ $data_records = [
     local $@;
     $source = "./t/data/alpha.csv";
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             file        => $source,
             components  => {
                 fields          => $fields,
@@ -50,7 +50,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => [
                 fields          => $fields,
                 data_records    => $data_records,
@@ -65,7 +65,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => 'foo',
         } );
     };
@@ -77,7 +77,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 data_records    => $data_records,
             }
@@ -90,7 +90,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields    => $fields,
             }
@@ -103,7 +103,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => 'foo',
                 data_records    => $data_records,
@@ -118,7 +118,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => { hash => ref},
                 data_records    => $data_records,
@@ -133,7 +133,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => $fields,
                 data_records    => { my => $data_records },
@@ -148,7 +148,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => $fields,
                 data_records    => [
@@ -166,7 +166,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => $fields,
                 data_records    => [
@@ -184,7 +184,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields          => $fields,
                 data_records    => $data_records,
@@ -200,7 +200,7 @@ $data_records = [
     local $@;
     my $dupe_field = 'gender';
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields        => [ "path","nationality",$dupe_field,"age",$dupe_field,"id_no" ],
                 data_records  => $data_records,
@@ -214,7 +214,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components => {
                 fields        => [ "path","nationality","gender","id","parent_id","name" ],
                 data_records  => $data_records,
@@ -230,7 +230,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields        => $fields,
                 data_records  => [
@@ -265,7 +265,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields        => $fields,
                 data_records  => [
@@ -295,7 +295,7 @@ $data_records = [
 {
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             components  => {
                 fields        => $fields,
                 data_records  => [
@@ -323,14 +323,14 @@ $data_records = [
 }
 
 {
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
         }
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 }
 
 {
@@ -350,7 +350,7 @@ $data_records = [
         ["",",Gamma,Iota,Nu", "", "", "", ""],
         ["",",Delta", "", "", "", ""],
     ];
-    my $obj = Parse::Taxonomy::Path->new( {
+    my $obj = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -359,6 +359,6 @@ $data_records = [
         path_col_sep => ',',
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 }
 

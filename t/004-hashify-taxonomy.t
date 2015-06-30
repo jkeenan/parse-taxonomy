@@ -6,18 +6,18 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::Taxonomy::Path;
+use Parse::Taxonomy::MaterializedPath;
 use Test::More tests => 17;
 
 my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     local $@;
     eval {
@@ -40,11 +40,11 @@ my ($obj, $source, $expect, $hashified);
 
 {
     $source = "./t/data/beta.csv";
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $expect = {
         "|Alpha" => {
@@ -716,7 +716,7 @@ my ($obj, $source, $expect, $hashified);
     is_deeply($hashified, $expect, "Got expected taxonomy (key_delim and root_str)");
 
     note("'components' interface");
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
 #        file    => $source,
         components => {
             fields          => ["path","vertical","currency_code","wholesale_price","retail_price","is_actionable"],
@@ -738,7 +738,7 @@ my ($obj, $source, $expect, $hashified);
         },
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $hashified = $obj->hashify( {
         key_delim => ' - ',
@@ -749,7 +749,7 @@ my ($obj, $source, $expect, $hashified);
 
 {
     note("Example of local validation");
-    my $obj = Parse::Taxonomy::Path->new( {
+    my $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => 't/data/iota.csv',
     } );
     my $hashified       = $obj->hashify();

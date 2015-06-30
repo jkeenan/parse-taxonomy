@@ -8,16 +8,16 @@ This file is a cookbook holding usage examples -- recipes -- for various
 F<Parse::Taxonomy> subclasses.
 
 The documentation herein presumes that you have already studied the
-documentation in F<Parse::Taxonomy>, F<Parse::Taxonomy::Path>,
-F<Parse::Taxonomy::Index>, etc.
+documentation in F<Parse::Taxonomy>, F<Parse::Taxonomy::MaterializedPath>,
+F<Parse::Taxonomy::AdjacentList>, etc.
 
 =head1 RECIPES
 
-=head2 Validate a taxonomy-by-path
+=head2 Validate a taxonomy-by-materialized-path
 
 =head3 Problem
 
-You have a CSV file which you have been told is a taxonomy-by-path.  You want to
+You have a CSV file which you have been told is a taxonomy-by-materialized-path.  You want to
 confirm its validity.
 
 Let's say the file holds these records:
@@ -33,11 +33,11 @@ Let's say the file holds these records:
 
 =head3 Solution
 
-Try to create a Parse::Taxonomy::Path object using the C<file> interface.
+Try to create a Parse::Taxonomy::MaterializedPath object using the C<file> interface.
 
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Path->new( {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
             file => './proposed_taxonomy.csv',
         } );
     };
@@ -48,11 +48,11 @@ described in F<Parse::Taxonomy>.  This particular file, however, will throw
 an exception.  Examination of the content of C<$@> will show that two records
 have the same materialized path, i.e., the same value in the C<path> column.
 
-=head2 Validate a taxonomy-by-index
+=head2 Validate a taxonomy-by-adjacent-list
 
 =head3 Problem
 
-You have a CSV file which you have been told is a taxonomy-by-index.  You want
+You have a CSV file which you have been told is a taxonomy-by-adjacent-list.  You want
 to confirm its validity.
 
 Let's say the file holds these records:
@@ -69,11 +69,11 @@ Let's say the file holds these records:
 
 =head3 Solution
 
-Try to create a Parse::Taxonomy::Index object using the C<file> interface.
+Try to create a Parse::Taxonomy::AdjacentList object using the C<file> interface.
 
     local $@;
     eval {
-        $obj = Parse::Taxonomy::Index->new( {
+        $obj = Parse::Taxonomy::AdjacentList->new( {
             file => './proposed_taxonomy_by_index.csv',
         } );
     };
@@ -89,7 +89,7 @@ with the same C<parent_id> have the same C<name>.
 =head3 Problem
 
 You have a taxonomy file from which you have successfully created a
-Parse::Taxonomy::Path object.  From that you know that it is valid with
+Parse::Taxonomy::MaterializedPath object.  From that you know that it is valid with
 respect to the requirements for a taxonomy imposed by this library.  But you
 have additional business requirements which a taxonomy must fulfill before you
 can use the taxonomy in production.
@@ -119,7 +119,7 @@ and write your own functions to conduct local validations.
 
 In this case:
 
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => 'local_requirement.csv',
     } );
     $hashified       = $obj->hashify();
@@ -149,12 +149,12 @@ Output will resemble:
 
 You can then decide how to handle this per your business requirements.
 
-=head2 Convert a taxonomy-by-path to a taxonomy-by-index
+=head2 Convert a taxonomy-by-materialized-path to a taxonomy-by-adjacent-list
 
 =head3 Problem
 
-You have a file which holds a validated taxonomy-by-path and you want to
-create a file which holds the equivalent taxonomy-by-index.
+You have a file which holds a validated taxonomy-by-materialized-path and you want to
+create a file which holds the equivalent taxonomy-by-adjacent-list.
 
 Suppose you have a file with this data:
 
@@ -172,10 +172,10 @@ Suppose you have a file with this data:
 
 =head3 Solution
 
-Use the C<indexify()> and C<write_indexified_to_csv()> methods.
+Use the C<adjacentify()> and C<write_adjacentified_to_csv()> methods.
 
-    $indexified = $obj->indexify();
-    $file_taxonomy_by_index = $obj->write_indexified_to_csv($indexified);
+    $adjacentified = $obj->adjacentify();
+    $file_taxonomy_by_index = $obj->write_adjacentified_to_csv($adjacentified);
 
 The file's whose path is stored in C<$file_taxonomy_by_index> will look like
 this:
@@ -192,7 +192,7 @@ this:
     9,4,Lambda,1
     10,4,Mu,1
 
-=head2 Convert a taxonomy-by-index to a taxonomy-by-path
+=head2 Convert a taxonomy-by-adjacent-list to a taxonomy-by-materialized-path
 
 =head3 Problem
 
@@ -224,12 +224,12 @@ The CSV file would then contain data like this:
     "8","2","Eta","1"
     "9","2","Theta","1"
 
-First, create a Parse::Taxonomy::Index object from this source file, and then
+First, create a Parse::Taxonomy::AdjacentList object from this source file, and then
 apply the C<pathify()> method to it with the C<as_string> option set to a true
 value.
 
     $source = "/path/to/taxonomy.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -255,7 +255,7 @@ That returns a Perl reference to an array of array references:
 =head3 Problem
 
 You have received a plain-text file which holds CSV-formatted records which
-constitute a taxonomy-by-path.  You passed the file off to the staff member
+constitute a taxonomy-by-materialized-path.  You passed the file off to the staff member
 with the "Big Data" t-shirt.  Big Data got the records inserted into an RDBMS
 where the materialized path is represented by "pointers" to records higher up
 in the taxonomy, I<i.e.,> by means of a C<parent_id> column.  You want to
@@ -281,7 +281,7 @@ Let's further suppose that the data was inserted into the F<greeks> table in
 the F<taxonomy> database:
 
     taxonomy=# SELECT * FROM greeks;
-     id | parent_id |  name   | is_actionable 
+     id | parent_id |  name   | is_actionable
     ----+-----------+---------+---------------
       1 |           | Alpha   | f
       2 |           | Beta    | f
@@ -317,9 +317,9 @@ Yielding:
     8,2,Eta,t
     9,2,Theta,t
 
-Create a Parse::Taxonomy::Index object using F<greeks.csv> as the source:
+Create a Parse::Taxonomy::AdjacentList object using F<greeks.csv> as the source:
 
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => '/path/to/taxonomy/greeks.csv',
     } );
 
@@ -363,13 +363,13 @@ C<0> to proceed with our test for equivalence.
         ];
     }
 
-We're now in a position to create a B<new> Parse::Taxonomy::Path object based
+We're now in a position to create a B<new> Parse::Taxonomy::MaterializedPath object based
 on the data extracted from the database via the CSV file.  We'll use the
-C<components> interface to C<Parse::Taxonomy::Path::new()> because our
+C<components> interface to C<Parse::Taxonomy::MaterializedPath::new()> because our
 taxonomy now lives in the form of Perl data structures suitable for the
 C<components> interface.
 
-    $ptpobj = Parse::Taxonomy::Path->new( {
+    $ptpobj = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => \@data_records,
@@ -400,10 +400,10 @@ Which, when dumped, gives:
     ]
 
 We now return to the original incoming taxononmy file, which we use as the
-source for a second Parse::Taxonomy::Path object.  Remember that C<--> was
+source for a second Parse::Taxonomy::MaterializedPath object.  Remember that C<--> was
 used to separate the parts of the materialized path in that file.
 
-    $tax = Parse::Taxonomy::Path->new( {
+    $tax = Parse::Taxonomy::MaterializedPath->new( {
         file => '/path/to/mu.csv,
         path_col_sep => '--',
     } );

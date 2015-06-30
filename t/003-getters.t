@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 
 use lib ('./lib');
-use Parse::Taxonomy::Path;
+use Parse::Taxonomy::MaterializedPath;
 use Test::More qw(no_plan); # tests => 62;
 
 my ($obj, $source, $expect);
@@ -14,11 +14,11 @@ my ($obj, $source, $expect);
 {
     $source = "./t/data/alpha.csv";
     note($source);
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
@@ -179,12 +179,12 @@ my ($obj, $source, $expect);
 {
     $source = "./t/data/alt_path_col_sep.csv";
     note($source);
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         file            => $source,
         path_col_sep    => ',',
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
@@ -206,7 +206,7 @@ my ($obj, $source, $expect);
 
 {
     note("'components' interface");
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => ["path","nationality","gender","age","income","id_no"],
             data_records    => [
@@ -227,7 +227,7 @@ my ($obj, $source, $expect);
         },
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;
@@ -375,7 +375,7 @@ my ($obj, $source, $expect);
 
 {
     note("'components' interface; alternate path_col_sep");
-    $obj = Parse::Taxonomy::Path->new( {
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
         components => {
             fields          => ["path","nationality","gender","age","income","id_no"],
             data_records    => [
@@ -397,7 +397,7 @@ my ($obj, $source, $expect);
         path_col_sep    => ',',
     } );
     ok(defined $obj, "'new()' returned defined value");
-    isa_ok($obj, 'Parse::Taxonomy::Path');
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
     $expect = [ "path","nationality","gender","age","income","id_no" ];
     my $fields = $obj->fields;

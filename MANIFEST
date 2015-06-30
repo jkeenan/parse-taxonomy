@@ -1,10 +1,10 @@
 .gitignore
 Changes
 lib/Parse/Taxonomy.pm
+lib/Parse/Taxonomy/AdjacentList.pm
 lib/Parse/Taxonomy/Auxiliary.pm
 lib/Parse/Taxonomy/Cookbook.pod
-lib/Parse/Taxonomy/Index.pm
-lib/Parse/Taxonomy/Path.pm
+lib/Parse/Taxonomy/MaterializedPath.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
@@ -15,7 +15,7 @@ t/001-new-file.t
 t/002-new-components.t
 t/003-getters.t
 t/004-hashify-taxonomy.t
-t/005-indexify.t
+t/005-adjacentify.t
 t/500-test-prep.t
 t/501-new.t
 t/502-getters.t

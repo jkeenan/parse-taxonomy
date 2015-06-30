@@ -1,4 +1,4 @@
-package Parse::Taxonomy::Index;
+package Parse::Taxonomy::AdjacentList;
 use strict;
 use parent qw( Parse::Taxonomy );
 use Carp;
@@ -14,14 +14,14 @@ use Parse::Taxonomy::Auxiliary qw(
 
 =head1 NAME
 
-Parse::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV file
+Parse::Taxonomy::AdjacentList - Extract a taxonomy from a hierarchy inside a CSV file
 
 =head1 SYNOPSIS
 
-    use Parse::Taxonomy::Index;
+    use Parse::Taxonomy::AdjacentList;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -35,7 +35,7 @@ Parse::Taxonomy::Index - Extract a taxonomy from a hierarchy inside a CSV file
 
 =item * Purpose
 
-Parse::Taxonomy::Index constructor.
+Parse::Taxonomy::AdjacentList constructor.
 
 =item * Arguments
 
@@ -46,7 +46,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/delta.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -86,7 +86,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -111,7 +111,7 @@ each of the latter arrayrefs holding one record or row from the data set.
 
 =item * Return Value
 
-Parse::Taxonomy::Index object.
+Parse::Taxonomy::AdjacentList object.
 
 =item * Exceptions
 
@@ -478,7 +478,7 @@ field.
 =head2 Accessors
 
 The following methods provide information about key columns in a
-Parse::Taxonomy::Path object.  The key columns are those which hold the
+Parse::Taxonomy::MaterializedPath object.  The key columns are those which hold the
 ID, parent ID and component information.  They take no arguments.  The methods
 whose names end in C<_idx> return integers, as they return the index position
 of the column in the header row.  The other methods return strings.
@@ -534,15 +534,15 @@ sub leaf_col {
 =item * Purpose
 
 Generate a new Perl data structure which holds the same information as a
-Parse::Taxonomy::Index object but which expresses the route from the
+Parse::Taxonomy::AdjacentList object but which expresses the route from the
 root node to a given branch or leaf node as either a separator-delimited
-string (as in the C<path> column of a Parse::Taxonomy::Path object) or
+string (as in the C<path> column of a Parse::Taxonomy::MaterializedPath object) or
 as an array reference holding the list of names which delineate that route.
 
-Another way of expressing this:  Transform a taxonomy-by-index to a
-taxonomy-by-path.
+Another way of expressing this:  Transform a taxonomy-by-adjacent-list to a
+taxonomy-by-materialized-path.
 
-Example:  Suppose we have a CSV file which serves as a taxonomy-by-index for
+Example:  Suppose we have a CSV file which serves as a taxonomy-by-adjacent-list for
 this data:
 
     "id","parent_id","name","is_actionable"
@@ -564,7 +564,7 @@ out among the C<id>, C<parent_id> and C<name> columns in a single C<path>
 column which, by default, would hold an array reference.
 
     $source = "./t/data/theta.csv";
-    $obj = Parse::Taxonomy::Index->new( {
+    $obj = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -786,7 +786,7 @@ the C<pathify()> method.
 =item * C<csvfile>
 
 Optional.  Path to location where a CSV-formatted text file holding the
-taxonomy-by-index will be written.  Defaults to a file called
+taxonomy-by-adjacent-list will be written.  Defaults to a file called
 F<taxonomy_out.csv> in the current working directory.
 
 =item * Text::CSV options
@@ -802,7 +802,7 @@ Returns path to CSV-formatted text file just created.
 
 =item * Example
 
-Suppose we have a CSV-formatted file holding the following taxonomy-by-index:
+Suppose we have a CSV-formatted file holding the following taxonomy-by-adjacent-list:
 
     "id","parent_id","name","is_actionable"
     "1","","Alpha","0"
@@ -817,7 +817,7 @@ Suppose we have a CSV-formatted file holding the following taxonomy-by-index:
 
 After running this file through C<new()>, C<pathify()> and
 C<write_pathified_to_csv()> we will have a new CSV-formatted file holding
-this taxonomy-by-path:
+this taxonomy-by-materialized-path:
 
     path,is_actionable
     |Alpha,0
