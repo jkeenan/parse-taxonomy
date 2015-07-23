@@ -11,7 +11,6 @@ use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
 use Test::More qw(no_plan); # tests => 12;
 use Scalar::Util qw( reftype );
-#use Data::Dump;
 
 my ($obj, $source, $expect);
 my ($exp_fields, $exp_data_records);
