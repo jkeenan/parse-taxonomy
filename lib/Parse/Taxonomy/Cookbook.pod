@@ -115,7 +115,7 @@ Suppose further that you have a business requirement that all nodes which are
 =head3 Solution
 
 Use Parse::Taxonomy:::Path accessor methods to get at the data in the taxonomy
-and write your own functions to conduct local validations.
+and then write your own functions to conduct local validations.
 
 In this case:
 

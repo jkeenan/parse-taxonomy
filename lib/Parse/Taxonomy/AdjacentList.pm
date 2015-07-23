@@ -78,7 +78,7 @@ with the same parent ID.  Defaults to C<name>.
 
 =item * Text::CSV options
 
-Any other options which could normally be passed to C<Text::CSV->new()> will
+Any other options which could normally be passed to C<Text::CSV-E<gt>new()> will
 be passed through to that module's constructor.  On the recommendation of the
 Text::CSV documentation, C<binary> is always set to a true value.
 
@@ -415,8 +415,6 @@ Read-only.
 
 =back
 
-# Implemented in lib/Parse/Taxonomy.pm
-
 =head2 C<data_records()>
 
 =over 4
@@ -445,8 +443,6 @@ or (b) use C<fields_and_data_records()>.
 
 =back
 
-# Implemented in lib/Parse/Taxonomy.pm
-
 =cut
 
 =head2 C<get_field_position()>
@@ -472,8 +468,6 @@ field.
 =back
 
 =cut
-
-# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 Accessors
 

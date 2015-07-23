@@ -24,9 +24,10 @@ released June 29 2015.
 This module is the base class for the Parse-Taxonomy extension to the
 Perl 5 programming language.  You will not instantiate objects of this class;
 rather, you will instantiate objects of subclasses, of which
-Parse::Taxonomy::MaterializedPath will be the first.
+Parse::Taxonomy::MaterializedPath and Parse::Taxonomy::AdjacentList are the first.
 
-B<This is an ALPHA release.>
+B<This is an BETA release.>  The documented interfaces are expected to remain
+stable but are not guaranteed to remain so.
 
 =head2 Taxonomy: definition
 
@@ -56,8 +57,9 @@ B<Diagram 1:>
 
 For the purpose of this module, a B<taxonomy file> is a CSV file in which (a)
 certain columns hold data from which the position of each record within the
-taxonomy can be derived; and (b) each node in the tree (other than the root
-node) is uniquely represented by a record within the file.
+taxonomy can be derived; and (b) each node in the tree (with the possible
+exception of the root node) is uniquely represented by a record within the
+file.
 
 =head3 CSV
 
@@ -65,9 +67,10 @@ B<"CSV">, strictly speaking, refers to B<comma-separated values>:
 
     path,nationality,gender,age,income,id_no
 
-For the purpose of this module, however, the column separators in a taxonomy file
-may be any user-specified character handled by the F<Text-CSV> library.
-Formats frequently observed are B<tab-separated values>:
+For the purpose of this module, however, the column separators in a taxonomy
+file may be any user-specified character handled by the
+L<Text-CSV|http://search.cpan.org/dist/Text-CSV/> library on CPAN.  Formats
+frequently observed are B<tab-separated values>:
 
     path	nationality	gender	age	income	id_no
 
@@ -75,7 +78,7 @@ and B<pipe-separated values>:
 
     path|nationality|gender|age|income|id_no
 
-The documentation for F<Text-CSV> comments that the CSV format could <I"...
+The documentation for F<Text-CSV> comments that the CSV format could I<"...
 perhaps better [be] called ASV (anything separated values)">, but we shall for
 convenience use "CSV" herein regardless of the specific delimiter.
 
@@ -202,11 +205,11 @@ representing this tree would look like this:
 
 =head3 Taxonomy-by-adjacent-list
 
-A B<taxonomy-by-adjacent-list> is one in which the data in which each record has a
-column with a unique identifier (B<id>) and another column holding the unique
-identifier of the record representing the next higher node in the hierarchy
-(B<parent_id>).  The record must also a column which holds a datum that is
-unique among all records having the same parent node.
+A B<taxonomy-by-adjacent-list> is one in which each record has a column with a
+unique identifier (B<id>) and another column holding the unique identifier of
+the record representing the next higher node in the hierarchy (B<parent_id>).
+The record must also a column which holds a datum that is unique among all
+records having the same parent node.
 
 Let's make this clearer by rewriting the taxonomy-by-materialized-path above for Example 3
 as a taxonomy-by-adjacent-list.
@@ -255,25 +258,31 @@ of them and join them into a single string, and you get:
 taxonomy-by-materialized-path displayed previously.
 
 With correct data, a given hierarchy of data can therefore be represented
-either by a taxonomy-by-materialized-path or by a taxonomy-by-adjacent-list.  We would therefore
-describe these two taxonomies as B<equivalent> to each other.
+either by a taxonomy-by-materialized-path or by a taxonomy-by-adjacent-list.
+This permit us to describe these two taxonomies as B<equivalent> to each
+other.
 
 =head2 Taxonomy Validation
 
-Each C<Parse::Taxonomy> subclass will have a constructor, C<new()>,
-which will probe a taxonomy file
-provided to it as an argument to determine whether it can be considered a
-valid taxonomy according to the description provided above.  The arguments
-needed for such a constructor will be found in the documentation of the
-subclass.
+Each C<Parse::Taxonomy> subclass will have a constructor, C<new()>, whose
+principal interface will take the name of a taxonomy file as an argument.  We
+will call this interface the B<file> interface to the constructor.  The
+purpose of the constructor will be to determine whether the taxonomy file
+holds a valid taxonomy according to the description provided above.  The
+arguments needed for such a constructor will be found in the documentation of
+the subclass.
 
 The constructor of a C<Parse::Taxonomy> subclass may, if desired, accept
 a different set of arguments.  Suppose you have already read a CSV file and
 parsed it into one array reference holding its header row -- a list of its
 columns -- and a second array reference, this one being an array of arrays
 where each element holds the data in one record in the CSV file.  You have the
-same C<components> needed to validate the taxonomy that you would get by
-parsing the CSV file.
+same components needed to validate the taxonomy that you would get by
+parsing the CSV file, so your subclass may implement a B<components> interface
+as well as a file interface.
+
+You should now proceed to read the documentation for
+L<Parse::Taxonomy::MaterializedPath> and L<Parse::Taxonomy::AdjacentList>.
 
 =cut
 
@@ -337,13 +346,13 @@ Development repository: L<https://github.com/jkeenan/parse-taxonomy>
 
 =head1 REFERENCES
 
-L<http://search.cpan.org/dist/DBIx-Class-MaterializedPath/|DBIx-Class-MaterializedPath>
+L<DBIx-Class-MaterializedPath|http://search.cpan.org/dist/DBIx-Class-MaterializedPath/>
 by Arthur Axel "fREW" Schmidt
 
-L<http://search.cpan.org/dist/DBIx-Tree-MaterializedPath/|DBIx-Tree-MaterializedPath>
+L<DBIx-Tree-MaterializedPath|http://search.cpan.org/dist/DBIx-Tree-MaterializedPath/>
 by Larry Leszczynski
 
-L<https://communities.bmc.com/docs/DOC-9902|Trees in SQL: Nested Sets and Materialized Path>
+L<Trees in SQL: Nested Sets and Materialized Path|https://communities.bmc.com/docs/DOC-9902>
 by Vadim Tropashko
 
 =head1 COPYRIGHT

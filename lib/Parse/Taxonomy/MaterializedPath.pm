@@ -87,7 +87,7 @@ Optional; defaults to C<|>.
 
 =item *  Text::CSV options
 
-Any other options which could normally be passed to C<Text::CSV->new()> will
+Any other options which could normally be passed to C<Text::CSV-E<gt>new()> will
 be passed through to that module's constructor.  On the recommendation of the
 Text::CSV documentation, C<binary> is always set to a true value.
 
@@ -157,7 +157,7 @@ incoming taxonomy file.
 =item * In the column designated as the "path" column, the same value is
 observed more than once.
 
-=item * C<id>, C<parent_id> and C<name> are reserved.  One or more columns is
+=item * C<id>, C<parent_id> and C<name> are reserved terms.  One or more columns is
 named with a reserved term.
 
 =item * A non-parent node's parent node cannot be located in the incoming taxonomy file.
@@ -376,8 +376,6 @@ Read-only.
 
 =back
 
-# Implemented in lib/Parse/Taxonomy.pm
-
 =head2 C<path_col_idx()>
 
 =over 4
@@ -504,8 +502,6 @@ or (b) use C<fields_and_data_records()>.
 
 =back
 
-# Implemented in lib/Parse/Taxonomy.pm
-
 =head2 C<fields_and_data_records()>
 
 =over 4
@@ -531,8 +527,6 @@ in that file.
 =back
 
 =cut
-
-# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<data_records_path_components()>
 
@@ -654,8 +648,6 @@ field.
 =back
 
 =cut
-
-# Implemented in lib/Parse/Taxonomy.pm
 
 =head2 C<child_counts()>
 
