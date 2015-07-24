@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 20;
+use Test::More tests => 30;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -192,5 +192,23 @@ my ($obj, $source, $fields, $data_records);
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
+}
+
+{
+    $source = "./t/data/extra_wordspace.csv";
+    note($source);
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file            => $source,
+        path_col_sep    => ' , ',
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my $hashified = $obj->hashify();
+    ok(defined($hashified), "hashify() returned defined value");
+    ok(exists $hashified->{" , Gamma , Iota , Nu Extra Wordspace"},
+        "Found element with wordspace inside path component");
+    my $adjacentified = $obj->adjacentify();
+    ok(defined($adjacentified), "adjacentify() returned defined value");
 }
 

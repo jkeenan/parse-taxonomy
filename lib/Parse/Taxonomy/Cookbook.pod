@@ -177,7 +177,7 @@ Use the C<adjacentify()> and C<write_adjacentified_to_csv()> methods.
     $adjacentified = $obj->adjacentify();
     $file_taxonomy_by_index = $obj->write_adjacentified_to_csv($adjacentified);
 
-The file's whose path is stored in C<$file_taxonomy_by_index> will look like
+The file whose path is stored in C<$file_taxonomy_by_index> will look like
 this:
 
     id,parent_id,name,is_actionable
@@ -399,7 +399,7 @@ Which, when dumped, gives:
       [["", "Beta", "Theta"], 1],
     ]
 
-We now return to the original incoming taxononmy file, which we use as the
+We now return to the original incoming taxonomy file, which we use as the
 source for a second Parse::Taxonomy::MaterializedPath object.  Remember that C<--> was
 used to separate the parts of the materialized path in that file.
 
