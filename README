@@ -28,15 +28,15 @@ Once installed, say:
 
 You should be able to use this set of instructions to install the module...
 
-This document refers to version 0.10 of Parse-Taxonomy.  This version was
-released July 23 2015.
+This document refers to version 0.11 of Parse-Taxonomy.  This version was
+released August 22 2015.
 
 To install this module on your system, place the tarball archive file in a
 temporary directory and call the following:
 
-    gunzip Parse-Taxonomy-0.10.tar.gz
-    tar xf Parse-Taxonomy-0.10.tar
-    cd Parse-Taxonomy-0.10
+    gunzip Parse-Taxonomy-0.11.tar.gz
+    tar xf Parse-Taxonomy-0.11.tar
+    cd Parse-Taxonomy-0.11
     perl Makefile.PL
     make
     make test
