@@ -37,3 +37,7 @@ Revision history for Perl module Parse::File::Taxonomy
 
 0.11 Sat Aug 22 20:30:39 EDT 2015
     - Add tests and test sample file only.
+
+0.12 Mon Sep  7 11:15:53 EDT 2015
+    - Require Text::CSV_XS in order to take advantage of options not
+      found in Text::CSV (i.e., Text::CSV::PP).
