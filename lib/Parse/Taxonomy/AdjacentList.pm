@@ -2,10 +2,10 @@ package Parse::Taxonomy::AdjacentList;
 use strict;
 use parent qw( Parse::Taxonomy );
 use Carp;
-use Text::CSV;
+use Text::CSV_XS;
 use Scalar::Util qw( reftype );
 use Cwd;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
@@ -75,9 +75,9 @@ The name of the column in the header row under which, in each data record, there
 is a found a string which differentiates that record from all other records
 with the same parent ID.  Defaults to C<name>.
 
-=item * Text::CSV options
+=item * Text::CSV_XS options
 
-Any other options which could normally be passed to C<Text::CSV-E<gt>new()> will
+Any other options which could normally be passed to C<Text::CSV_XS-E<gt>new()> will
 be passed through to that module's constructor.  On the recommendation of the
 Text::CSV documentation, C<binary> is always set to a true value.
 
@@ -216,8 +216,8 @@ sub new {
             unless (-f $args->{file});
         $data->{file}             = delete $args->{file};
         $args->{binary} = 1;
-        my $csv = Text::CSV->new ( $args )
-            or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+        my $csv = Text::CSV_XS->new ( $args )
+            or croak "Cannot use CSV: ".Text::CSV_XS->error_diag ();
         open my $IN, "<", $data->{file}
             or croak "Unable to open '$data->{file}' for reading";
         my $header_ref = $csv->getline($IN);
@@ -782,10 +782,10 @@ Optional.  Path to location where a CSV-formatted text file holding the
 taxonomy-by-adjacent-list will be written.  Defaults to a file called
 F<taxonomy_out.csv> in the current working directory.
 
-=item * Text::CSV options
+=item * Text::CSV_XS options
 
 You can also pass through any key-value pairs normally accepted by
-F<Text::CSV>.
+F<Text::CSV_XS>.
 
 =back
 
@@ -870,14 +870,14 @@ sub write_pathified_to_csv {
     delete $args->{csvfile};
 
     # By this point, we should have processed all args other than those
-    # intended for Text::CSV and assigned their contents to variables as
+    # intended for Text::CSV_XS and assigned their contents to variables as
     # needed.
 
     my $csv_args = { binary => 1 };
     while (my ($k,$v) = each %{$args}) {
         $csv_args->{$k} = $v;
     }
-    my $csv = Text::CSV->new($csv_args);
+    my $csv = Text::CSV_XS->new($csv_args);
     open my $OUT, ">:encoding(utf8)", $csvfile
         or croak "Unable to open $csvfile for writing";
     $csv->eol(defined($csv_args->{eol}) ? $csv_args->{eol} : "\n");

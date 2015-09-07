@@ -28,7 +28,7 @@ WriteMakefile(
         },
     })),
     PREREQ_PM    => {
-                     'Text::CSV'    => 0,
+                     'Text::CSV_XS' => 0,
                      'Carp'         => 0,
                      'Scalar::Util' => 0,
     },

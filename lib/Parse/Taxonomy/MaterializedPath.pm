@@ -2,11 +2,11 @@ package Parse::Taxonomy::MaterializedPath;
 use strict;
 use parent qw( Parse::Taxonomy );
 use Carp;
-use Text::CSV;
+use Text::CSV_XS;
 use Scalar::Util qw( reftype );
 use List::Util qw( max );
 use Cwd;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
@@ -84,9 +84,9 @@ If the string used to distinguish components of the path in the path column in
 the incoming taxonomy file is not a pipe (C<|>), this option must be set.
 Optional; defaults to C<|>.
 
-=item *  Text::CSV options
+=item *  Text::CSV_XS options
 
-Any other options which could normally be passed to C<Text::CSV-E<gt>new()> will
+Any other options which could normally be passed to C<Text::CSV_XS-E<gt>new()> will
 be passed through to that module's constructor.  On the recommendation of the
 Text::CSV documentation, C<binary> is always set to a true value.
 
@@ -227,11 +227,11 @@ sub new {
         $data->{file} = delete $args->{file};
 
         # We've now handled all the Parse::Taxonomy::MaterializedPath-specific options.
-        # Any remaining options are assumed to be intended for Text::CSV::new().
+        # Any remaining options are assumed to be intended for Text::CSV_XS::new().
 
         $args->{binary} = 1;
-        my $csv = Text::CSV->new ( $args )
-            or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+        my $csv = Text::CSV_XS->new ( $args )
+            or croak "Cannot use CSV: ".Text::CSV_XS->error_diag ();
         open my $IN, "<", $data->{file}
             or croak "Unable to open '$data->{file}' for reading";
         my $header_ref = $csv->getline($IN);
@@ -321,16 +321,16 @@ ERROR_MSG_WRONG_COUNT
 
     # Confirm each node appears in taxonomy:
     my $path_args = { map { $_ => $args->{$_} } keys %{$args} };
-    $path_args->{sep_char} = $data->{path_col_sep};
-    my $path_csv = Text::CSV->new ( $path_args )
-        or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+    $path_args->{sep} = $data->{path_col_sep};
+    my $path_csv = Text::CSV_XS->new ( $path_args )
+        or croak "Cannot use CSV: ".Text::CSV_XS->error_diag ();
     my %missing_parents = ();
     for my $path (sort keys %paths_seen) {
         my $status  = $path_csv->parse($path);
         my @columns = $path_csv->fields();
         if (@columns > 2) {
             my $parent =
-                join($path_args->{sep_char} => @columns[0 .. ($#columns - 1)]);
+                join($path_args->{sep} => @columns[0 .. ($#columns - 1)]);
             unless (exists $paths_seen{$parent}) {
                 $missing_parents{$path} = $parent;
             }
@@ -955,10 +955,10 @@ Optional.  Path to location where a CSV-formatted text file holding the
 taxonomy-by-adjacent-list will be written.  Defaults to a file called
 F<taxonomy_out.csv> in the current working directory.
 
-=item * Text::CSV options
+=item * Text::CSV_XS options
 
 You can also pass through any key-value pairs normally accepted by
-F<Text::CSV>.
+F<Text::CSV_XS>.
 
 =back
 
@@ -1035,14 +1035,14 @@ sub write_adjacentified_to_csv {
     delete $args->{csvfile};
 
     # By this point, we should have processed all args other than those
-    # intended for Text::CSV and assigned their contents to variables as
+    # intended for Text::CSV_XS and assigned their contents to variables as
     # needed.
 
     my $csv_args = { binary => 1 };
     while (my ($k,$v) = each %{$args}) {
         $csv_args->{$k} = $v;
     }
-    my $csv = Text::CSV->new($csv_args);
+    my $csv = Text::CSV_XS->new($csv_args);
     open my $OUT, ">:encoding(utf8)", $csvfile
         or croak "Unable to open $csvfile for writing";
     $csv->eol(defined($csv_args->{eol}) ? $csv_args->{eol} : "\n");
