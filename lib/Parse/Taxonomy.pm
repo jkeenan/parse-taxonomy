@@ -67,7 +67,7 @@ B<"CSV">, strictly speaking, refers to B<comma-separated values>:
 
 For the purpose of this module, however, the column separators in a taxonomy
 file may be any user-specified character handled by the
-L<Text-CSV|http://search.cpan.org/dist/Text-CSV/> library on CPAN.  Formats
+L<Text-CSV_XS|http://search.cpan.org/dist/Text-CSV_XS/> library on CPAN.  Formats
 frequently observed are B<tab-separated values>:
 
     path	nationality	gender	age	income	id_no
