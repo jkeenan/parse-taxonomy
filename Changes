@@ -41,3 +41,7 @@ Revision history for Perl module Parse::File::Taxonomy
 0.12 Mon Sep  7 11:15:53 EDT 2015
     - Require Text::CSV_XS in order to take advantage of options not
       found in Text::CSV (i.e., Text::CSV::PP).
+
+0.13 Sat Sep 19 14:18:34 EDT 2015
+    - Require Text::CSV_XS 1.10 to guarantee presence of 'sep' key;
+      recommendation of H. Merijn Brand.
