@@ -206,11 +206,11 @@ representing this tree would look like this:
 A B<taxonomy-by-adjacent-list> is one in which each record has a column with a
 unique identifier (B<id>) and another column holding the unique identifier of
 the record representing the next higher node in the hierarchy (B<parent_id>).
-The record must also a column which holds a datum that is unique among all
-records having the same parent node.
+The record must also have a column which holds a datum that is unique among
+all records having the same parent node.
 
-Let's make this clearer by rewriting the taxonomy-by-materialized-path above for Example 3
-as a taxonomy-by-adjacent-list.
+Let's make this clearer by rewriting the taxonomy-by-materialized-path above
+for Example 3 as a taxonomy-by-adjacent-list.
 
     "id","parent_id","name","nationality","gender","age","income","id_no"
     1,,"Alpha","","","","",""
@@ -244,8 +244,8 @@ value identical to the child's C<parent_id>.
 
     Via name:  Kappa    Epsilon Alpha
 
-We go from C<id 3> to its C<parent_id 2>, then to C<2>'s C<parent_id 1>.
-Putting C<name>s to this, we go from C<Kappa> to C<Epsilon> to C<Alpha>.
+We go from C<id 3> to its C<parent_id>, <2>, then to C<2>'s C<parent_id>, <1>.
+Putting names to this, we go from C<Kappa> to C<Epsilon> to C<Alpha>.
 
 Now, reverse the order of those C<name>s, throw a pipe delimiter before each
 of them and join them into a single string, and you get:
@@ -257,7 +257,7 @@ taxonomy-by-materialized-path displayed previously.
 
 With correct data, a given hierarchy of data can therefore be represented
 either by a taxonomy-by-materialized-path or by a taxonomy-by-adjacent-list.
-This permit us to describe these two taxonomies as B<equivalent> to each
+This permits us to describe these two taxonomies as B<equivalent> to each
 other.
 
 =head2 Taxonomy Validation
