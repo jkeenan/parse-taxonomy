@@ -37,13 +37,13 @@ Try to create a Parse::Taxonomy::MaterializedPath object using the C<file> inter
 
     local $@;
     eval {
-        $obj = Parse::Taxonomy::MaterializedPath->new( {
+        $self = Parse::Taxonomy::MaterializedPath->new( {
             file => './proposed_taxonomy.csv',
         } );
     };
     print STDERR "$@\n";
 
-If C<$obj> is created successfully, the taxonomy meets the requirements
+If C<$self> is created successfully, the taxonomy meets the requirements
 described in F<Parse::Taxonomy>.  This particular file, however, will throw
 an exception.  Examination of the content of C<$@> will show that two records
 have the same materialized path, i.e., the same value in the C<path> column.
@@ -73,13 +73,13 @@ Try to create a Parse::Taxonomy::AdjacentList object using the C<file> interface
 
     local $@;
     eval {
-        $obj = Parse::Taxonomy::AdjacentList->new( {
+        $self = Parse::Taxonomy::AdjacentList->new( {
             file => './proposed_taxonomy_by_index.csv',
         } );
     };
     print STDERR "$@\n";
 
-If C<$obj> is created successfully, the taxonomy meets the requirements
+If C<$self> is created successfully, the taxonomy meets the requirements
 described in F<Parse::Taxonomy>.  This particular file, however, will throw
 an exception.  Examination of the content of C<$@> will show that two records
 with the same C<parent_id> have the same C<name>.
@@ -119,11 +119,11 @@ and then write your own functions to conduct local validations.
 
 In this case:
 
-    $obj = Parse::Taxonomy::MaterializedPath->new( {
+    $self = Parse::Taxonomy::MaterializedPath->new( {
         file    => 'local_requirement.csv',
     } );
-    $hashified       = $obj->hashify();
-    $child_counts    = $obj->child_counts();
+    $hashified       = $self->hashify();
+    $child_counts    = $self->child_counts();
 
 Use C<hashify()> to turn the taxonomy into a hash.  Use C<child_counts()> to
 get the number of children each node has.  Then iterate over the hash checking
@@ -174,8 +174,8 @@ Suppose you have a file with this data:
 
 Use the C<adjacentify()> and C<write_adjacentified_to_csv()> methods.
 
-    $adjacentified = $obj->adjacentify();
-    $file_taxonomy_by_index = $obj->write_adjacentified_to_csv($adjacentified);
+    $adjacentified = $self->adjacentify();
+    $file_taxonomy_by_index = $self->write_adjacentified_to_csv($adjacentified);
 
 The file whose path is stored in C<$file_taxonomy_by_index> will look like
 this:
@@ -229,11 +229,11 @@ apply the C<pathify()> method to it with the C<as_string> option set to a true
 value.
 
     $source = "/path/to/taxonomy.csv";
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
-    $rv = $obj->pathify( { as_string => 1 } );
+    $rv = $self->pathify( { as_string => 1 } );
 
 That returns a Perl reference to an array of array references:
 
@@ -319,13 +319,13 @@ Yielding:
 
 Create a Parse::Taxonomy::AdjacentList object using F<greeks.csv> as the source:
 
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         file    => '/path/to/taxonomy/greeks.csv',
     } );
 
 Call the C<pathify> method on the object.
 
-    $pathified = $obj->pathify;
+    $pathified = $self->pathify;
 
 If we were to dump C<$pathified>, we would see:
 

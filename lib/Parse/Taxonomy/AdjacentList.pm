@@ -20,7 +20,7 @@ Parse::Taxonomy::AdjacentList - Extract a taxonomy from a hierarchy inside a CSV
     use Parse::Taxonomy::AdjacentList;
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -45,7 +45,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/delta.csv";
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
@@ -85,7 +85,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -454,7 +454,7 @@ Identify the index position of a given field within the header row.
 
 =item * Arguments
 
-    $index = $obj->get_field_position('income');
+    $index = $self->get_field_position('income');
 
 Takes a single string holding the name of one of the fields (column names).
 
@@ -557,11 +557,11 @@ out among the C<id>, C<parent_id> and C<name> columns in a single C<path>
 column which, by default, would hold an array reference.
 
     $source = "./t/data/theta.csv";
-    $obj = Parse::Taxonomy::AdjacentList->new( {
+    $self = Parse::Taxonomy::AdjacentList->new( {
         file    => $source,
     } );
 
-    $taxonomy_with_path_as_array = $obj->pathify;
+    $taxonomy_with_path_as_array = $self->pathify;
 
 Yielding:
 
@@ -581,7 +581,7 @@ Yielding:
 If we wanted the path information represented as a string rather than an array
 reference, we would say:
 
-    $taxonomy_with_path_as_string = $obj->pathify( { as_string => 1 } );
+    $taxonomy_with_path_as_string = $self->pathify( { as_string => 1 } );
 
 Yielding:
 
@@ -602,7 +602,7 @@ If we are providing a true value to the C<as_string> key, we also get to
 choose what character to use as the separator in the C<path> column.
 
     $taxonomy_with_path_as_string_different_path_col_sep =
-        $obj->pathify( {
+        $self->pathify( {
             as_string       => 1,
             path_col_sep    => '~~',
          } );
@@ -762,7 +762,7 @@ Create a CSV-formatted file holding the data returned by C<pathify()>.
 
 =item * Arguments
 
-    $csv_file = $obj->write_pathified_to_csv( {
+    $csv_file = $self->write_pathified_to_csv( {
        pathified => $pathified,                   # output of pathify()
        csvfile => './t/data/taxonomy_out5.csv',
     } );

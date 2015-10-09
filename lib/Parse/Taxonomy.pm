@@ -353,6 +353,9 @@ by Larry Leszczynski
 L<Trees in SQL: Nested Sets and Materialized Path|https://communities.bmc.com/docs/DOC-9902>
 by Vadim Tropashko
 
+L<DBIx-Tree|http://search.cpan.org/dist/DBIx-Tree/>, now maintained by Ron
+Savage.
+
 =head1 COPYRIGHT
 
 Copyright (c) 2002-15 James E. Keenan.  United States.  All rights reserved.

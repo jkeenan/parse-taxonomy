@@ -23,14 +23,14 @@ Parse::Taxonomy::MaterializedPath - Validate a file for use as a path-based taxo
     # 'file' interface: reads a CSV file for you
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::MaterializedPath->new( {
+    $self = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
     } );
 
     # 'components' interface:  as if you've already read a
     # CSV file and now have Perl array references to header and data rows
 
-    $obj = Parse::Taxonomy::MaterializedPath->new( {
+    $self = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -56,7 +56,7 @@ Single hash reference.  There are two possible interfaces: C<file> and C<compone
 =item 1 C<file> interface
 
     $source = "./t/data/alpha.csv";
-    $obj = Parse::Taxonomy::MaterializedPath->new( {
+    $self = Parse::Taxonomy::MaterializedPath->new( {
         file    => $source,
         path_col_idx    => 0,
         path_col_sep    => '|',
@@ -94,7 +94,7 @@ Text::CSV documentation, C<binary> is always set to a true value.
 
 =item 2 C<components> interface
 
-    $obj = Parse::Taxonomy::MaterializedPath->new( {
+    $self = Parse::Taxonomy::MaterializedPath->new( {
         components  => {
             fields          => $fields,
             data_records    => $data_records,
@@ -634,7 +634,7 @@ Identify the index position of a given field within the header row.
 
 =item * Arguments
 
-    $index = $obj->get_field_position('income');
+    $index = $self->get_field_position('income');
 
 Takes a single string holding the name of one of the fields (column names).
 
@@ -846,9 +846,9 @@ Transform a taxonomy-by-materialized-path into a taxonomy-by-adjacent-list.
 
 =item * Arguments
 
-    $adjacentified = $obj->adjacentify();
+    $adjacentified = $self->adjacentify();
 
-    $adjacentified = $obj->adjacentify( { serial => 500 } );
+    $adjacentified = $self->adjacentify( { serial => 500 } );
 
 Optional single hash reference.
 
@@ -935,7 +935,7 @@ Create a CSV-formatted file holding the data returned by C<adjacentify()>.
 
 =item * Arguments
 
-    $csv_file = $obj->write_adjacentified_to_csv( {
+    $csv_file = $self->write_adjacentified_to_csv( {
        adjacentified => $adjacentified,                   # output of adjacentify()
        csvfile => './t/data/taxonomy_out3.csv',
     } );
