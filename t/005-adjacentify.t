@@ -8,7 +8,7 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
 use Parse::Taxonomy::AdjacentList;
-use Test::More qw(no_plan); # tests => 15;
+use Test::More tests => 42;
 use List::Util qw( min );
 use Cwd;
 use File::Temp qw/ tempdir /;
@@ -257,6 +257,84 @@ my ($obj, $source, $expect, $adjacentified);
       ["|beta|baker", 1, 0],
       ["|beta|baker|Agnes", 1, 1],
       ["|beta|baker|Agnew", 1, 1],
+    );
+    note("Create MaterializedPath taxonomy from components");
+    my $obj = Parse::Taxonomy::MaterializedPath->new( {
+        components  => {
+            fields          => \@input_columns,
+            data_records    => \@data_records,
+        }
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my $dr = $obj->data_records();
+    my %ver;
+    for my $row (@{$dr}) {
+        my $path_as_string = $row->[0];
+        $ver{$path_as_string} = [ @{$row}[1 .. $#{$row}] ];
+    }
+
+    my $adjacentified = $obj->adjacentify();
+    ok($adjacentified, "'adjacentify() returned true value");
+    my $csv_file = $obj->write_adjacentified_to_csv( {
+       adjacentified => $adjacentified,
+       csvfile => './t/data/taxonomy_out5.csv',
+    } );
+
+
+    note("Create AdjacentList object starting from file just now created");
+    my $objal = Parse::Taxonomy::AdjacentList->new( {
+        file            => $csv_file,
+        id_col          => 'id',
+        parent_id_col   => 'parent_id',
+    } );
+    ok(defined $objal, "AdjacentList constructor returned defined value");
+
+    my $pathified = $objal->pathify();
+    my %rev;
+    for my $el (@{$pathified}[1 .. $#{$pathified}]) {
+        my $path_as_string = join('|' => @{$el->[0]});
+        $rev{$path_as_string} = [ @{$el}[1 .. $#{$el}] ];
+    }
+
+    is_deeply(\%ver, \%rev, "Successful round trip");
+}
+
+{
+    note("Test same second- and third- and fourth- level leaf fields");
+    my @input_columns = ( qw| path letter_vendor_id is_actionable | );
+    my @data_records = (
+      ["|alpha", 1, 0],
+      ["|alpha|able", 1, 0],
+      ["|alpha|able|Agnes", 1, 0],
+      ["|alpha|able|Agnes|Calvin", 1, 1],
+      ["|alpha|able|Agnes|Camron", 1, 1],
+      ["|alpha|able|Agnew", 1, 0],
+      ["|alpha|able|Agnew|Calvin", 1, 1],
+      ["|alpha|able|Agnew|Camron", 1, 1],
+      ["|alpha|baker", 1, 0],
+      ["|alpha|baker|Agnes", 1, 0],
+      ["|alpha|baker|Agnes|Calvin", 1, 1],
+      ["|alpha|baker|Agnes|Camron", 1, 1],
+      ["|alpha|baker|Agnew", 1, 0],
+      ["|alpha|baker|Agnew|Calvin", 1, 1],
+      ["|alpha|baker|Agnew|Camron", 1, 1],
+      ["|beta", 1, 0],
+      ["|beta|able", 1, 0],
+      ["|beta|able|Agnes", 1, 0],
+      ["|beta|able|Agnes|Calvin", 1, 1],
+      ["|beta|able|Agnes|Camron", 1, 1],
+      ["|beta|able|Agnew", 1, 0],
+      ["|beta|able|Agnew|Calvin", 1, 1],
+      ["|beta|able|Agnew|Camron", 1, 1],
+      ["|beta|baker", 1, 0],
+      ["|beta|baker|Agnes", 1, 0],
+      ["|beta|baker|Agnes|Calvin", 1, 1],
+      ["|beta|baker|Agnes|Camron", 1, 1],
+      ["|beta|baker|Agnew", 1, 0],
+      ["|beta|baker|Agnew|Calvin", 1, 1],
+      ["|beta|baker|Agnew|Camron", 1, 1],
     );
     note("Create MaterializedPath taxonomy from components");
     my $obj = Parse::Taxonomy::MaterializedPath->new( {
