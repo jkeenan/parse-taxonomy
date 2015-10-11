@@ -885,12 +885,7 @@ sub adjacentify {
     my $drpc = $self->data_records_path_components();
 
     my $path_col_idx = $self->path_col_idx();
-    my %col2idx = map { $fields->[$_] => $_  } (0..$#{$fields});
     my %non_path_col2idx = map { $fields->[$_] => $_  }
-        grep { $_ != $path_col_idx }
-        (0..$#{$fields});
-    my %idx2col = map { $_ => $fields->[$_] } (0..$#{$fields});
-    my %non_path_idx2col = map { $_ => $fields->[$_] }
         grep { $_ != $path_col_idx }
         (0..$#{$fields});
 
@@ -899,29 +894,34 @@ sub adjacentify {
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
     my $serial = $args->{serial} || 0;
     my @adjacentified = ();
-    my %depth_name_id = ();
+    my %paths_to_id;
     for my $depth (1..$max_components) {
         for (my $r = 0; $r <= $#components_by_row; $r++) {
             if (scalar(@{$components_by_row[$r]}) == $depth) {
                 my %rowdata = map { $_ => $drpc->[$r]->[$non_path_col2idx{$_}] }
                     keys %non_path_col2idx;
-                my $name = $drpc->[$r]->[$path_col_idx]->[$depth];
-                my $parent_of_name = $drpc->[$r]->[$path_col_idx]->[$depth-1];
-                my $parent_id = defined($depth_name_id{$depth-1}{$parent_of_name})
-                    ? $depth_name_id{$depth-1}{$parent_of_name}
-                    : '';
+                my @path_components = @{$drpc->[$r]->[$path_col_idx]};
+                my $name = $path_components[-1];
+                my $parent_of_name = join('|' =>
+                    @path_components[1 .. ($#path_components -1)]);
+
+                my $candidate_for_path = (length($parent_of_name))
+                    ? join('|' => $parent_of_name, $name)
+                    : $name;
+
                 my %rowhash = (
                     id => ++$serial,
-                    parent_id => $parent_id,
+                    parent_id => $paths_to_id{$parent_of_name}{id},
                     name => $name,
                     %rowdata,
                 );
-                $depth_name_id{$depth}{$name} = $rowhash{id};
+                $paths_to_id{$candidate_for_path}{id} = $rowhash{id};
+                $paths_to_id{$candidate_for_path}{parent_path} = $parent_of_name
+                    if (length($parent_of_name));
                 push @adjacentified, \%rowhash;
             }
         }
     }
-
     return \@adjacentified;
 }
 
