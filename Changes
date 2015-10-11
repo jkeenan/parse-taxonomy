@@ -45,3 +45,8 @@ Revision history for Perl module Parse::File::Taxonomy
 0.13 Sat Sep 19 14:18:34 EDT 2015
     - Require Text::CSV_XS 1.10 to guarantee presence of 'sep' key;
       recommendation of H. Merijn Brand.
+
+0.14 Sun Oct 11 17:27:59 EDT 2015
+    - Respond to https://rt.cpan.org/Ticket/Display.html?id=107705.
+      Correct bad 'parent_id' assignments in
+      Parse::Taxonomy::MaterializedPath::adjacentify().
