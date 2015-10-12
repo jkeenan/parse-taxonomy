@@ -421,4 +421,70 @@ If this function returns true -- which it does -- then the taxonomy implicit
 in the F<greeks> table in the database is equivalent to that in the original
 incoming taxonomy file.
 
+=head2 Create taxonomically correct dummy data
+
+=head3 Problem
+
+You have a database table with views built on top of it.  The data in the
+table is hierarchical in nature and is structured as a
+taxonomy-by-adjacent-list.  You want to explore alternative definitions of the
+views but while conducting your research you do not want to touch production
+data.  Hence, you want to create a dummy table and load suitable dummy data
+into it.  You know how to load a table from a CSV file and want to correctly
+populate that CSV file with hierarchical data.
+
+=head3 Solution
+
+Let's assume that you want to populate the table with three columns of data:
+
+    path    letter_vendor_id    is_actionable
+
+In PostgreSQL, the table might be defined like this:
+
+                          Table "public.letters"
+          Column      |         Type          |       Modifiers        
+    ------------------+-----------------------+------------------------
+     id               | integer               | not null
+     parent_id        | integer               | 
+     name             | character varying(16) | not null
+     letter_vendor_id | integer               | not null
+     is_actionable    | boolean               | not null default false
+    Indexes:
+        "letters_pkey" PRIMARY KEY, btree (id)
+    Foreign-key constraints:
+        "letters_letter_vendor_id_fkey"
+            FOREIGN KEY (letter_vendor_id) REFERENCES letter_vendors(id)
+        "letters_parent_id_fkey"
+            FOREIGN KEY (parent_id) REFERENCES letters(id)
+    Referenced by:
+        TABLE "letters" CONSTRAINT "letters_parent_id_fkey"
+            FOREIGN KEY (parent_id) REFERENCES letters(id)
+
+The C<path> column holds a materialized path starting with the name of a root
+node, proceeding through the names of branch nodes and ending with the name of
+a leaf node.  All the names are concatenated with a delimiter string.  Example:
+
+    omega - joyride - Africa
+
+From this we infer that there is a root node named C<omega>, a branch node
+named C<joyride> and a leaf node named C<Africa>.
+
+To make the data somewhat more realistic, we'll say that C<letter_vendor_id>
+points to the C<id> column of a C<letter_vendors> table.
+
+    hierarchy=# SELECT * FROM letter_vendors;
+     id |  name  | namespace_code 
+    ----+--------+----------------
+      1 | Athens | at
+      2 | Sparta | sp
+      3 | Thebes | th
+    (3 rows)
+
+For another dollop of realism, we'll say that only 3-level nodes -- rows whose
+C<path> column have 3 elements will be assigned a C<TRUE> value for
+C<is_actionable>.  Nodes with only 1 or 2 elements will have C<FALSE> assigned
+to C<is_actionable>.
+
+
+
 =cut
