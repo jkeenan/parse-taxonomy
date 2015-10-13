@@ -14,7 +14,7 @@ use Parse::Taxonomy::MaterializedPath;
 # taxonomy. I should be able to accomplish that by creating the Perl data
 # structures needed to use Parse::Taxonomy::MaterializedPath's 'components'
 # interface, then calling adjacentify() and write_adjacentified_to_file() on
-# the object. 
+# the object.
 
 my @input_columns = ( qw| path letter_vendor_id is_actionable | );
 my (@toplevels, @seconds, @thirds);

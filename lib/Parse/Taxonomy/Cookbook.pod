@@ -442,10 +442,10 @@ Let's assume that you want to populate the table with three columns of data:
 In PostgreSQL, the table might be defined like this:
 
                           Table "public.letters"
-          Column      |         Type          |       Modifiers        
+          Column      |         Type          |       Modifiers
     ------------------+-----------------------+------------------------
      id               | integer               | not null
-     parent_id        | integer               | 
+     parent_id        | integer               |
      name             | character varying(16) | not null
      letter_vendor_id | integer               | not null
      is_actionable    | boolean               | not null default false
@@ -473,7 +473,7 @@ To make the data somewhat more realistic, we'll say that C<letter_vendor_id>
 points to the C<id> column of a C<letter_vendors> table.
 
     hierarchy=# SELECT * FROM letter_vendors;
-     id |  name  | namespace_code 
+     id |  name  | namespace_code
     ----+--------+----------------
       1 | Athens | at
       2 | Sparta | sp

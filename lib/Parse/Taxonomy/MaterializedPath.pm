@@ -870,6 +870,11 @@ non-materialized-path fields in the records in the original taxonomy-by-material
 
 See documentation for C<write_adjacentified_to_csv()> for example.
 
+Note that the order in which C<adjacentify()> will assign C<id> and
+C<parent_id> values to records in the taxonomy-by-adjacent-list will almost
+certainly B<not> match the order in which elements appear in a CSV file or in
+the data structure returned by a method such as C<data_records()>.
+
 =back
 
 =cut
