@@ -428,16 +428,16 @@ incoming taxonomy file.
 You have a database table with views built on top of it.  The data in the
 table is hierarchical in nature and is structured as a
 taxonomy-by-adjacent-list.  You want to explore alternative definitions of the
-views but while conducting your research you do not want to touch production
-data.  Hence, you want to create a dummy table and load suitable dummy data
-into it.  You know how to load a table from a CSV file and want to correctly
-populate that CSV file with hierarchical data.
+views. While conducting your research, however, you do not want to touch
+production data.  Hence, you want to create a dummy table and load suitable
+dummy data into it.  You know how to load a table from a CSV file and want to
+correctly populate that CSV file with hierarchical data.
 
 =head3 Solution
 
 Let's assume that you want to populate the table with three columns of data:
 
-    path    letter_vendor_id    is_actionable
+    @input_columns = ( qw| path  letter_vendor_id  is_actionable |);
 
 In PostgreSQL, the table might be defined like this:
 
@@ -480,11 +480,135 @@ points to the C<id> column of a C<letter_vendors> table.
       3 | Thebes | th
     (3 rows)
 
+As we create nodes, we'll sprinkle various C<letter_vendor_ids> among them.
+
 For another dollop of realism, we'll say that only 3-level nodes -- rows whose
 C<path> column have 3 elements will be assigned a C<TRUE> value for
 C<is_actionable>.  Nodes with only 1 or 2 elements will have C<FALSE> assigned
 to C<is_actionable>.
 
+Let's say that there will be 24 top-level nodes:  one for each letter in the
+Classical Greek alphabet.
 
+    @toplevels = ( qw|
+        alpha beta gamma delta epsilon zeta eta theta
+        iota kappa lamda mu nu xi omicron pi
+        rho sigma tau upsilon phi chi psi omega
+    | );
+
+Under each of the top-level nodes will be 10 second-level nodes.  To
+illustrate an unusual but important edge case, we'll name these second-level
+nodes exactly the same under each of the 24 top-level nodes.
+
+    @seconds = ( qw|
+        able baker charlie dogtag entry
+        fargo golfer hiphop icicle joyride
+    | );
+
+Under each of the second-level nodes will be 100 third-level nodes.
+Continuing along the same path as above, we'll named these third-level nodes
+exactly the same under each of the 240 (24 x 10) second-level nodes.
+
+    @thirds = (
+        "AOL", "Aachen", "Aaliyah", "Aaron", "Abbas",
+        # ...
+        "Agatha", "Aggie", "Aglaia", "Agnes", "Agnew",
+    );
+
+(A list extracted from F</usr/share/dict/words>; you can find the complete
+list in F<examples/create_letters_taxonomy.pl> in this distribution.)
+
+As promised, we'll distribute C<letter_vendor_ids> among the nodes as we
+create an array of data records with which we'll populate our database table.
+
+    my %toplevels_to_lvis = (
+        ( map { $_ => 1 } @toplevels[0..7]),
+        ( map { $_ => 2 } @toplevels[8..15]),
+        ( map { $_ => 3 } @toplevels[16..23]),
+    );
+
+    my @data_records;
+    for my $r (@toplevels) {
+        push @data_records, [ join('|' => ('', $r)), $toplevels_to_lvis{$r}, 0 ];
+        for my $s (@seconds) {
+            push @data_records, [ join('|' => ('', $r, $s)), $toplevels_to_lvis{$r}, 0 ];
+            for my $t (@thirds) {
+                push @data_records, [ join('|' => ('', $r, $s, $t)), $toplevels_to_lvis{$r}, 1 ];
+            }
+        }
+    }
+
+We expect to have 24,264 elements in the list of data records:  24 for
+top-level nodes, 240 for second-level nodes and 24,000 for third-level nodes.
+
+Between C<@input_columns> and C<@data_records> we have all the data we need to
+create a Parse::Taxonomy::MaterializedPath using the C<components> interface
+to that class's constructor.
+
+    my $self = Parse::Taxonomy::MaterializedPath->new( {
+        components  => {
+            fields          => [ @input_columns ],
+            data_records    => [ @data_records  ],
+        },
+        path_col_sep => '|',
+    } );
+
+If C<$self> is C<defined>, then we have a data structure in memory which is
+validated as a taxonomy -- in this case, a taxonomy-by-materialized-path.
+We're now in a position to call the C<adjacentify()> method to transform that
+taxonomy-by-materialized-path into a taxonomy-by-adjacent-list.
+
+    my $adjacentified = $self->adjacentify();
+
+And the next step is to write that data structure out to a new CSV file
+suitable for loading into the C<letters> table in our database.
+
+    my $csv_file = $self->write_adjacentified_to_csv( {
+        adjacentified => $adjacentified,
+        csvfile => './letters.csv',
+    } );
+
+Here is a peek at the contents of F<./letters.csv>:
+
+    id,parent_id,name,letter_vendor_id,is_actionable
+    1,,alpha,1,0
+    2,,beta,1,0
+    3,,gamma,1,0
+    4,,delta,1,0
+    5,,epsilon,1,0
+    6,,zeta,1,0
+    7,,eta,1,0
+    8,,theta,1,0
+    ...
+    23,,psi,3,0
+    24,,omega,3,0
+    25,1,able,1,0
+    26,1,baker,1,0
+    27,1,charlie,1,0
+    28,1,dogtag,1,0
+    29,1,entry,1,0
+    30,1,fargo,1,0
+    ...
+    263,24,icicle,3,0
+    264,24,joyride,3,0
+    265,25,AOL,1,1
+    266,25,Aachen,1,1
+    267,25,Aaliyah,1,1
+    268,25,Aaron,1,1
+    269,25,Abbas,1,1
+    270,25,Abbasid,1,1
+    ...
+    24257,264,Agamemnon,3,1
+    24258,264,Agassi,3,1
+    24259,264,Agassiz,3,1
+    24260,264,Agatha,3,1
+    24261,264,Aggie,3,1
+    24262,264,Aglaia,3,1
+    24263,264,Agnes,3,1
+    24264,264,Agnew,3,1
+
+And finally, here's how we would populate our database table (in PostgreSQL):
+
+    \copy letters (id,parent_id,name,letter_vendor_id,is_actionable) FROM './letters.csv' CSV HEADER
 
 =cut
