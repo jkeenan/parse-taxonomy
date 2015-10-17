@@ -648,7 +648,7 @@ field.
 
 =cut
 
-=head2 C<child_counts()>
+=head2 C<descendant_counts()>
 
 =over 4
 
@@ -659,7 +659,7 @@ taxonomy has.
 
 =item * Arguments
 
-    $child_counts = $self->child_counts();
+    $descendant_counts = $self->descendant_counts();
 
 None.
 
@@ -672,19 +672,19 @@ column in the incoming taxonomy file.
 
 =cut
 
-sub child_counts {
+sub descendant_counts {
     my $self = shift;
-    my %child_counts = map { $_->[$self->{path_col_idx}] => 0 } @{$self->{data_records}};
-    for my $node (keys %child_counts) {
-        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %child_counts) {
-            $child_counts{$node}++
+    my %descendant_counts = map { $_->[$self->{path_col_idx}] => 0 } @{$self->{data_records}};
+    for my $node (keys %descendant_counts) {
+        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %descendant_counts) {
+            $descendant_counts{$node}++
                 if $other_node =~ m/^\Q$node$self->{path_col_sep}\E/;
         }
     }
-    return \%child_counts;
+    return \%descendant_counts;
 }
 
-=head2 C<get_child_count()>
+=head2 C<get_descendant_count()>
 
 =over 4
 
@@ -695,7 +695,7 @@ taxonomy.
 
 =item * Arguments
 
-    $child_count = $self->get_child_count('|Path|To|Node');
+    $descendant_count = $self->get_descendant_count('|Path|To|Node');
 
 String containing node's path as spelled in the taxonomy.
 
@@ -712,12 +712,32 @@ Will throw an exception if the node does not exist or is misspelled.
 
 =cut
 
-sub get_child_count {
+sub get_descendant_count {
     my ($self, $node) = @_;
-    my $child_counts = $self->child_counts();
-    croak "Node '$node' not found" unless exists $child_counts->{$node};
-    return $child_counts->{$node};
+    my $descendant_counts = $self->descendant_counts();
+    croak "Node '$node' not found" unless exists $descendant_counts->{$node};
+    return $descendant_counts->{$node};
 }
+
+=head2 C<child_counts()>
+
+B<DEPRECATED:>  This is an older, less precise name for
+C<descendant_counts()>.  It will be removed in the first CPAN release
+following January 1, 2016.
+
+=cut
+
+*child_counts = \&descendant_counts;
+
+=head2 C<get_child_count()>
+
+B<DEPRECATED:>  This is an older, less precise name for
+C<get_descendant_count()>.  It will be removed in the first CPAN release
+following January 1, 2016.
+
+=cut
+
+*get_child_count = \&get_descendant_count;
 
 =head2 C<hashify()>
 

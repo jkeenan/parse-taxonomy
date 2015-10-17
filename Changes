@@ -56,3 +56,8 @@ Revision history for Perl module Parse::File::Taxonomy
       examples/create_letters_taxonomy.pl, which is basis
       for an additional cookbook recipe.  Also, clarification of
       documentation per feedback from Ron Savage.
+
+0.16 TO COME
+    - DEPRECATION NOTICE:  child_counts() and get_child_count() are
+      deprecated in favor of descendant_counts() and get_descendant_count().
+      They will be removed in first CPAN release in 2016.

@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 62;
+use Test::More tests => 72;
 
 my ($obj, $source, $expect);
 
@@ -138,9 +138,33 @@ my ($obj, $source, $expect);
       "|Gamma|Iota"          => 1,
       "|Gamma|Iota|Nu"       => 0,
     };
+    my $descendant_counts = $obj->descendant_counts();
+    is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
+
     my $child_counts = $obj->child_counts();
     is_deeply($child_counts, $expect, "Got expected child count for each node");
 
+
+    {
+        my ($n, $node_descendant_count);
+
+        local $@;
+        $n = 'foo';
+        eval { $node_descendant_count = $obj->get_descendant_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_descendant_count' is not a node");
+        local $@;
+
+        $n = '|Gamma';
+        $expect = 2;
+        $node_descendant_count = $obj->get_descendant_count($n);
+        is($node_descendant_count, $expect, "Node with $expect descendants found");
+
+        $n = '|Gamma|Iota|Nu';
+        $expect = 0;
+        $node_descendant_count = $obj->get_descendant_count($n);
+        is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
+    }
 
     {
         my ($n, $node_child_count);
@@ -347,9 +371,33 @@ my ($obj, $source, $expect);
       "|Gamma|Iota"          => 1,
       "|Gamma|Iota|Nu"       => 0,
     };
+    my $descendant_counts = $obj->descendant_counts();
+    is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
+
     my $child_counts = $obj->child_counts();
     is_deeply($child_counts, $expect, "Got expected child count for each node");
 
+
+    {
+        my ($n, $node_descendant_count);
+
+        local $@;
+        $n = 'foo';
+        eval { $node_descendant_count = $obj->get_descendant_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_descendant_count' is not a node");
+        local $@;
+
+        $n = '|Gamma';
+        $expect = 2;
+        $node_descendant_count = $obj->get_descendant_count($n);
+        is($node_descendant_count, $expect, "Node with $expect descendants found");
+
+        $n = '|Gamma|Iota|Nu';
+        $expect = 0;
+        $node_descendant_count = $obj->get_descendant_count($n);
+        is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
+    }
 
     {
         my ($n, $node_child_count);
