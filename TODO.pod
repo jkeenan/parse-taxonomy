@@ -1,0 +1,36 @@
+=head1 TODO for Parse-Taxonomy
+
+=head2 Replace C<child_counts()> with C<descendant_counts()>.
+
+In Internet discussions of hierarchical data, one often sees a distinction
+between the B<children> of a node and the B<descendants> of a node.  The
+former term usually means "first-generation only", whereas the latter usually
+means "all subsequent generations."
+
+C<Parse::Taxonomy::MaterializedPath::child_counts()> and C<get_child_count()>
+are documented as returning the count of all descendants of a node, I<i.e.,> a
+multi-generational count for either all nodes (C<child_counts()>) or for one
+particular node (C<get_child_count()>).  Hence, these methods would be better
+named C<descendant_counts()> and C<get_descendant_count()>, respectively.
+
+Implement this, at first making the existing method names alias to the new
+method names, then deprecated the older names in favor of the newer ones.
+
+=head2 Nested Sets
+
+=head3 Methods in existing packages
+
+A method in Parse::Taxonomy::MaterializedPath that would generate a Perl data
+structure holding a taxonomy-by-nested-set equivalent to that in the object.
+
+A method in Parse::Taxonomy::AdjacentList that would generate a Perl data
+structure holding a taxonomy-by-nested-set equivalent to that in the object.
+
+=head3 New package
+
+Explore creation of a Parse::Taxonomy::NestedSet package which would
+take as input a taxonomy-by-nested-set (via a CSV file or via a C<components>
+interface), created a NestedSet object against which methods such as
+C<descendant_counts()>, C<pathify()> and C<adjacentify()> would be callable.
+
+=cut

@@ -1,5 +1,6 @@
 .gitignore
 Changes
+examples/create_letters_taxonomy.pl
 lib/Parse/Taxonomy.pm
 lib/Parse/Taxonomy/AdjacentList.pm
 lib/Parse/Taxonomy/Auxiliary.pm
@@ -50,3 +51,4 @@ t/data/theta.csv
 t/data/wrong_row_count.csv
 t/data/zeta.csv
 Todo
+TODO.pod
