@@ -57,7 +57,8 @@ Revision history for Perl module Parse::File::Taxonomy
       for an additional cookbook recipe.  Also, clarification of
       documentation per feedback from Ron Savage.
 
-0.16 TO COME
+0.16 Sun Oct 18 08:04:48 EDT 2015
     - DEPRECATION NOTICE:  child_counts() and get_child_count() are
       deprecated in favor of descendant_counts() and get_descendant_count().
       They will be removed in first CPAN release in 2016.
+    - Add examples/walk_tree.pl, contributed by Ron Savage.

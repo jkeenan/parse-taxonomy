@@ -1,8 +1,0 @@
-TODO list for Perl module Parse::Taxonomy
-
-What would it mean for a Parse::Taxonomy subclass to accept a
-filehandle as an argument, rather than a file?  Would that be difficult to
-implement?
-
-Cookbook:  Include recipe for predicting the result of a data migration
-between relational database tables.

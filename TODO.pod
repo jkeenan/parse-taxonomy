@@ -1,6 +1,19 @@
 =head1 TODO for Parse-Taxonomy
 
-=head2 Replace C<child_counts()> with C<descendant_counts()>.
+TODO list for Perl module Parse::Taxonomy
+
+=head2 Filehandle as argument
+
+What would it mean for a Parse::Taxonomy subclass to accept a
+filehandle as an argument, rather than a file?  Would that be difficult to
+implement?
+
+=head2 Data migration example
+
+Cookbook:  Include recipe for predicting the result of a data migration
+between relational database tables.
+
+=head2 Remove C<child_counts()> and C<get_child_count()>
 
 In Internet discussions of hierarchical data, one often sees a distinction
 between the B<children> of a node and the B<descendants> of a node.  The
@@ -13,8 +26,9 @@ multi-generational count for either all nodes (C<child_counts()>) or for one
 particular node (C<get_child_count()>).  Hence, these methods would be better
 named C<descendant_counts()> and C<get_descendant_count()>, respectively.
 
-Implement this, at first making the existing method names alias to the new
-method names, then deprecated the older names in favor of the newer ones.
+C<child_counts()> and C<get_child_count()> are deprecated as of v0.16.  Remove
+them and their associated unit tests in the first CPAN release after
+January 1, 2016. 
 
 =head2 Nested Sets
 
