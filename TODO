@@ -28,7 +28,7 @@ named C<descendant_counts()> and C<get_descendant_count()>, respectively.
 
 C<child_counts()> and C<get_child_count()> are deprecated as of v0.16.  Remove
 them and their associated unit tests in the first CPAN release after
-January 1, 2016. 
+January 1, 2016.
 
 =head2 Nested Sets
 
@@ -46,5 +46,12 @@ Explore creation of a Parse::Taxonomy::NestedSet package which would
 take as input a taxonomy-by-nested-set (via a CSV file or via a C<components>
 interface), created a NestedSet object against which methods such as
 C<descendant_counts()>, C<pathify()> and C<adjacentify()> would be callable.
+
+=head2 Speed Up C<descendant_counts()> and C<get_descendant_count()>
+
+Up through v0.16, these methods in Parse::Taxonomy::MaterializedPath are
+extremely slow.  See if they can be sped up.  IN PROGRESS.  Next step:
+explore generation of path depth table from inside C<descendant_counts()> to end
+of C<new()>.
 
 =cut

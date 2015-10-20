@@ -245,6 +245,12 @@ sub new {
     while (my ($k,$v) = each %{$args}) {
         $data->{$k} = $v;
     }
+    my %row_depths = ();
+    for my $el (@{$data->{data_records}}) {
+        my $rowkey = $el->[$data->{path_col_idx}];
+        $row_depths{$rowkey} = split(/\Q$data->{path_col_sep}\E/, $rowkey);
+    }
+    $data->{row_depths} = \%row_depths;
     return bless $data, $class;
 }
 
@@ -674,11 +680,15 @@ column in the incoming taxonomy file.
 
 sub descendant_counts {
     my $self = shift;
-    my %descendant_counts = map { $_->[$self->{path_col_idx}] => 0 } @{$self->{data_records}};
-    for my $node (keys %descendant_counts) {
-        for my $other_node ( grep { ! m/^\Q$node\E$/ } keys %descendant_counts) {
-            $descendant_counts{$node}++
-                if $other_node =~ m/^\Q$node$self->{path_col_sep}\E/;
+    my %descendant_counts = ();
+    my $hashified = $self->hashify();
+    for my $p (keys %{$hashified}) {
+        $descendant_counts{$p} = 0;
+        for my $q (
+            grep { $self->{row_depths}->{$_} > $self->{row_depths}->{$p} }
+            keys %{$hashified}
+        ) {
+            $descendant_counts{$p}++ if $q =~ m/^\Q$p$self->{path_col_sep}\E/;
         }
     }
     return \%descendant_counts;
