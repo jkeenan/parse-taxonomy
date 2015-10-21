@@ -62,3 +62,8 @@ Revision history for Perl module Parse::File::Taxonomy
       deprecated in favor of descendant_counts() and get_descendant_count().
       They will be removed in first CPAN release in 2016.
     - Add examples/walk_tree.pl, contributed by Ron Savage.
+
+0.17 Wed Oct 21 18:23:18 EDT 2015
+    - Improve performance of
+      Parse::Taxonomy::MaterializedPath::descendant_counts().
+    - Change name of TODO.pod back to TODO so it does not get installed.
