@@ -1128,12 +1128,150 @@ sub write_adjacentified_to_csv {
     return $csvfile;
 }
 
-sub nest {
+sub nestify {
     my $self = shift;
     $self->{nest_counter} = 0;
 
+    # We'll need a true arborescence.
+    # https://en.wikipedia.org/wiki/Arborescence_%28graph_theory%29
+    # We'll need to accommodate the case where, in a given taxonomy, we have
+    # more than one "top-level" nodes with have no parent.  We need something
+    # to serve as the "parent" of nodes which, in a business sense, have no
+    # identified parent.  Think of this as the universe, Gaia, the One, etc.
 
-    return 1;
+    my %nest = ();
+    while (my ($k, $v) = each(%{$self->{row_analysis}})) {
+        $nest{$k} = $v;
+    }
+    $nest{""} = { row_depth => 1 };
+    # Sanity check:  croak should never be reached:
+    my $row_depth_1_count = grep { $nest{$_}->{row_depth} == 1 } keys (%nest);
+    croak "Mystery: more than 1 row with row_depth equal to 1"
+        if $row_depth_1_count > 1;
+    $self->{nest} = \%nest;
+
+    $self->_handle_node('');
+
+    my %nest_out = ();
+    for my $path (keys %{$self->{row_analysis}}) {
+        unless ($self->{nest}->{$path} eq '') {
+            while (my ($k,$v) = each %{$self->{row_analysis}->{$path}}) {
+                $nest_out{$path}{$k} = $v;
+            }
+            while (my ($k,$v) = each %{$self->{nest}->{$path}}) {
+                $nest_out{$path}{$k} = $v
+                    unless exists $nest_out{$path}{$k};
+            }
+        }
+    }
+
+    return \%nest_out;
+}
+
+sub _handle_node {
+    my ($self, $node) = @_;
+
+    # The ultimate exit condition:
+    # All children of the root node have lft and right and have therefore been
+    # marked as handled.
+    # Presumes that we have a list of the root node's children.
+    if (
+        ($node eq '') and
+        (exists $self->{nest}->{$node}->{children}) and
+        (! grep { $self->{nest}->{$node}->{children}->{$_}->{handled} == 0 }
+           keys %{$self->{nest}->{$node}->{children}})
+    ) {
+        return 1;
+    }
+
+    if ($node eq '') {
+        if (! exists $self->{nest}->{$node}->{children}) {
+            # The root node will not get an lft or a rgh
+            $self->{nest}->{$node}->{lft} = undef;
+            $self->{nest}->{$node}->{rgh} = undef;
+            # build a list of the root node's children,
+            # marking each one as not yet handled;;
+            # set 
+            # sort the list
+            my %children = ();
+            for my $root_child (grep { $self->{nest}->{$_}->{row_depth} == 2 } keys %{$self->{nest}}) {
+                $children{$root_child} = { handled => 0 };
+            }
+            $self->{nest}->{$node}->{children} = \%children;
+            my @root_children_names = sort keys %children;
+            $self->_handle_node($root_children_names[0]);
+        }
+        else {
+            # We're back at the root node, but this time we have
+            # a list of its children.  We now want to process the next
+            # unhandled node among the root's children.
+        }
+    }
+    else {
+        # We are not at the root node.
+        # But we don't know whether we've been here before.
+        #
+        # If we have been here before,
+        # we will know the node's parent, the node will have an lft and,
+        # if it has children, will have a list of its children.
+        #
+        # If we have not been here before,
+        # we will need to note the node's parent,
+        # assign an lft and make a list of any children.
+
+        if (! exists $self->{nest}->{$node}->{lft}) { 
+            $self->{nest}->{$node}->{lft} = ++$self->{nest_counter};
+        }
+        my @path_components = split(/\Q$self->{path_col_sep}\E/, $node);
+        if (! exists $self->{nest}->{$node}->{parent}) {
+            $self->{nest}->{$node}->{parent} =
+                join($self->{path_col_sep}, @path_components[0..($#path_components - 1 )]);
+        }
+        if (! exists $self->{row_analysis}->{$node}->{children}) {
+            my %children = ();
+            for my $other (
+                grep { my $substr = substr($_, 0, length($node)); $substr eq $node }
+                grep { $self->{nest}->{$_}->{row_depth} ==
+                   $self->{nest}->{$node}->{row_depth} + 1 }
+                grep { $_ ne $node }
+                keys %{$self->{nest}}
+            ) {
+                    $children{$other} = { handled => 0 };
+            }
+            # If %children is still empty, then we can assign 'rgh' and be done
+            # with this node; go back to its parent; in the parent's children
+            # list, mark this node as handled => 1; proceed to ???
+            if (! keys %children) {
+                $self->{nest}->{$node}->{rgh} = ++$self->{nest_counter};
+                my $parent = $self->{nest}->{$node}->{parent};
+                $self->{nest}->{$parent}->{children}->{$node}->{handled}++;
+                $self->_handle_node($self->{nest}->{$node}->{parent});
+                # to come
+            }
+            else {
+                $self->{nest}->{$node}->{children} = \%children;
+                my @children_names = sort keys %children;
+                $self->_handle_node($children_names[0]);
+            }
+        }
+        else {
+            my @unhandled_children_names = sort
+                grep { !  $self->{nest}->{$node}->{children}->{$_}->{handled} }
+                keys %{$self->{nest}->{$node}->{children}};
+            # If there are no unhandled children, then we can assign an rgt to
+            # this node and go back to its parent
+            if (! @unhandled_children_names) {
+                $self->{nest}->{$node}->{rgh} = ++$self->{nest_counter};
+                my $parent = $self->{nest}->{$node}->{parent};
+                $self->{nest}->{$parent}->{children}->{$node}->{handled}++;
+                $self->_handle_node($self->{nest}->{$node}->{parent});
+            }
+            else {
+                $self->_handle_node($unhandled_children_names[0]);
+            }
+        }
+    }
+    return;
 }
 
 1;

@@ -1,5 +1,5 @@
 # perl
-# t/006-nest.t
+# t/006-nestify.t
 use strict;
 use warnings;
 use Carp;
@@ -72,6 +72,42 @@ my ($obj, $source, $expect, $hashified);
     $hashified = $obj->hashify();
     is_deeply($hashified, $expect, "Got expected hashified taxonomy (no args)");
 
+    my $nest;
+    ok($nest = $obj->nestify(), "nestify() returned true value");
+
+    my $expect = {
+      "|Alpha"               => {
+                                  children => {
+                                    "|Alpha|Epsilon" => { handled => 1 },
+                                    "|Alpha|Zeta"    => { handled => 1 },
+                                  },
+                                  lft => 1,
+                                  parent => "",
+                                  rgh => 12,
+                                  row_depth => 2,
+                                },
+      "|Alpha|Epsilon"       => {
+                                  children => { "|Alpha|Epsilon|Kappa" => { handled => 1 } },
+                                  lft => 2,
+                                  parent => "|Alpha",
+                                  rgh => 5,
+                                  row_depth => 3,
+                                },
+      "|Alpha|Epsilon|Kappa" => { lft => 3, parent => "|Alpha|Epsilon", rgh => 4, row_depth => 4 },
+      "|Alpha|Zeta"          => {
+                                  children => {
+                                    "|Alpha|Zeta|Lambda" => { handled => 1 },
+                                    "|Alpha|Zeta|Mu"     => { handled => 1 },
+                                  },
+                                  lft => 6,
+                                  parent => "|Alpha",
+                                  rgh => 11,
+                                  row_depth => 3,
+                                },
+      "|Alpha|Zeta|Lambda"   => { lft => 7, parent => "|Alpha|Zeta", rgh => 8, row_depth => 4 },
+      "|Alpha|Zeta|Mu"       => { lft => 9, parent => "|Alpha|Zeta", rgh => 10, row_depth => 4 },
+    };
+    is_deeply($nest, $expect, "Got expected nested set");
 }
 
 

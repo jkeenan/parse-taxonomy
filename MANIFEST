@@ -20,7 +20,7 @@ t/002-new-components.t
 t/003-getters.t
 t/004-hashify-taxonomy.t
 t/005-adjacentify.t
-t/006-nest.t
+t/006-nestify.t
 t/500-test-prep.t
 t/501-new.t
 t/502-getters.t
