@@ -6,19 +6,36 @@ use warnings;
 use Test::More tests => 1;
 
 my @dummy = qw(
-    alpha.csv
-    alt_path_col_sep.csv
-    beta.csv
-    reserved_field_names.csv
-    duplicate_field.csv
-    duplicate_path.csv
-    missing_parents.csv
-    path_sibling_same_name.csv
-    wrong_row_count.csv
-    non_sibling_same_name.csv
-    iota.csv
-    small_path.csv
-    mu.csv
+  alpha.csv
+  alt_path_col_sep.csv
+  bad_row_count.csv
+  beta.csv
+  delta.csv
+  duplicate_field.csv
+  duplicate_header_field.csv
+  duplicate_id.csv
+  duplicate_path.csv
+  epsilon.csv
+  eta.csv
+  extra_wordspace.csv
+  ids_missing_parents.csv
+  iota.csv
+  kappa.csv
+  lambda.csv
+  missing_parents.csv
+  mu.csv
+  nameless_leaf.csv
+  non_numeric_ids.csv
+  non_path_col_sep_start_to_path.csv
+  non_sibling_same_name.csv
+  path_sibling_same_name.csv
+  reserved_field_names.csv
+  sibling_same_name.csv
+  small_path.csv
+  small_sibling_same_name.csv
+  theta.csv
+  wrong_row_count.csv
+  zeta.csv
 );
 
 my %seen_bad;

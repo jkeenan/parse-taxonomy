@@ -290,13 +290,19 @@ sub _check_path_col_idx {
 }
 
 sub _prepare_data_records {
+    # Confirm each row's path starts with path_col_sep:
     # Confirm no duplicate entries in column holding path:
     # Confirm all rows have same number of columns as header:
     my ($data, $data_records, $args) = @_;
+    my $error_msg;
+    my @bad_path_cols = ();
     my @bad_count_records = ();
     my %paths_seen = ();
     my $field_count = scalar(@{$data->{fields}});
     for my $rec (@{$data_records}) {
+        unless ($rec->[$data->{path_col_idx}] =~ m/^\Q$data->{path_col_sep}\E/) {
+            push @bad_path_cols, $rec->[$data->{path_col_idx}];
+        }
         $paths_seen{$rec->[$data->{path_col_idx}]}++;
         my $this_row_count = scalar(@{$rec});
         if ($this_row_count != $field_count) {
@@ -304,11 +310,20 @@ sub _prepare_data_records {
                 [ $rec->[$data->{path_col_idx}], $this_row_count ];
         }
     }
+    $error_msg = <<IMPROPER_PATH;
+The value of the column designated as path must start with the path column separator.
+Rows with the following paths fail to do so:
+IMPROPER_PATH
+    for my $path (@bad_path_cols) {
+        $error_msg .= "  $path\n";
+    }
+    croak $error_msg if @bad_path_cols;
+
     my @dupe_paths = ();
     for my $path (sort keys %paths_seen) {
         push @dupe_paths, $path if $paths_seen{$path} > 1;
     }
-    my $error_msg = <<ERROR_MSG_DUPE;
+    $error_msg = <<ERROR_MSG_DUPE;
 No duplicate entries are permitted in column designated as path.
 The following entries appear the number of times shown:
 ERROR_MSG_DUPE
@@ -1091,6 +1106,14 @@ sub write_adjacentified_to_csv {
     close $OUT or croak "Unable to close $csvfile after writing";
 
     return $csvfile;
+}
+
+sub nest {
+    my $self = shift;
+    $self->{nest_counter} = 0;
+
+
+    return 1;
 }
 
 1;

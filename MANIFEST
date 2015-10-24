@@ -42,6 +42,7 @@ t/data/missing_parents.csv
 t/data/mu.csv
 t/data/nameless_leaf.csv
 t/data/non_numeric_ids.csv
+t/data/non_path_col_sep_start_to_path.csv
 t/data/non_sibling_same_name.csv
 t/data/path_sibling_same_name.csv
 t/data/reserved_field_names.csv

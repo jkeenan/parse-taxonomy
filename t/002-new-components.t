@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 30;
+use Test::More tests => 34;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -225,6 +225,40 @@ $data_records = [
         like($@, qr/^Bad column names: <.*\b$reserved\b.*>/,
             "'new()' died due to column named with reserved term '$reserved'");
     }
+}
+
+{
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
+            components  => {
+                fields        => $fields,
+                data_records  => [
+                   ["|Alpha","","","","",""],
+                   ["|Alpha|Epsilon","","","","",""],
+                   ["Alpha|Epsilon|Kappa","","","","",""],
+                   ["|Alpha|Zeta","","","","",""],
+                   ["|Alpha|Zeta|Lambda","","","","",""],
+                   ["|Alpha|Zeta|Mu","","","","",""],
+                   ["|Beta","","","","",""],
+                   ["|Beta|Eta","","","","",""],
+                   ["Beta|Theta","","","","",""],
+                   ["|Gamma","","","","",""],
+                   ["Gamma|Iota","","","","",""],
+                   ["|Gamma|Iota|Nu","","","","",""],
+                   ["|Delta","","","","",""],
+                ],
+            },
+        } );
+    };
+    like($@, qr/The value of the column designated as path must start with the path column separator/s,
+        "'new()' died due to path(s) not starting with path column separator");
+    like($@, qr/Alpha|Epsilon|Kappa/s,
+        "Path not starting with path column separator identified");
+    like($@, qr/Beta|Theta/s,
+        "Path not starting with path column separator identified");
+    like($@, qr/Gamma|Iota/s,
+        "Path not starting with path column separator identified");
 }
 
 {

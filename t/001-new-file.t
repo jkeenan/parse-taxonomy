@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 32;
+use Test::More tests => 36;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -108,6 +108,24 @@ my ($obj, $source, $fields, $data_records);
         like($@, qr/^Bad column names: <.*\b$reserved\b.*>/,
             "'new()' died due to column named with reserved term '$reserved'");
     }
+}
+
+{
+    $source = "./t/data/non_path_col_sep_start_to_path.csv";
+    local $@;
+    eval {
+        $obj = Parse::Taxonomy::MaterializedPath->new( {
+            file    => $source,
+        } );
+    };
+    like($@, qr/The value of the column designated as path must start with the path column separator/s,
+        "'new()' died due to path(s) not starting with path column separator");
+    like($@, qr/Alpha|Epsilon|Kappa/s,
+        "Path not starting with path column separator identified");
+    like($@, qr/Beta|Theta/s,
+        "Path not starting with path column separator identified");
+    like($@, qr/Gamma|Iota/s,
+        "Path not starting with path column separator identified");
 }
 
 {
