@@ -28,6 +28,7 @@ my @dummy = qw(
   non_numeric_ids.csv
   non_path_col_sep_start_to_path.csv
   non_sibling_same_name.csv
+  nu.csv
   path_sibling_same_name.csv
   reserved_field_names.csv
   sibling_same_name.csv
@@ -37,7 +38,6 @@ my @dummy = qw(
   wrong_row_count.csv
   zeta.csv
 );
-
 my %seen_bad;
 for my $f (@dummy) {
     my $path = "./t/data/$f";
