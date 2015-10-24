@@ -156,8 +156,8 @@ incoming taxonomy file.
 =item * In the column designated as the "path" column, the same value is
 observed more than once.
 
-=item * C<id>, C<parent_id> and C<name> are reserved terms.  One or more columns is
-named with a reserved term.
+=item * C<id>, C<parent_id>, C<name>, C<lft> and C<rgh> are reserved terms.
+One or more columns is named with a reserved term.
 
 =item * A non-parent node's parent node cannot be located in the incoming taxonomy file.
 
@@ -267,11 +267,11 @@ sub _prepare_fields {
 
     my %fields_seen = map { $_ => 1 } @{$fields_ref};
     my @bad_fields = ();
-    for my $reserved ( qw| id parent_id name | ) {
+    for my $reserved ( qw| id parent_id name lft rgh | ) {
         push @bad_fields, $reserved if $fields_seen{$reserved};
     }
-    my $msg = "Bad column names: <@bad_fields>.  These are reserved for subroutine 'adjacentify()' ";
-    $msg .= "and for interaction with Parse::Taxonomy::AdjacentList; please rename";
+    my $msg = "Bad column names: <@bad_fields>.  These are reserved for ";
+    $msg .= "Parse::Taxonomy's internal use; please rename";
     croak $msg if @bad_fields;
 
     $data->{fields} = $fields_ref;

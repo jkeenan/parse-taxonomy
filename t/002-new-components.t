@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 20;
+use Test::More tests => 30;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -216,12 +216,12 @@ $data_records = [
     eval {
         $obj = Parse::Taxonomy::MaterializedPath->new( {
             components => {
-                fields        => [ "path","nationality","gender","id","parent_id","name" ],
+                fields        => [ "path","lft","rgh","id","parent_id","name" ],
                 data_records  => $data_records,
             }
         } );
     };
-    for my $reserved ( qw| id parent_id name | ) {
+    for my $reserved ( qw| id parent_id name lft rgh | ) {
         like($@, qr/^Bad column names: <.*\b$reserved\b.*>/,
             "'new()' died due to column named with reserved term '$reserved'");
     }

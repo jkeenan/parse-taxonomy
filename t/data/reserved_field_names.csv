@@ -1,4 +1,4 @@
-"path","nationality","gender","id","parent_id","name"
+"path","lft","rgh","id","parent_id","name"
 "|Alpha","","","","",""
 "|Alpha|Epsilon","","","","",""
 "|Alpha|Epsilon|Kappa","","","","",""
