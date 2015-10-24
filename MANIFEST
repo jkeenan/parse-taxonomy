@@ -20,6 +20,7 @@ t/002-new-components.t
 t/003-getters.t
 t/004-hashify-taxonomy.t
 t/005-adjacentify.t
+t/006-nest.t
 t/500-test-prep.t
 t/501-new.t
 t/502-getters.t
@@ -46,6 +47,7 @@ t/data/nameless_leaf.csv
 t/data/non_numeric_ids.csv
 t/data/non_path_col_sep_start_to_path.csv
 t/data/non_sibling_same_name.csv
+t/data/nu.csv
 t/data/path_sibling_same_name.csv
 t/data/reserved_field_names.csv
 t/data/sibling_same_name.csv

@@ -1,0 +1,7 @@
+"path","vertical","currency_code","wholesale_price","retail_price","is_actionable"
+"|Alpha","Auto","USD","","","0"
+"|Alpha|Epsilon","Auto","USD","","","0"
+"|Alpha|Epsilon|Kappa","Auto","USD","0.50","0.60","1"
+"|Alpha|Zeta","Auto","USD","","","0"
+"|Alpha|Zeta|Lambda","Auto","USD","0.40","0.50","1"
+"|Alpha|Zeta|Mu","Auto","USD","0.40","0.50","0"
