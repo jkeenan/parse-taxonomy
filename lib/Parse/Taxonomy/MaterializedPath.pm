@@ -1129,7 +1129,11 @@ sub write_adjacentified_to_csv {
 }
 
 sub nestify {
-    my $self = shift;
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'nestify()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+    }
     $self->{nest_counter} = 0;
 
     # We'll need a true arborescence.
