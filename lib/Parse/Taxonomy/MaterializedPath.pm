@@ -1130,11 +1130,19 @@ sub write_adjacentified_to_csv {
 
 sub nestify {
     my ($self, $args) = @_;
+    my $nest_counter = 0;
+    my $diagnostic = 0;
     if (defined $args) {
         croak "Argument to 'nestify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
+        if (exists $args->{floor}) {
+            croak "Element 'floor' in argument to 'adjacentify()' must be integer"
+                unless ($args->{floor} =~ m/^\d+$/);
+            $nest_counter = $args->{floor};
+        }
     }
-    $self->{nest_counter} = 0;
+    $diagnostic++ if $args->{diagnostic};
+    $self->{nest_counter} = $nest_counter;
 
     # We'll need a true arborescence.
     # https://en.wikipedia.org/wiki/Arborescence_%28graph_theory%29
@@ -1154,8 +1162,19 @@ sub nestify {
         if $row_depth_1_count > 1;
     $self->{nest} = \%nest;
 
+
     $self->_handle_node('');
 
+    if ($diagnostic) {
+        return $self->_diagnostic_nest;
+    }
+    else {
+        return; # still in development
+    }
+}
+
+sub _diagnostic_nest {
+    my $self = shift;
     my %nest_out = ();
     for my $path (keys %{$self->{row_analysis}}) {
         unless ($self->{nest}->{$path} eq '') {
@@ -1209,6 +1228,10 @@ sub _handle_node {
             # We're back at the root node, but this time we have
             # a list of its children.  We now want to process the next
             # unhandled node among the root's children.
+            my @unhandled_children_names = sort
+                grep { !  $self->{nest}->{$node}->{children}->{$_}->{handled} }
+                keys %{$self->{nest}->{$node}->{children}};
+            $self->_handle_node($unhandled_children_names[0]);
         }
     }
     else {
