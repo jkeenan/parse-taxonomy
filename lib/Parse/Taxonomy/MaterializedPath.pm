@@ -1130,6 +1130,8 @@ sub write_adjacentified_to_csv {
 
 sub nestify {
     my ($self, $args) = @_;
+#say STDERR "NNN:";
+#Data::Dump::pp($self->{row_analysis});
     my $nest_counter = 0;
     my $diagnostic = 0;
     if (defined $args) {
@@ -1166,10 +1168,12 @@ sub nestify {
     $self->_handle_node('');
 
     if ($diagnostic) {
-        return $self->_diagnostic_nest;
+        my $diag = $self->_diagnostic_nest;
+        return $diag;
     }
     else {
-        return; # still in development
+        my $diag = $self->_diagnostic_nest;
+        return $diag;
     }
 }
 
@@ -1177,7 +1181,7 @@ sub _diagnostic_nest {
     my $self = shift;
     my %nest_out = ();
     for my $path (keys %{$self->{row_analysis}}) {
-        unless ($self->{nest}->{$path} eq '') {
+#        unless ($self->{nest}->{$path} eq '') {
             while (my ($k,$v) = each %{$self->{row_analysis}->{$path}}) {
                 $nest_out{$path}{$k} = $v;
             }
@@ -1185,7 +1189,7 @@ sub _diagnostic_nest {
                 $nest_out{$path}{$k} = $v
                     unless exists $nest_out{$path}{$k};
             }
-        }
+#        }
     }
 
     return \%nest_out;
@@ -1254,7 +1258,7 @@ sub _handle_node {
             $self->{nest}->{$node}->{parent} =
                 join($self->{path_col_sep}, @path_components[0..($#path_components - 1 )]);
         }
-        if (! exists $self->{row_analysis}->{$node}->{children}) {
+        if (! exists $self->{nest}->{$node}->{children}) {
             my %children = ();
             for my $other (
                 grep { my $substr = substr($_, 0, length($node)); $substr eq $node }
