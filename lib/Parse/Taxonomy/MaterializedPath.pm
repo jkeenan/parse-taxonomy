@@ -1130,8 +1130,12 @@ sub write_adjacentified_to_csv {
 
 sub nestify {
     my ($self, $args) = @_;
-#say STDERR "NNN:";
-#Data::Dump::pp($self->{row_analysis});
+    my %clean_row_analysis = ();
+    for my $path (keys %{$self->{row_analysis}}) {
+        $clean_row_analysis{$path}{row_depth} = $self->{row_analysis}->{$path}->{row_depth};
+    }
+    $self->{row_analysis} = \%clean_row_analysis;
+
     my $nest_counter = 0;
     my $diagnostic = 0;
     if (defined $args) {
