@@ -1162,12 +1162,13 @@ sub nestify {
         $nest{$k} = $v;
     }
     $nest{""} = { row_depth => 1 };
-    # Sanity check:  croak should never be reached:
-    my $row_depth_1_count = grep { $nest{$_}->{row_depth} == 1 } keys (%nest);
-    croak "Mystery: more than 1 row with row_depth equal to 1"
-        if $row_depth_1_count > 1;
-    $self->{nest} = \%nest;
 
+    # Sanity check:  croak should never be reached:
+    # my $row_depth_1_count = grep { $nest{$_}->{row_depth} == 1 } keys (%nest);
+    # croak "Mystery: more than 1 row with row_depth equal to 1"
+    #     if $row_depth_1_count > 1;
+
+    $self->{nest} = \%nest;
 
     $self->_handle_node('');
 
