@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 13;
+use Test::More tests => 18;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -87,6 +87,15 @@ my ($obj, $source, $expect, $hashified);
         like($@,
             qr/Argument to 'nestify\(\)' must be hashref/,
             "Got expected error: nestify() must take hashref"
+        );
+    }
+
+    {
+        local $@;
+        eval { $nest = $obj->nestify( { floor => 'foo' } ); };
+        like($@,
+            qr/Element 'floor' in argument to 'adjacentify\(\)' must be integer/,
+            "Got expected error: 'floor' key in nestify() must take integer"
         );
     }
 

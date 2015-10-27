@@ -24,3 +24,4 @@ Parse-Taxonomy-*.tar.gz
 /t/data/taxonomy_out*.csv
 examples/data/auto_adjacent.csv
 examples/data/auto_pathified.csv
+/t/data/taxonomy_out.csv

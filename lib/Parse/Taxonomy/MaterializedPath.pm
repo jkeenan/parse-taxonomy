@@ -1207,6 +1207,8 @@ sub _diagnostic_nest {
         while (my ($k,$v) = each %{$self->{nest}->{$path}}) {
             $nest_out{$path}{$k} = $v
                 unless exists $nest_out{$path}{$k};
+                # it's not clear whether this 'unless' is reachable;
+                # needs more analysis
         }
     }
     return \%nest_out;

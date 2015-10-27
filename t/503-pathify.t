@@ -9,8 +9,11 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 12;
+use Test::More tests => 121;
 use Scalar::Util qw( reftype );
+use Cwd;
+use File::Basename;
+use File::Temp qw( tempdir );
 
 my ($obj, $source, $expect);
 my ($exp_fields, $exp_data_records);
@@ -617,13 +620,19 @@ my $path_data_records = [
     $pathified = $obj->pathify( { as_string => 1 } );
     ok($pathified, "pathify() returned true value");
 
-    $csv_file = $obj->write_pathified_to_csv( {
-        pathified   =>  $pathified,
-        csvfile     => './t/data/taxonomy_out6.csv',
-        sep_char => "\t",
-    } );
-    ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
-    ok((-f $csv_file), "'$csv_file' is plain-text file");
-    ok((-r $csv_file), "'$csv_file' is readable");
+    my $cwd = cwd();
+    {
+        my $tdir = tempdir( CLEANUP => 1 );
+        chdir $tdir or croak "Unable to change to tempdir for testing";
+        $csv_file = $obj->write_pathified_to_csv( {
+            pathified   =>  $pathified,
+            sep_char => "\t",
+        } );
+        ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
+        ok((-f $csv_file), "'$csv_file' is plain-text file");
+        ok((-r $csv_file), "'$csv_file' is readable");
+        is(basename($csv_file), 'taxonomy_out.csv', "Got default name for CSV file");
+        chdir $cwd or croak "Unable to return to starting directory";
+    }
 }
 
