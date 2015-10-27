@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 13;
+use Test::More qw(no_plan); # tests => 13;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -333,4 +333,75 @@ my ($obj, $source, $expect, $hashified);
     my $nest;
     ok($nest = $obj->nestify( ), "nestify() returned true value");
     is_deeply($nest, $expect, "Got expected diagnostic nest");
+}
+
+{
+    $source = "./t/data/beta.csv";
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my $expect = {
+      "|Alpha"               => {
+                                  children => {
+                                    "|Alpha|Epsilon" => { handled => 1 },
+                                    "|Alpha|Zeta"    => { handled => 1 },
+                                  },
+                                  lft => 501,
+                                  parent => "",
+                                  rgh => 512,
+                                  row_depth => 2,
+                                },
+      "|Alpha|Epsilon"       => {
+                                  children => { "|Alpha|Epsilon|Kappa" => { handled => 1 } },
+                                  lft => 502,
+                                  parent => "|Alpha",
+                                  rgh => 505,
+                                  row_depth => 3,
+                                },
+      "|Alpha|Epsilon|Kappa" => { lft => 503, parent => "|Alpha|Epsilon", rgh => 504, row_depth => 4 },
+      "|Alpha|Zeta"          => {
+                                  children => {
+                                    "|Alpha|Zeta|Lambda" => { handled => 1 },
+                                    "|Alpha|Zeta|Mu"     => { handled => 1 },
+                                  },
+                                  lft => 506,
+                                  parent => "|Alpha",
+                                  rgh => 511,
+                                  row_depth => 3,
+                                },
+      "|Alpha|Zeta|Lambda"   => { lft => 507, parent => "|Alpha|Zeta", rgh => 508, row_depth => 4 },
+      "|Alpha|Zeta|Mu"       => { lft => 509, parent => "|Alpha|Zeta", rgh => 510, row_depth => 4 },
+      "|Beta"                => {
+                                  children => { "|Beta|Eta" => { handled => 1 }, "|Beta|Theta" => { handled => 1 } },
+                                  lft => 513,
+                                  parent => "",
+                                  rgh => 518,
+                                  row_depth => 2,
+                                },
+      "|Beta|Eta"            => { lft => 514, parent => "|Beta", rgh => 515, row_depth => 3 },
+      "|Beta|Theta"          => { lft => 516, parent => "|Beta", rgh => 517, row_depth => 3 },
+      "|Delta"               => { lft => 519, parent => "", rgh => 520, row_depth => 2 },
+      "|Gamma"               => {
+                                  children => { "|Gamma|Iota" => { handled => 1 } },
+                                  lft => 521,
+                                  parent => "",
+                                  rgh => 526,
+                                  row_depth => 2,
+                                },
+      "|Gamma|Iota"          => {
+                                  children => { "|Gamma|Iota|Nu" => { handled => 1 } },
+                                  lft => 522,
+                                  parent => "|Gamma",
+                                  rgh => 525,
+                                  row_depth => 3,
+                                },
+      "|Gamma|Iota|Nu"       => { lft => 523, parent => "|Gamma|Iota", rgh => 524, row_depth => 4 },
+    };
+
+    my $diag;
+    ok($diag = $obj->nestify( {floor => 500, diagnostic => 1} ), "nestify() returned true value");
+    is_deeply($diag, $expect, "Got expected diagnostic nest");
 }
