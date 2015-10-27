@@ -7,8 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 13;
-use Data::Dump;
+use Test::More tests => 13;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -199,8 +198,139 @@ my ($obj, $source, $expect, $hashified);
     ok($diag = $obj->nestify( { diagnostic => 1 } ), "nestify() returned true value");
     is_deeply($diag, $expect, "Got expected diagnostic nest");
 
+    $expect = {
+      "|Alpha"               => {
+                                  currency_code => "USD",
+                                  is_actionable => 0,
+                                  lft => 1,
+                                  name => "Alpha",
+                                  retail_price => "",
+                                  rgh => 12,
+                                  vertical => "Auto",
+                                  wholesale_price => "",
+                                },
+      "|Alpha|Epsilon"       => {
+                                  currency_code => "USD",
+                                  is_actionable => 0,
+                                  lft => 2,
+                                  name => "Epsilon",
+                                  retail_price => "",
+                                  rgh => 5,
+                                  vertical => "Auto",
+                                  wholesale_price => "",
+                                },
+      "|Alpha|Epsilon|Kappa" => {
+                                  currency_code => "USD",
+                                  is_actionable => 1,
+                                  lft => 3,
+                                  name => "Kappa",
+                                  retail_price => "0.60",
+                                  rgh => 4,
+                                  vertical => "Auto",
+                                  wholesale_price => "0.50",
+                                },
+      "|Alpha|Zeta"          => {
+                                  currency_code => "USD",
+                                  is_actionable => 0,
+                                  lft => 6,
+                                  name => "Zeta",
+                                  retail_price => "",
+                                  rgh => 11,
+                                  vertical => "Auto",
+                                  wholesale_price => "",
+                                },
+      "|Alpha|Zeta|Lambda"   => {
+                                  currency_code => "USD",
+                                  is_actionable => 1,
+                                  lft => 7,
+                                  name => "Lambda",
+                                  retail_price => "0.50",
+                                  rgh => 8,
+                                  vertical => "Auto",
+                                  wholesale_price => "0.40",
+                                },
+      "|Alpha|Zeta|Mu"       => {
+                                  currency_code => "USD",
+                                  is_actionable => 0,
+                                  lft => 9,
+                                  name => "Mu",
+                                  retail_price => "0.50",
+                                  rgh => 10,
+                                  vertical => "Auto",
+                                  wholesale_price => "0.40",
+                                },
+      "|Beta"                => {
+                                  currency_code => "JPY",
+                                  is_actionable => 0,
+                                  lft => 13,
+                                  name => "Beta",
+                                  retail_price => "",
+                                  rgh => 18,
+                                  vertical => "Electronics",
+                                  wholesale_price => "",
+                                },
+      "|Beta|Eta"            => {
+                                  currency_code => "JPY",
+                                  is_actionable => 1,
+                                  lft => 14,
+                                  name => "Eta",
+                                  retail_price => 0.45,
+                                  rgh => 15,
+                                  vertical => "Electronics",
+                                  wholesale_price => 0.35,
+                                },
+      "|Beta|Theta"          => {
+                                  currency_code => "JPY",
+                                  is_actionable => 1,
+                                  lft => 16,
+                                  name => "Theta",
+                                  retail_price => 0.45,
+                                  rgh => 17,
+                                  vertical => "Electronics",
+                                  wholesale_price => 0.35,
+                                },
+      "|Delta"               => {
+                                  currency_code => "USD",
+                                  is_actionable => 1,
+                                  lft => 19,
+                                  name => "Delta",
+                                  retail_price => "0.30",
+                                  rgh => 20,
+                                  vertical => "Life Insurance",
+                                  wholesale_price => 0.25,
+                                },
+      "|Gamma"               => {
+                                  currency_code => "EUR",
+                                  is_actionable => 0,
+                                  lft => 21,
+                                  name => "Gamma",
+                                  retail_price => "",
+                                  rgh => 26,
+                                  vertical => "Travel",
+                                  wholesale_price => "",
+                                },
+      "|Gamma|Iota"          => {
+                                  currency_code => "EUR",
+                                  is_actionable => 0,
+                                  lft => 22,
+                                  name => "Iota",
+                                  retail_price => "",
+                                  rgh => 25,
+                                  vertical => "Travel",
+                                  wholesale_price => "",
+                                },
+      "|Gamma|Iota|Nu"       => {
+                                  currency_code => "EUR",
+                                  is_actionable => 1,
+                                  lft => 23,
+                                  name => "Nu",
+                                  retail_price => 0.75,
+                                  rgh => 24,
+                                  vertical => "Travel",
+                                  wholesale_price => "0.60",
+                                },
+    };
     my $nest;
-    ok($nest = $obj->nestify( { diagnostic => 1 } ), "nestify() returned true value");
+    ok($nest = $obj->nestify( ), "nestify() returned true value");
     is_deeply($nest, $expect, "Got expected diagnostic nest");
-
 }

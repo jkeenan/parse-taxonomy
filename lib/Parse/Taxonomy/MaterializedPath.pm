@@ -156,7 +156,7 @@ incoming taxonomy file.
 =item * In the column designated as the "path" column, the same value is
 observed more than once.
 
-=item * C<id>, C<parent_id>, C<name>, C<lft> and C<rgh> are reserved terms.
+=item * C<id>, C<parent_id>, C<name>, C<lft>, and C<rgh> are reserved terms.
 One or more columns is named with a reserved term.
 
 =item * A non-parent node's parent node cannot be located in the incoming taxonomy file.
@@ -1177,7 +1177,22 @@ sub nestify {
     }
     else {
         my $diag = $self->_diagnostic_nest;
-        return $diag;
+        my %nest;
+        for my $path (sort keys %{$diag}) {
+            $nest{$path}->{lft} = $diag->{$path}->{lft};
+            $nest{$path}->{rgh} = $diag->{$path}->{rgh};
+        }
+        my @data_fields = grep { $_ ne $self->{path_col} } @{$self->fields()};
+        my $hashified = $self->hashify();
+        for my $path (sort keys %{$hashified}) {
+            my @path_components = split(/\Q$self->{path_col_sep}\E/, $path);
+            $nest{$path}{name} = $path_components[-1];
+            for my $field (grep { $_ ne $self->{path_col} } keys
+                %{$hashified->{$path}}) {
+                $nest{$path}->{$field} = $hashified->{$path}->{$field};
+            }
+        }
+        return \%nest;
     }
 }
 
@@ -1185,17 +1200,14 @@ sub _diagnostic_nest {
     my $self = shift;
     my %nest_out = ();
     for my $path (keys %{$self->{row_analysis}}) {
-#        unless ($self->{nest}->{$path} eq '') {
-            while (my ($k,$v) = each %{$self->{row_analysis}->{$path}}) {
-                $nest_out{$path}{$k} = $v;
-            }
-            while (my ($k,$v) = each %{$self->{nest}->{$path}}) {
-                $nest_out{$path}{$k} = $v
-                    unless exists $nest_out{$path}{$k};
-            }
-#        }
+        while (my ($k,$v) = each %{$self->{row_analysis}->{$path}}) {
+            $nest_out{$path}{$k} = $v;
+        }
+        while (my ($k,$v) = each %{$self->{nest}->{$path}}) {
+            $nest_out{$path}{$k} = $v
+                unless exists $nest_out{$path}{$k};
+        }
     }
-
     return \%nest_out;
 }
 
@@ -1222,7 +1234,7 @@ sub _handle_node {
             $self->{nest}->{$node}->{rgh} = undef;
             # build a list of the root node's children,
             # marking each one as not yet handled;;
-            # set 
+            # set
             # sort the list
             my %children = ();
             for my $root_child (grep { $self->{nest}->{$_}->{row_depth} == 2 } keys %{$self->{nest}}) {
@@ -1254,7 +1266,7 @@ sub _handle_node {
         # we will need to note the node's parent,
         # assign an lft and make a list of any children.
 
-        if (! exists $self->{nest}->{$node}->{lft}) { 
+        if (! exists $self->{nest}->{$node}->{lft}) {
             $self->{nest}->{$node}->{lft} = ++$self->{nest_counter};
         }
         my @path_components = split(/\Q$self->{path_col_sep}\E/, $node);
