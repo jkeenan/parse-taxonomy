@@ -1251,9 +1251,7 @@ sub _handle_node {
             # We're back at the root node, but this time we have
             # a list of its children.  We now want to process the next
             # unhandled node among the root's children.
-            my @unhandled_children_names = sort
-                grep { !  $self->{nest}->{$node}->{children}->{$_}->{handled} }
-                keys %{$self->{nest}->{$node}->{children}};
+            my @unhandled_children_names = $self->_get_unhandled_children($node);
             $self->_handle_node($unhandled_children_names[0]);
         }
     }
@@ -1292,11 +1290,7 @@ sub _handle_node {
             # with this node; go back to its parent; in the parent's children
             # list, mark this node as handled => 1; proceed to ???
             if (! keys %children) {
-                $self->{nest}->{$node}->{rgh} = ++$self->{nest_counter};
-                my $parent = $self->{nest}->{$node}->{parent};
-                $self->{nest}->{$parent}->{children}->{$node}->{handled}++;
-                $self->_handle_node($self->{nest}->{$node}->{parent});
-                # to come
+                $self->_back_to_parent($node);
             }
             else {
                 $self->{nest}->{$node}->{children} = \%children;
@@ -1305,16 +1299,11 @@ sub _handle_node {
             }
         }
         else {
-            my @unhandled_children_names = sort
-                grep { !  $self->{nest}->{$node}->{children}->{$_}->{handled} }
-                keys %{$self->{nest}->{$node}->{children}};
+            my @unhandled_children_names = $self->_get_unhandled_children($node);
             # If there are no unhandled children, then we can assign an rgt to
             # this node and go back to its parent
             if (! @unhandled_children_names) {
-                $self->{nest}->{$node}->{rgh} = ++$self->{nest_counter};
-                my $parent = $self->{nest}->{$node}->{parent};
-                $self->{nest}->{$parent}->{children}->{$node}->{handled}++;
-                $self->_handle_node($self->{nest}->{$node}->{parent});
+                $self->_back_to_parent($node);
             }
             else {
                 $self->_handle_node($unhandled_children_names[0]);
@@ -1322,6 +1311,21 @@ sub _handle_node {
         }
     }
     return;
+}
+
+sub _get_unhandled_children {
+    my ($self, $node) = @_;
+    return sort
+        grep { ! $self->{nest}->{$node}->{children}->{$_}->{handled} }
+        keys %{$self->{nest}->{$node}->{children}};
+}
+
+sub _back_to_parent {
+    my ($self, $node) = @_;
+    $self->{nest}->{$node}->{rgh} = ++$self->{nest_counter};
+    my $parent = $self->{nest}->{$node}->{parent};
+    $self->{nest}->{$parent}->{children}->{$node}->{handled}++;
+    $self->_handle_node($self->{nest}->{$node}->{parent});
 }
 
 1;
