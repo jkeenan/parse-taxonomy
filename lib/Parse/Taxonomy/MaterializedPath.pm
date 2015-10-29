@@ -1128,6 +1128,132 @@ sub write_adjacentified_to_csv {
     return $csvfile;
 }
 
+=head2 C<nestify()>
+
+=over 4
+
+=item * Purpose
+
+Transform a taxonomy-by-materialized-path into a taxonomy-by-nested-set.
+
+In a taxonomy-by-nested-set, each node can be uniquely identified by a pair of
+indices herein designated as C<lft> and C<rgh>.
+
+=item * Arguments
+
+    $nest = $self->nestify();
+
+    $nest = $self->nestify( { floor => 500 } );
+
+    $nest = $self->nestify( { diagnostic => 1 } );
+
+Takes one optional hash reference.  Currently, the only keys supported for
+that hashref are:
+
+=over 4
+
+=item * C<floor>
+
+Non-negative integer.  If provided in the hashref passed as argument to
+C<nestify()>, it establishes the "floor" above which the C<lft> index of the
+first top-level node will be set.  Hence, if C<floor> is set to C<500>, the
+value assigned to the first C<lft> index will be C<501>.  If not provided,
+defaults to C<0>, so that the first C<lft> index will be C<1>.
+
+=item * C<diagnostic>
+
+If set to any Perl-true value, changes the structure of the return value of
+C<nestify()> to provide diagnostic information on the structure of the
+taxonomy-by-nested-set.  (See below.)
+
+=back
+
+=item * Return Value
+
+Hash reference, the structure of which depends on whether C<nestify()> was
+called with argument C<diagnostic> set to a true value or not.
+
+=over 4
+
+=item * Regular (C<diagnostic> not present or false)
+
+If C<diagnostic> was set to a false value or (more likely) not provided at
+all, the hashref returned has this structure:
+
+    $nest = {
+        "|Alpha"               => {
+            currency_code => "USD",
+            is_actionable => 0,
+            lft => 1,
+            name => "Alpha",
+            retail_price => "",
+            rgh => 12,
+            vertical => "Auto",
+            wholesale_price => "",
+        },
+        "|Alpha|Epsilon"       => {
+            currency_code => "USD",
+            is_actionable => 0,
+            lft => 2,
+            name => "Epsilon",
+            retail_price => "",
+            rgh => 5,
+            vertical => "Auto",
+            wholesale_price => "",
+        },
+        "|Alpha|Epsilon|Kappa" => {
+            currency_code => "USD",
+            is_actionable => 1,
+            lft => 3,
+            name => "Kappa",
+            retail_price => "0.60",
+            rgh => 4,
+            vertical => "Auto",
+            wholesale_price => "0.50",
+        },
+      # ...
+    };
+
+Note that each element in C<$nest> is a hash reference keyed on (a) the C<lft>
+and C<rgh> indexes of the node; (b) the non-structural fields in the node; and
+(c) C<name>, the basename of the materialized path of the node.
+
+=item * C<diagnostic> true
+
+If C<diagnostic> was set to a true value, the hashref returned has this
+structure:
+
+    $diagnostic = {
+        "|Alpha"               => {
+            children => {
+              "|Alpha|Epsilon" => { handled => 1 },
+              "|Alpha|Zeta"    => { handled => 1 },
+            },
+            lft => 1,
+            parent => "",
+            rgh => 12,
+            row_depth => 2,
+        },
+        "|Alpha|Epsilon"       => {
+            children => { "|Alpha|Epsilon|Kappa" => { handled => 1 } },
+            lft => 2,
+            parent => "|Alpha",
+            rgh => 5,
+            row_depth => 3,
+        },
+        "|Alpha|Epsilon|Kappa" => { lft => 3, parent => "|Alpha|Epsilon", rgh => 4, row_depth => 4 },
+      # ...
+      };
+
+In this version of the return value, the focus is on the B<structure> of the
+taxonomy.  None of the non-structural fields of the taxonomy are presented.
+
+=back
+
+=back
+
+=cut
+
 sub nestify {
     my ($self, $args) = @_;
     my %clean_row_analysis = ();
