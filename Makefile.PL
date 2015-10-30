@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
-require 5.008;
+require 5.006001;
 
 my $mm_ver = ExtUtils::MakeMaker->VERSION;
 
