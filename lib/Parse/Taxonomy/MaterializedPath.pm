@@ -1309,7 +1309,6 @@ sub nestify {
             $nest{$path}->{lft} = $diag->{$path}->{lft};
             $nest{$path}->{rgh} = $diag->{$path}->{rgh};
         }
-        my @data_fields = grep { $_ ne $self->{path_col} } @{$self->fields()};
         my $hashified = $self->hashify();
         for my $path (sort keys %{$hashified}) {
             my @path_components = split(/\Q$self->{path_col_sep}\E/, $path);
