@@ -943,7 +943,7 @@ sub adjacentify {
         (0..$#{$fields});
 
     my @components_by_row =
-        map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] }  @{$drpc};
+        map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] } @{$drpc};
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
     my $serial = $args->{serial} || 0;
     my @adjacentified = ();

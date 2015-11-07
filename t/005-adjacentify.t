@@ -142,7 +142,7 @@ my ($obj, $source, $expect, $adjacentified);
     $adjacentified = $obj->adjacentify( { serial => $serial } );
     ok($adjacentified, "'adjacentify() returned true value");
     my @ids_seen = map { $_->{id} } @{$adjacentified};
-    my $expect = 501;
+    my $expect = $serial + 1;
     is(min(@ids_seen), $expect,
         "Lowest 'id' value is $expect, as serial was set to $serial");
 
@@ -182,7 +182,7 @@ my ($obj, $source, $expect, $adjacentified);
     $adjacentified = $obj->adjacentify( { serial => $serial } );
     ok($adjacentified, "'adjacentify() returned true value");
     my @ids_seen = map { $_->{id} } @{$adjacentified};
-    my $expect = 421;
+    my $expect = $serial + 1;
     is(min(@ids_seen), $expect,
         "Lowest 'id' value is $expect, as serial was set to $serial");
 
