@@ -1,6 +1,8 @@
 .gitignore
 Changes
 examples/create_letters_taxonomy.pl
+examples/data/automobiles_taxonomy.csv
+examples/presentation.pl
 examples/walk_tree.pl
 lib/Parse/Taxonomy.pm
 lib/Parse/Taxonomy/AdjacentList.pm
