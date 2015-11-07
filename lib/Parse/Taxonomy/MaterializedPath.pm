@@ -248,12 +248,12 @@ sub new {
     while (my ($k,$v) = each %{$args}) {
         $data->{$k} = $v;
     }
-    my %row_depths = ();
+    my %row_analysis = ();
     for my $el (@{$data->{data_records}}) {
         my $rowkey = $el->[$data->{path_col_idx}];
-        $row_depths{$rowkey} = split(/\Q$data->{path_col_sep}\E/, $rowkey);
+        $row_analysis{$rowkey} = split(/\Q$data->{path_col_sep}\E/, $rowkey);
     }
-    $data->{row_depths} = \%row_depths;
+    $data->{row_analysis} = \%row_analysis;
     return bless $data, $class;
 }
 
@@ -703,7 +703,7 @@ sub descendant_counts {
     for my $p (keys %{$hashified}) {
         $descendant_counts{$p} = 0;
         for my $q (
-            grep { $self->{row_depths}->{$_} > $self->{row_depths}->{$p} }
+            grep { $self->{row_analysis}->{$_} > $self->{row_analysis}->{$p} }
             keys %{$hashified}
         ) {
             $descendant_counts{$p}++ if $q =~ m/^\Q$p$self->{path_col_sep}\E/;
