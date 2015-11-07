@@ -897,14 +897,20 @@ Transform a taxonomy-by-materialized-path into a taxonomy-by-adjacent-list.
     $adjacentified = $self->adjacentify();
 
     $adjacentified = $self->adjacentify( { serial => 500 } );
+    $adjacentified = $self->adjacentify( { floor  => 500 } );  # same as serial
 
 Optional single hash reference.
 
-At this time the only key supported for that
-hash is C<serial>, which defaults to C<0>.  C<serial> must be a non-negative
-integer and sets the "floor" above which new unique IDs will be assigned to
-the C<id> column.  Hence, if C<serial> is set to C<500>, the value assigned to
-the C<id> column of the first record to be processed will be C<501>.
+For that hashref, C<adjacentify()> supports the key C<serial>, which defaults
+to C<0>.  C<serial> must be a non-negative integer and sets the "floor" above
+which new unique IDs will be assigned to the C<id> column.  Hence, if
+C<serial> is set to C<500>, the value assigned to the C<id> column of the
+first record to be processed will be C<501>.
+
+Starting with version 0.18, C<floor> will serve as an alternative way of
+providing the same information to C<adjacentify()>.  If, however, by mistake
+you provide B<both> C<serial> and C<floor> elements in the hash, C<serial>
+will take precedence.
 
 =item * Return Value
 
@@ -945,7 +951,7 @@ sub adjacentify {
     my @components_by_row =
         map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] } @{$drpc};
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
-    my $serial = $args->{serial} || 0;
+    my $serial = $args->{serial} || $args->{floor} || 0;
     my @adjacentified = ();
     my %paths_to_id;
     for my $depth (1..$max_components) {

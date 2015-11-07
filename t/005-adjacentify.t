@@ -8,7 +8,7 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
 use Parse::Taxonomy::AdjacentList;
-use Test::More tests => 42;
+use Test::More tests => 50;
 use List::Util qw( min );
 use Cwd;
 use File::Temp qw/ tempdir /;
@@ -165,6 +165,46 @@ my ($obj, $source, $expect, $adjacentified);
         chdir $cwd or croak "Unable to change back to $cwd";
     }
 
+}
+
+{
+    note("adjacentify() with 'serial' and/or 'floor'");
+
+    $source = "./t/data/beta.csv";
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my ($floor, $serial, @ids_seen, $expect);
+
+    $floor = 500;
+    $adjacentified = $obj->adjacentify( { floor => $floor } );
+    ok($adjacentified, "'adjacentify() returned true value");
+    @ids_seen = map { $_->{id} } @{$adjacentified};
+    $expect = 501;
+    is(min(@ids_seen), $expect,
+        "Lowest 'id' value is $expect, as floor was set to $floor");
+
+    $serial = 300;
+    $adjacentified = $obj->adjacentify( { serial => $serial } );
+    ok($adjacentified, "'adjacentify() returned true value");
+    @ids_seen = map { $_->{id} } @{$adjacentified};
+    $expect = 301;
+    is(min(@ids_seen), $expect,
+        "Lowest 'id' value is $expect, as serial was set to $serial");
+
+    $serial = 1300;
+    $adjacentified = $obj->adjacentify( {
+        serial  => $serial,
+        floor   => $floor,
+    } );
+    ok($adjacentified, "'adjacentify() returned true value");
+    @ids_seen = map { $_->{id} } @{$adjacentified};
+    $expect = 1301;
+    is(min(@ids_seen), $expect,
+        "Lowest 'id' value is $expect, as 'serial' takes precedence over 'floor'");
 }
 
 {
