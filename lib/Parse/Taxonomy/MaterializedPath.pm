@@ -176,10 +176,13 @@ sub new {
 
     croak "Argument to 'new()' must be hashref"
         unless (ref($args) and reftype($args) eq 'HASH');
+    my $argscount = 0;
+    $argscount++ if $args->{file};
+    $argscount++ if $args->{components};
     croak "Argument to 'new()' must have either 'file' or 'components' element"
-        unless ($args->{file} or $args->{components});
+        if ($argscount == 0);
     croak "Argument to 'new()' must have either 'file' or 'components' element but not both"
-        if ($args->{file} and $args->{components});
+        if ($argscount == 2);
 
     if (exists $args->{path_col_idx}) {
         croak "Argument to 'path_col_idx' must be integer"
