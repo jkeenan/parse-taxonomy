@@ -8,7 +8,7 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
 use Parse::Taxonomy::AdjacentList;
-use Test::More tests => 50;
+use Test::More tests => 53;
 use List::Util qw( min );
 use Cwd;
 use File::Temp qw/ tempdir /;
@@ -40,6 +40,24 @@ my ($obj, $source, $expect, $adjacentified);
     };
     like($@, qr/^Argument to 'adjacentify\(\)' must be hashref/,
         "'adjacentify()' died to lack of hashref as argument; was arrayref");
+
+    local $@;
+    eval {
+        $adjacentified = $obj->adjacentify( {
+            serial => 'foo',
+        } );
+    };
+    like($@, qr/^Element 'serial' in argument to 'adjacentify\(\)' must be integer/,
+        "Element 'serial' in hashref argument for 'adjacentify()' must be integer");
+
+    local $@;
+    eval {
+        $adjacentified = $obj->adjacentify( {
+            floor => 'foo',
+        } );
+    };
+    like($@, qr/^Element 'floor' in argument to 'adjacentify\(\)' must be integer/,
+        "Element 'floor' in hashref argument for 'adjacentify()' must be integer");
 }
 
 {
@@ -146,13 +164,20 @@ my ($obj, $source, $expect, $adjacentified);
     is(min(@ids_seen), $expect,
         "Lowest 'id' value is $expect, as serial was set to $serial");
 
-    note("write_adjacentified_to_csv()");
+    note("write_adjacentified_to_csv(); assign to 'eol'");
     my $csv_file;
     $csv_file = $obj->write_adjacentified_to_csv( {
        adjacentified => $adjacentified,
        csvfile => './t/data/taxonomy_out1.csv',
        sep_char => '|',
+       eol => "\r\n",
     } );
+    open my $IN, '<', $csv_file or croak "Unable to open $csv_file for reading";
+    my $line = <$IN>;
+    close $IN or croak "Unable to close $csv_file after reading";
+    my $line_ending;
+    ($line_ending) = $line =~ m/(\R)$/;
+    is($line_ending, "\r\n", "Wrote DOS line endings to output file");
 
     {
         my $cwd = cwd();

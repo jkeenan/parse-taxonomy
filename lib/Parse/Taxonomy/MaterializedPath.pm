@@ -935,10 +935,19 @@ the data structure returned by a method such as C<data_records()>.
 
 sub adjacentify {
     my ($self, $args) = @_;
+    my $serial = 0;
     if (defined $args) {
         croak "Argument to 'adjacentify()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
+        for my $w ('serial', 'floor') {
+            if (exists $args->{$w}) {
+                croak "Element '$w' in argument to 'adjacentify()' must be integer"
+                    unless ($args->{$w} =~ m/^\d+$/);
+            }
+        }
+        $serial = $args->{serial} || $args->{floor} || 0;
     }
+
 
     my $fields = $self->fields();
     my $drpc = $self->data_records_path_components();
