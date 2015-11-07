@@ -67,3 +67,10 @@ Revision history for Perl module Parse::File::Taxonomy
     - Improve performance of
       Parse::Taxonomy::MaterializedPath::descendant_counts().
     - Change name of TODO.pod back to TODO so it does not get installed.
+
+0.18 Sat Nov  7 07:55:25 EST 2015
+    - Decrease minimum version of Perl required to Text::CSV_XS's listed
+      minimum version of 5.006001.
+    - Parse::Taxonomy::MaterializedPath: value of path column must start
+      with path column separator.
+    - Add 'lft' and 'rgh' to list of reserved terms.
