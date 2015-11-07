@@ -268,11 +268,21 @@ my ($obj, $source, $expect, $adjacentified);
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
-    my $dr = $obj->data_records();
+    # For testing purposes, create a hash where each element is keyed on the
+    # materialized_path of a row in $obj->data_records() and where the value
+    # is an array of the non-path elements in each such row.  Example:
+    # {
+    #   "|alpha"             => [1, 0],
+    #   "|alpha|able"        => [1, 0],
+    #   "|alpha|able|Agnes"  => [1, 1],
+    #   # ...
+    #   "|beta"              => [1, 0],
+    #   "|beta|able"         => [1, 0],
+    # }
+
     my %ver;
-    for my $row (@{$dr}) {
-        my $path_as_string = $row->[0];
-        $ver{$path_as_string} = [ @{$row}[1 .. $#{$row}] ];
+    for my $row (@{$obj->data_records()}) {
+        $ver{$row->[0]} = [ @{$row}[1 .. $#{$row}] ];
     }
 
     my $adjacentified = $obj->adjacentify();
@@ -291,6 +301,8 @@ my ($obj, $source, $expect, $adjacentified);
     } );
     ok(defined $objal, "AdjacentList constructor returned defined value");
 
+    # pathify the data in the AdjacentList object, then use the result
+    # to create a hash of arrays with same structure as %ver above.
     my $pathified = $objal->pathify();
     my %rev;
     for my $el (@{$pathified}[1 .. $#{$pathified}]) {
@@ -298,7 +310,8 @@ my ($obj, $source, $expect, $adjacentified);
         $rev{$path_as_string} = [ @{$el}[1 .. $#{$el}] ];
     }
 
-    is_deeply(\%ver, \%rev, "Successful round trip");
+    is_deeply(\%ver, \%rev,
+        "Successful round trip:  materialized path to adjacent list and back again");
 }
 
 {
@@ -346,11 +359,9 @@ my ($obj, $source, $expect, $adjacentified);
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 
-    my $dr = $obj->data_records();
     my %ver;
-    for my $row (@{$dr}) {
-        my $path_as_string = $row->[0];
-        $ver{$path_as_string} = [ @{$row}[1 .. $#{$row}] ];
+    for my $row (@{$obj->data_records()}) {
+        $ver{$row->[0]} = [ @{$row}[1 .. $#{$row}] ];
     }
 
     my $adjacentified = $obj->adjacentify();
@@ -359,7 +370,6 @@ my ($obj, $source, $expect, $adjacentified);
        adjacentified => $adjacentified,
        csvfile => './t/data/taxonomy_out5.csv',
     } );
-
 
     note("Create AdjacentList object starting from file just now created");
     my $objal = Parse::Taxonomy::AdjacentList->new( {
@@ -376,5 +386,5 @@ my ($obj, $source, $expect, $adjacentified);
         $rev{$path_as_string} = [ @{$el}[1 .. $#{$el}] ];
     }
 
-    is_deeply(\%ver, \%rev, "Successful round trip");
+    is_deeply(\%ver, \%rev, "Another successful round trip");
 }
