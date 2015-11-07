@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 36;
+use Test::More tests => 38;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -197,7 +197,33 @@ my ($obj, $source, $fields, $data_records);
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+}
 
+{
+    my $fields = ["path", "nationality", "gender", "age", "income", "id_no"];
+    my $data_records = [
+        ["|Alpha", "", "", "", "", ""],
+        ["|Alpha|Epsilon", "", "", "", "", ""],
+        ["|Alpha|Epsilon|Kappa", "", "", "", "", ""],
+        ["|Alpha|Zeta", "", "", "", "", ""],
+        ["|Alpha|Zeta|Lambda", "", "", "", "", ""],
+        ["|Alpha|Zeta|Mu", "", "", "", "", ""],
+        ["|Beta", "", "", "", "", ""],
+        ["|Beta|Eta", "", "", "", "", ""],
+        ["|Beta|Theta", "", "", "", "", ""],
+        ["|Gamma", "", "", "", "", ""],
+        ["|Gamma|Iota", "", "", "", "", ""],
+        ["|Gamma|Iota|Nu", "", "", "", "", ""],
+        ["|Delta", "", "", "", "", ""],
+    ];
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $data_records,
+        }
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
 }
 
 {
