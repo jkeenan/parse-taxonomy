@@ -1108,14 +1108,6 @@ sub write_adjacentified_to_csv {
     return $csvfile;
 }
 
-sub nest {
-    my $self = shift;
-    $self->{nest_counter} = 0;
-
-
-    return 1;
-}
-
 1;
 
 # vim: formatoptions=crqot
