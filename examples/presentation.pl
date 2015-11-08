@@ -28,5 +28,18 @@ my $csv_out = "$cwd/examples/data/auto_adjacent.csv";
 #Data::Dump::pp($adjacentified);
 $obj->write_adjacentified_to_csv( {
     adjacentified => $adjacentified,
-    csvfile => "$csv_out",
+    csvfile => $csv_out,
+} );
+
+my $alobj = Parse::Taxonomy::AdjacentList->new( {
+    file => $csv_out,
+} );
+croak "Invalid taxonomy" unless defined($alobj);
+
+my $pathified = $alobj->pathify();
+#Data::Dump::pp($pathified);
+my $csv_out_path = "$cwd/examples/data/auto_pathified.csv";
+$alobj->write_pathified_to_csv( {
+    pathified => $pathified,
+    csvfile => $csv_out_path,
 } );

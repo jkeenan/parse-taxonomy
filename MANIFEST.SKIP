@@ -38,3 +38,4 @@ nytprof.out
 t/data/*taxonomy_out*
 demo/
 examples/data/auto_adjacent.csv
+examples/data/auto_pathified.csv
