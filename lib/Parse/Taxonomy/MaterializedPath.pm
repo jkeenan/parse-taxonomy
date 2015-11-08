@@ -960,7 +960,6 @@ sub adjacentify {
     my @components_by_row =
         map { my $f = $_->[$path_col_idx]; my $c = $#{$f}; [ @{$f}[1..$c] ] } @{$drpc};
     my $max_components = max( map { scalar(@{$_}) } @components_by_row);
-    my $serial = $args->{serial} || $args->{floor} || 0;
     my @adjacentified = ();
     my %paths_to_id;
     for my $depth (1..$max_components) {
