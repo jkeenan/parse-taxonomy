@@ -74,3 +74,7 @@ Revision history for Perl module Parse::File::Taxonomy
     - Parse::Taxonomy::MaterializedPath: value of path column must start
       with path column separator.
     - Add 'lft' and 'rgh' to list of reserved terms.
+
+0.19 Thu Nov 12 18:53:39 EST 2015
+    - Restore 5.008 as minimum version.  Implement 'floor' option to
+      Parse::Taxonomy::MaterializedPath::adjacentify().
