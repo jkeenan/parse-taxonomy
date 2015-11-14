@@ -176,7 +176,7 @@ my ($obj, $source, $expect, $adjacentified);
     my $line = <$IN>;
     close $IN or croak "Unable to close $csv_file after reading";
     my $line_ending;
-    ($line_ending) = $line =~ m/(\R)$/;
+    ($line_ending) = $line =~ m/(\015\012)$/;
     is($line_ending, "\r\n", "Wrote DOS line endings to output file");
 
     {

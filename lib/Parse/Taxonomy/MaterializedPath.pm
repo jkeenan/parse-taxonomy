@@ -6,7 +6,7 @@ use Text::CSV_XS;
 use Scalar::Util qw( reftype );
 use List::Util qw( max );
 use Cwd;
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 use Parse::Taxonomy::Auxiliary qw(
     path_check_fields
     components_check_fields
@@ -907,7 +907,7 @@ which new unique IDs will be assigned to the C<id> column.  Hence, if
 C<serial> is set to C<500>, the value assigned to the C<id> column of the
 first record to be processed will be C<501>.
 
-Starting with version 0.19, C<floor> will serve as an alternative way of
+Starting with version .19, C<floor> will serve as an alternative way of
 providing the same information to C<adjacentify()>.  If, however, by mistake
 you provide B<both> C<serial> and C<floor> elements in the hash, C<serial>
 will take precedence.
