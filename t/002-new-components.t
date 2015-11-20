@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 34;
+use Test::More tests => 37;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $fields, $data_records);
@@ -365,6 +365,54 @@ $data_records = [
     } );
     ok(defined $obj, "'new()' returned defined value");
     isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    # For testing purposes, create a hash where each element is keyed on the
+    # materialized_path of a row in $obj->data_records() and where the value
+    # is an array of the non-path elements in each such row.  Example:
+    # {
+    #   "|alpha"             => [1, 0],
+    #   "|alpha|able"        => [1, 0],
+    #   "|alpha|able|Agnes"  => [1, 1],
+    #   # ...
+    #   "|beta"              => [1, 0],
+    #   "|beta|able"         => [1, 0],
+    # }
+
+    my %ver;
+    for my $row (@{$obj->data_records()}) {
+        $ver{$row->[0]} = [ @{$row}[1 .. $#{$row}] ];
+    }
+
+    my $scrambled_data_records = [
+        ["|Alpha", "", "", "", "", ""],
+        ["|Beta|Eta", "", "", "", "", ""],
+        ["|Alpha|Epsilon|Kappa", "", "", "", "", ""],
+        ["|Delta", "", "", "", "", ""],
+        ["|Alpha|Zeta|Lambda", "", "", "", "", ""],
+        ["|Alpha|Zeta|Mu", "", "", "", "", ""],
+        ["|Beta", "", "", "", "", ""],
+        ["|Alpha|Zeta", "", "", "", "", ""],
+        ["|Alpha|Epsilon", "", "", "", "", ""],
+        ["|Beta|Theta", "", "", "", "", ""],
+        ["|Gamma|Iota", "", "", "", "", ""],
+        ["|Gamma", "", "", "", "", ""],
+        ["|Gamma|Iota|Nu", "", "", "", "", ""],
+    ];
+    my $second_obj = Parse::Taxonomy::MaterializedPath->new( {
+        components  => {
+            fields          => $fields,
+            data_records    => $scrambled_data_records,
+        }
+    } );
+    ok(defined $second_obj, "'new()' returned defined value");
+    isa_ok($second_obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my %rev;
+    for my $row (@{$second_obj->data_records()}) {
+        $rev{$row->[0]} = [ @{$row}[1 .. $#{$row}] ];
+    }
+    is_deeply(\%rev, \%rev,
+        "Scrambling data_records in input made no difference to taxonomy");
 }
 
 {
