@@ -697,7 +697,15 @@ column in the incoming taxonomy file.
 =cut
 
 sub descendant_counts {
-    my $self = shift;
+    my ($self, $args) = @_;
+    if (defined $args) {
+        croak "Argument to 'hashify()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+        if (length($args->{generations})) {
+            croak "Value for 'generations' element passed to descendant_counts() must be integer >= 0"
+                unless ($args->{generations} =~ m/^[0-9]+$/);
+        }
+    }
     my %descendant_counts = ();
     my $hashified = $self->hashify();
     for my $p (keys %{$hashified}) {
@@ -706,7 +714,17 @@ sub descendant_counts {
             grep { $self->{row_analysis}->{$_} > $self->{row_analysis}->{$p} }
             keys %{$hashified}
         ) {
-            $descendant_counts{$p}++ if $q =~ m/^\Q$p$self->{path_col_sep}\E/;
+            if ($q =~ m/^\Q$p$self->{path_col_sep}\E/) {
+                if (! $args->{generations}) {
+                    $descendant_counts{$p}++;
+                }
+                else {
+                    my @c = $p =~ m/\Q$self->{path_col_sep}\E/g;
+                    my @d = $q =~ m/\Q$self->{path_col_sep}\E/g;
+                    $descendant_counts{$p}++
+                        if (scalar(@d) - scalar(@c) <= $args->{generations});
+                }
+            }
         }
     }
     $self->{descendant_counts} = \%descendant_counts;

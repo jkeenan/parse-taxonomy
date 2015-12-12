@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 68;
+use Test::More tests => 69;
 
 my ($obj, $source, $expect);
 
@@ -123,6 +123,28 @@ my ($obj, $source, $expect);
     ok($is_array_ref,
         "Path column in each row returned by fields_and_data_records_path_components() is now an array ref");
 
+    my $descendant_counts;
+    {
+        my $gen_count = 1;
+        $expect = {
+          "|Alpha"               => 2,
+          "|Alpha|Epsilon"       => 1,
+          "|Alpha|Epsilon|Kappa" => 0,
+          "|Alpha|Zeta"          => 2,
+          "|Alpha|Zeta|Lambda"   => 0,
+          "|Alpha|Zeta|Mu"       => 0,
+          "|Beta"                => 2,
+          "|Beta|Eta"            => 0,
+          "|Beta|Theta"          => 0,
+          "|Delta"               => 0,
+          "|Gamma"               => 1,
+          "|Gamma|Iota"          => 1,
+          "|Gamma|Iota|Nu"       => 0,
+        };
+        $descendant_counts = $obj->descendant_counts( { generations => $gen_count } );
+        is_deeply($descendant_counts, $expect,
+            "Got expected descendant count for each node limited to $gen_count generation(s)");
+    }
     $expect = {
       "|Alpha"               => 5,
       "|Alpha|Epsilon"       => 1,
@@ -138,7 +160,7 @@ my ($obj, $source, $expect);
       "|Gamma|Iota"          => 1,
       "|Gamma|Iota|Nu"       => 0,
     };
-    my $descendant_counts = $obj->descendant_counts();
+    $descendant_counts = $obj->descendant_counts();
     is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
 
     {
