@@ -709,7 +709,8 @@ sub descendant_counts {
             $descendant_counts{$p}++ if $q =~ m/^\Q$p$self->{path_col_sep}\E/;
         }
     }
-    return \%descendant_counts;
+    $self->{descendant_counts} = \%descendant_counts;
+    return $self->{descendant_counts};
 }
 
 =head2 C<get_descendant_count()>
@@ -742,7 +743,13 @@ Will throw an exception if the node does not exist or is misspelled.
 
 sub get_descendant_count {
     my ($self, $node) = @_;
-    my $descendant_counts = $self->descendant_counts();
+    my $descendant_counts;
+    if (exists $self->{descendant_counts}) {
+        $descendant_counts = $self->{descendant_counts};
+    }
+    else {
+        $descendant_counts = $self->descendant_counts();
+    }
     croak "Node '$node' not found" unless exists $descendant_counts->{$node};
     return $descendant_counts->{$node};
 }
