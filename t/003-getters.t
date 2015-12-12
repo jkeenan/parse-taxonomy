@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 64;
+use Test::More tests => 68;
 
 my ($obj, $source, $expect);
 
@@ -415,4 +415,26 @@ my ($obj, $source, $expect);
     is($path_col_sep, $expect, "Path column separator is '$expect'");
 }
 
+{
+    my ($obj, $source, $expect);
 
+    $source = "./t/data/alpha.csv";
+    note($source);
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my ($n, $node_descendant_count);
+
+    $n = '|Gamma';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node with $expect descendants found");
+
+    $n = '|Gamma|Iota|Nu';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
+}

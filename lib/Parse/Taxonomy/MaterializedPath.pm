@@ -737,6 +737,13 @@ leaf node.
 
 Will throw an exception if the node does not exist or is misspelled.
 
+If C<get_descendant_count()> is called following an invocation of
+C<descendant_counts()> or a previous invocation of C<get_descendant_count()>,
+it will return a value from an internal cache created during that earlier
+method call.  Otherwise, it will re-create the cache from scratch.  (This, of
+course, assumes that you have not manipulated the object's internal data
+subsequent to its creation.)
+
 =back
 
 =cut
