@@ -747,26 +747,6 @@ sub get_descendant_count {
     return $descendant_counts->{$node};
 }
 
-=head2 C<child_counts()>
-
-B<DEPRECATED:>  This is an older, less precise name for
-C<descendant_counts()>.  It will be removed in the first CPAN release
-following January 1, 2016.
-
-=cut
-
-*child_counts = \&descendant_counts;
-
-=head2 C<get_child_count()>
-
-B<DEPRECATED:>  This is an older, less precise name for
-C<get_descendant_count()>.  It will be removed in the first CPAN release
-following January 1, 2016.
-
-=cut
-
-*get_child_count = \&get_descendant_count;
-
 =head2 C<hashify()>
 
 =over 4
