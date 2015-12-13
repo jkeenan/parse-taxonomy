@@ -699,12 +699,10 @@ column in the incoming taxonomy file.
 sub descendant_counts {
     my ($self, $args) = @_;
     if (defined $args) {
-        croak "Argument to 'hashify()' must be hashref"
+        croak "Argument to 'descendant_counts()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
-        if (length($args->{generations})) {
-            croak "Value for 'generations' element passed to descendant_counts() must be integer >= 0"
-                unless ($args->{generations} =~ m/^[0-9]+$/);
-        }
+        croak "Value for 'generations' element passed to descendant_counts() must be integer >= 0"
+            unless ($args->{generations} =~ m/^[0-9]+$/);
     }
     my %descendant_counts = ();
     my $hashified = $self->hashify();
@@ -768,13 +766,9 @@ subsequent to its creation.)
 
 sub get_descendant_count {
     my ($self, $node) = @_;
-    my $descendant_counts;
-    if (exists $self->{descendant_counts}) {
-        $descendant_counts = $self->{descendant_counts};
-    }
-    else {
-        $descendant_counts = $self->descendant_counts();
-    }
+    my $descendant_counts = (exists $self->{descendant_counts})
+        ? $self->{descendant_counts}
+        : $self->descendant_counts();
     croak "Node '$node' not found" unless exists $descendant_counts->{$node};
     return $descendant_counts->{$node};
 }

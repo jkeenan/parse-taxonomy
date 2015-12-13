@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 69;
+use Test::More tests => 72;
 
 my ($obj, $source, $expect);
 
@@ -141,6 +141,37 @@ my ($obj, $source, $expect);
           "|Gamma|Iota"          => 1,
           "|Gamma|Iota|Nu"       => 0,
         };
+
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( generations => $gen_count );
+            };
+            like($@, qr/^Argument to 'descendant_counts\(\)' must be hashref/,
+                "'descendant_counts()' died to lack of hashref as argument; was just a key-value pair");
+        }
+
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( [ generations => $gen_count ] );
+            };
+            like($@, qr/^Argument to 'descendant_counts\(\)' must be hashref/,
+                "'descendant_counts()' died to lack of hashref as argument; was arrayref");
+        }
+
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( { generations => 'foo' } );
+            };
+            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer >= 0/,
+                "'descendant_counts()' died to non-integer argument");
+        }
+
         $descendant_counts = $obj->descendant_counts( { generations => $gen_count } );
         is_deeply($descendant_counts, $expect,
             "Got expected descendant count for each node limited to $gen_count generation(s)");
