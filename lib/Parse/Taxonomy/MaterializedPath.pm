@@ -685,7 +685,14 @@ taxonomy has.
 
     $descendant_counts = $self->descendant_counts();
 
-None.
+    $descendant_counts = $self->descendant_counts( { generations => 1 } );
+
+None required; one optional hash reference.  Currently, the only element
+honored in that hashref is C<generations>, whose value must be a non-negative
+integer.  If, instead of getting all the descendants of a node, you only want
+its first generation, i.e., its immediate children, you provide a value of
+C<1>.  Want only the first and second generations?  Provide a value of C<2> --
+and so on.
 
 =item * Return Value
 
@@ -701,8 +708,8 @@ sub descendant_counts {
     if (defined $args) {
         croak "Argument to 'descendant_counts()' must be hashref"
             unless (ref($args) and reftype($args) eq 'HASH');
-        croak "Value for 'generations' element passed to descendant_counts() must be integer >= 0"
-            unless ($args->{generations} =~ m/^[0-9]+$/);
+        croak "Value for 'generations' element passed to descendant_counts() must be integer > 0"
+            unless ($args->{generations} and $args->{generations} =~ m/^[0-9]+$/);
     }
     my %descendant_counts = ();
     my $hashified = $self->hashify();

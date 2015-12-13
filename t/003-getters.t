@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 72;
+use Test::More tests => 73;
 
 my ($obj, $source, $expect);
 
@@ -123,25 +123,9 @@ my ($obj, $source, $expect);
     ok($is_array_ref,
         "Path column in each row returned by fields_and_data_records_path_components() is now an array ref");
 
-    my $descendant_counts;
     {
+        my ($descendant_counts, $expect);
         my $gen_count = 1;
-        $expect = {
-          "|Alpha"               => 2,
-          "|Alpha|Epsilon"       => 1,
-          "|Alpha|Epsilon|Kappa" => 0,
-          "|Alpha|Zeta"          => 2,
-          "|Alpha|Zeta|Lambda"   => 0,
-          "|Alpha|Zeta|Mu"       => 0,
-          "|Beta"                => 2,
-          "|Beta|Eta"            => 0,
-          "|Beta|Theta"          => 0,
-          "|Delta"               => 0,
-          "|Gamma"               => 1,
-          "|Gamma|Iota"          => 1,
-          "|Gamma|Iota|Nu"       => 0,
-        };
-
         {
             local $@;
             eval {
@@ -168,31 +152,57 @@ my ($obj, $source, $expect);
                 $descendant_counts =
                     $obj->descendant_counts( { generations => 'foo' } );
             };
-            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer >= 0/,
+            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer > 0/,
                 "'descendant_counts()' died to non-integer argument");
         }
 
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( { generations => 0 } );
+            };
+            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer > 0/,
+                "'descendant_counts()' died to argument 0");
+        }
+
+        $expect = {
+          "|Alpha"               => 2,
+          "|Alpha|Epsilon"       => 1,
+          "|Alpha|Epsilon|Kappa" => 0,
+          "|Alpha|Zeta"          => 2,
+          "|Alpha|Zeta|Lambda"   => 0,
+          "|Alpha|Zeta|Mu"       => 0,
+          "|Beta"                => 2,
+          "|Beta|Eta"            => 0,
+          "|Beta|Theta"          => 0,
+          "|Delta"               => 0,
+          "|Gamma"               => 1,
+          "|Gamma|Iota"          => 1,
+          "|Gamma|Iota|Nu"       => 0,
+        };
         $descendant_counts = $obj->descendant_counts( { generations => $gen_count } );
         is_deeply($descendant_counts, $expect,
             "Got expected descendant count for each node limited to $gen_count generation(s)");
+
+        $expect = {
+          "|Alpha"               => 5,
+          "|Alpha|Epsilon"       => 1,
+          "|Alpha|Epsilon|Kappa" => 0,
+          "|Alpha|Zeta"          => 2,
+          "|Alpha|Zeta|Lambda"   => 0,
+          "|Alpha|Zeta|Mu"       => 0,
+          "|Beta"                => 2,
+          "|Beta|Eta"            => 0,
+          "|Beta|Theta"          => 0,
+          "|Delta"               => 0,
+          "|Gamma"               => 2,
+          "|Gamma|Iota"          => 1,
+          "|Gamma|Iota|Nu"       => 0,
+        };
+        $descendant_counts = $obj->descendant_counts();
+        is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
     }
-    $expect = {
-      "|Alpha"               => 5,
-      "|Alpha|Epsilon"       => 1,
-      "|Alpha|Epsilon|Kappa" => 0,
-      "|Alpha|Zeta"          => 2,
-      "|Alpha|Zeta|Lambda"   => 0,
-      "|Alpha|Zeta|Mu"       => 0,
-      "|Beta"                => 2,
-      "|Beta|Eta"            => 0,
-      "|Beta|Theta"          => 0,
-      "|Delta"               => 0,
-      "|Gamma"               => 2,
-      "|Gamma|Iota"          => 1,
-      "|Gamma|Iota|Nu"       => 0,
-    };
-    $descendant_counts = $obj->descendant_counts();
-    is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
 
     {
         my ($n, $node_descendant_count);
