@@ -18,6 +18,7 @@ my @dummy = qw(
   epsilon.csv
   eta.csv
   extra_wordspace.csv
+  gamma.csv
   ids_missing_parents.csv
   iota.csv
   kappa.csv

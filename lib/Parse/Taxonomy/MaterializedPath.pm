@@ -689,10 +689,10 @@ taxonomy has.
 
 None required; one optional hash reference.  Currently, the only element
 honored in that hashref is C<generations>, whose value must be a non-negative
-integer.  If, instead of getting all the descendants of a node, you only want
-its first generation, i.e., its immediate children, you provide a value of
-C<1>.  Want only the first and second generations?  Provide a value of C<2> --
-and so on.
+integer.  If, instead of getting the count of all descendants of a node, you
+only want the count of its first generation, i.e., its immediate children, you
+provide a value of C<1>.  Want the count of only the first and second
+generations?  Provide a value of C<2> -- and so on.
 
 =item * Return Value
 
@@ -749,7 +749,16 @@ taxonomy.
 
     $descendant_count = $self->get_descendant_count('|Path|To|Node');
 
-String containing node's path as spelled in the taxonomy.
+    $descendant_counts = $self->get_descendant_count('|Path|To|Node', { generations => 1 } );
+
+One required:  string containing node's path as spelled in the taxonomy.
+
+One optional hash reference.  Currently, the only element honored in that
+hashref is C<generations>, whose value must be a non-negative integer.  If,
+instead of getting the count of all descendants of a node, you only want the
+count of its first generation, i.e., its immediate children, you provide a
+value of C<1>.  Want the count of only first and second generations?  Provide
+a value of C<2> -- and so on.
 
 =item * Return Value
 
@@ -760,24 +769,54 @@ leaf node.
 
 Will throw an exception if the node does not exist or is misspelled.
 
-If C<get_descendant_count()> is called following an invocation of
-C<descendant_counts()> or a previous invocation of C<get_descendant_count()>,
-it will return a value from an internal cache created during that earlier
-method call.  Otherwise, it will re-create the cache from scratch.  (This, of
-course, assumes that you have not manipulated the object's internal data
-subsequent to its creation.)
+If C<get_descendant_count()> is called with no second (hashref) argument
+following an invocation of C<descendant_counts()>, it will return a value from
+an internal cache created during that earlier method call.  Otherwise, it will
+re-create the cache from scratch.  (This, of course, assumes that you have not
+manipulated the object's internal data subsequent to its creation.)
 
 =back
 
 =cut
 
 sub get_descendant_count {
-    my ($self, $node) = @_;
-    my $descendant_counts = (exists $self->{descendant_counts})
-        ? $self->{descendant_counts}
-        : $self->descendant_counts();
-    croak "Node '$node' not found" unless exists $descendant_counts->{$node};
-    return $descendant_counts->{$node};
+    my ($self, $node, $args) = @_;
+    if (defined $args) {
+        croak "Second argument to 'get_descendant_count()' must be hashref"
+            unless (ref($args) and reftype($args) eq 'HASH');
+        croak "Value for 'generations' element passed to second argument to get_descendant_count() must be integer > 0"
+            unless ($args->{generations} and $args->{generations} =~ m/^[0-9]+$/);
+    }
+    if (exists $self->{descendant_counts}) {
+        my $descendant_counts = $self->{descendant_counts};
+        croak "Node '$node' not found" unless exists $descendant_counts->{$node};
+        return $descendant_counts->{$node};
+    }
+    else {
+        my %descendant_counts = ();
+        my $hashified = $self->hashify();
+        croak "Node '$node' not found" unless exists $hashified->{$node};
+        for my $p ($node) {
+            $descendant_counts{$p} = 0;
+            for my $q (
+                grep { $self->{row_analysis}->{$_} > $self->{row_analysis}->{$p} }
+                keys %{$hashified}
+            ) {
+                if ($q =~ m/^\Q$p$self->{path_col_sep}\E/) {
+                    if (! $args->{generations}) {
+                        $descendant_counts{$p}++;
+                    }
+                    else {
+                        my @c = $p =~ m/\Q$self->{path_col_sep}\E/g;
+                        my @d = $q =~ m/\Q$self->{path_col_sep}\E/g;
+                        $descendant_counts{$p}++
+                            if (scalar(@d) - scalar(@c) <= $args->{generations});
+                    }
+                }
+            }
+        }
+        return $descendant_counts{$node};
+    }
 }
 
 =head2 C<hashify()>

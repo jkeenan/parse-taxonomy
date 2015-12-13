@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 73;
+use Test::More tests => 93;
 
 my ($obj, $source, $expect);
 
@@ -479,6 +479,7 @@ my ($obj, $source, $expect);
 }
 
 {
+    note("Test free-standing get_descendant_count()");
     my ($obj, $source, $expect);
 
     $source = "./t/data/alpha.csv";
@@ -491,6 +492,14 @@ my ($obj, $source, $expect);
 
     my ($n, $node_descendant_count);
 
+    {
+        local $@;
+        $n = 'foo';
+        eval { $node_descendant_count = $obj->get_descendant_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_descendant_count' is not a node");
+    }
+
     $n = '|Gamma';
     $expect = 2;
     $node_descendant_count = $obj->get_descendant_count($n);
@@ -500,4 +509,126 @@ my ($obj, $source, $expect);
     $expect = 0;
     $node_descendant_count = $obj->get_descendant_count($n);
     is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, generations => 1 );
+        };
+        like($@, qr/^Second argument to 'get_descendant_count\(\)' must be hashref/,
+            "'get_descendant_count()' died to lack of hashref as second argument; was just a key-value pair");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, [ generations => 1 ] );
+        };
+        like($@, qr/^Second argument to 'get_descendant_count\(\)' must be hashref/,
+            "'get_descendant_count()' died to lack of hashref as second argument; was arrayref");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, { generations => 'foo' } );
+        };
+        like($@, qr/^Value for 'generations' element passed to second argument to get_descendant_count\(\) must be integer > 0/,
+            "'get_descendant_count()' died to non-integer as value in second argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, { generations => 0 } );
+        };
+        like($@, qr/^Value for 'generations' element passed to second argument to get_descendant_count\(\) must be integer > 0/,
+            "'get_descendant_count()' died to 0 as value in second argument");
+    }
+
+    my $gen_count = 1;
+
+    $n = '|Alpha';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Alpha|Epsilon';
+    $expect = 1;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Alpha|Epsilon|Kappa';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta|Eta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta|Theta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Delta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
 }
+
+{
+    note("Test a file with more segments in path");
+    $source = "./t/data/gamma.csv";
+    note($source);
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my ($n, $gen_count, $expect, $node_descendant_count);
+
+    $n = '|Omicron';
+    $expect = 5;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node '$n': $expect descendants found");
+
+    $gen_count = 1;
+    $expect = 1;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $gen_count = 3;
+    $expect = 4;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $gen_count = 4;
+    $expect = 5;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $n = '|Omicron|Pi|Rho';
+    $expect = 3;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node '$n': $expect descendants found");
+
+    $gen_count = 1;
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+}
+
