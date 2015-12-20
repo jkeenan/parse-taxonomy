@@ -9,7 +9,7 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
-use Test::More qw(no_plan); # tests => 12;
+use Test::More tests => 126;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $expect);
@@ -627,3 +627,28 @@ my $path_data_records = [
     ok((-r $csv_file), "'$csv_file' is readable");
 }
 
+{
+    note("Cookbook example: adjacent-list to materialized-path");
+    $source = "./t/data/theta.csv";
+    note($source);
+    $obj = Parse::Taxonomy::AdjacentList->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
+
+    my $rv;
+    $rv = $obj->pathify( { as_string => 1 });
+    ok($rv, "pathify() with 'as_string' returned true value");
+    ok(ref($rv), "pathify() with 'as_string' returned reference");
+    is(reftype($rv), 'ARRAY', "pathify() with 'as_string' returned array reference");
+
+    my $newobj = Parse::Taxonomy::MaterializedPath->new( {
+        components => {
+            fields          => $rv->[0],
+            data_records    => [ @{$rv}[1..$#{$rv}] ],
+        },
+    } );
+    ok(defined $newobj, "Output of 'pathify' with 'as_string' used as input to Parse::Taxonomy::MaterializedPath::new() with 'components' inteface");
+
+}
