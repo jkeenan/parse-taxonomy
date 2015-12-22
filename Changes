@@ -81,3 +81,6 @@ Revision history for Perl module Parse::File::Taxonomy
 
 0.20 Fri Nov 13 22:55:48 EST 2015
     - Make one test in t/005-adjacentify.t more perl-5.8-friendly.
+
+0.21 Mon Dec 21 19:07:06 EST 2015
+    - Only additional tests and documentation; expand one cookbook recipe.
