@@ -36,6 +36,7 @@ nytprof/
 nytprof.out
 .version_info.pl
 t/data/*taxonomy_out*
+./*taxonomy_out*
 demo/
 examples/data/auto_adjacent.csv
 examples/data/auto_pathified.csv

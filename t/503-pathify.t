@@ -9,7 +9,7 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 126;
+use Test::More tests => 127;
 use Scalar::Util qw( reftype );
 
 my ($obj, $source, $expect);
@@ -598,10 +598,17 @@ my $path_data_records = [
     $csv_file = $obj->write_pathified_to_csv( {
         pathified   =>  $pathified,
         csvfile     => './t/data/taxonomy_out5.csv',
+        eol         => "\r\n",
     } );
     ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
     ok((-f $csv_file), "'$csv_file' is plain-text file");
     ok((-r $csv_file), "'$csv_file' is readable");
+    open my $IN, '<', $csv_file or croak "Unable to open $csv_file for reading";
+    my $line = <$IN>;
+    close $IN or croak "Unable to close $csv_file after reading";
+    my $line_ending;
+    ($line_ending) = $line =~ m/(\015\012)$/;
+    is($line_ending, "\r\n", "Wrote DOS line endings to output file");
 }
 
 {

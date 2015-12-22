@@ -22,5 +22,6 @@ Parse-Taxonomy-*.tar.gz
 /nytprof/
 *.swp
 /t/data/taxonomy_out*.csv
+/taxonomy_out.csv
 examples/data/auto_adjacent.csv
 examples/data/auto_pathified.csv
