@@ -250,6 +250,17 @@ That returns a Perl reference to an array of array references:
       ["|Beta|Theta", 1],
     ]
 
+This array of arrays can provide values to the C<fields> and C<data_records>
+arguments in the C<components> interface to a new
+F<Parse::Taxonomy::MaterializedPath> object, as follows:
+
+    $newobj = Parse::Taxonomy::MaterializedPath->new( {
+        components => {
+            fields          => $rv->[0],
+            data_records    => [ @{$rv}[1..$#{$rv}] ],
+        },
+    } );
+
 =head2 Confirm that two taxonomies are equivalent
 
 =head3 Problem
