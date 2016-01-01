@@ -84,3 +84,8 @@ Revision history for Perl module Parse::File::Taxonomy
 
 0.21 Mon Dec 21 19:07:06 EST 2015
     - Only additional tests and documentation; expand one cookbook recipe.
+
+0.22 Fri Jan  1 18:24:18 EST 2016
+    - Remove deprecated Parse::Taxonomy methods child_counts() and
+      get_child_count().  Improve performance, documentation and testing of
+      descendant_counts() and get_descendant_count().
