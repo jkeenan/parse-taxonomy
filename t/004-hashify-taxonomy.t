@@ -785,12 +785,12 @@ my ($obj, $source, $expect, $hashified);
     my $obj = Parse::Taxonomy::MaterializedPath->new( {
         file    => 't/data/iota.csv',
     } );
-    my $hashified       = $obj->hashify();
-    my $child_counts    = $obj->child_counts();
+    my $hashified           = $obj->hashify();
+    my $descendant_counts   = $obj->descendant_counts();
     my @non_actionable_leaf_nodes = ();
     for my $node (keys %{$hashified}) {
         if (
-            ($child_counts->{$node} == 0) &&
+            ($descendant_counts->{$node} == 0) &&
             (! $hashified->{$node}->{is_actionable})
         ) {
             push @non_actionable_leaf_nodes, $node;
@@ -801,11 +801,11 @@ my ($obj, $source, $expect, $hashified);
 
     my %non_actionable_leaf_nodes =
         map { $_ => {
-            child_count => $child_counts->{$_},
-            is_actionable => $hashified->{$_}->{is_actionable},
+            descendant_count    => $descendant_counts->{$_},
+            is_actionable       => $hashified->{$_}->{is_actionable},
         } }
         grep {
-            ($child_counts->{$_} == 0) &&
+            ($descendant_counts->{$_} == 0) &&
             (! $hashified->{$_}->{is_actionable})
         }
         keys %{$hashified};

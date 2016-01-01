@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 72;
+use Test::More tests => 93;
 
 my ($obj, $source, $expect);
 
@@ -123,27 +123,86 @@ my ($obj, $source, $expect);
     ok($is_array_ref,
         "Path column in each row returned by fields_and_data_records_path_components() is now an array ref");
 
-    $expect = {
-      "|Alpha"               => 5,
-      "|Alpha|Epsilon"       => 1,
-      "|Alpha|Epsilon|Kappa" => 0,
-      "|Alpha|Zeta"          => 2,
-      "|Alpha|Zeta|Lambda"   => 0,
-      "|Alpha|Zeta|Mu"       => 0,
-      "|Beta"                => 2,
-      "|Beta|Eta"            => 0,
-      "|Beta|Theta"          => 0,
-      "|Delta"               => 0,
-      "|Gamma"               => 2,
-      "|Gamma|Iota"          => 1,
-      "|Gamma|Iota|Nu"       => 0,
-    };
-    my $descendant_counts = $obj->descendant_counts();
-    is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
+    {
+        my ($descendant_counts, $expect);
+        my $gen_count = 1;
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( generations => $gen_count );
+            };
+            like($@, qr/^Argument to 'descendant_counts\(\)' must be hashref/,
+                "'descendant_counts()' died to lack of hashref as argument; was just a key-value pair");
+        }
 
-    my $child_counts = $obj->child_counts();
-    is_deeply($child_counts, $expect, "Got expected child count for each node");
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( [ generations => $gen_count ] );
+            };
+            like($@, qr/^Argument to 'descendant_counts\(\)' must be hashref/,
+                "'descendant_counts()' died to lack of hashref as argument; was arrayref");
+        }
 
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( { generations => 'foo' } );
+            };
+            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer > 0/,
+                "'descendant_counts()' died to non-integer argument");
+        }
+
+        {
+            local $@;
+            eval {
+                $descendant_counts =
+                    $obj->descendant_counts( { generations => 0 } );
+            };
+            like($@, qr/^Value for 'generations' element passed to descendant_counts\(\) must be integer > 0/,
+                "'descendant_counts()' died to argument 0");
+        }
+
+        $expect = {
+          "|Alpha"               => 2,
+          "|Alpha|Epsilon"       => 1,
+          "|Alpha|Epsilon|Kappa" => 0,
+          "|Alpha|Zeta"          => 2,
+          "|Alpha|Zeta|Lambda"   => 0,
+          "|Alpha|Zeta|Mu"       => 0,
+          "|Beta"                => 2,
+          "|Beta|Eta"            => 0,
+          "|Beta|Theta"          => 0,
+          "|Delta"               => 0,
+          "|Gamma"               => 1,
+          "|Gamma|Iota"          => 1,
+          "|Gamma|Iota|Nu"       => 0,
+        };
+        $descendant_counts = $obj->descendant_counts( { generations => $gen_count } );
+        is_deeply($descendant_counts, $expect,
+            "Got expected descendant count for each node limited to $gen_count generation(s)");
+
+        $expect = {
+          "|Alpha"               => 5,
+          "|Alpha|Epsilon"       => 1,
+          "|Alpha|Epsilon|Kappa" => 0,
+          "|Alpha|Zeta"          => 2,
+          "|Alpha|Zeta|Lambda"   => 0,
+          "|Alpha|Zeta|Mu"       => 0,
+          "|Beta"                => 2,
+          "|Beta|Eta"            => 0,
+          "|Beta|Theta"          => 0,
+          "|Delta"               => 0,
+          "|Gamma"               => 2,
+          "|Gamma|Iota"          => 1,
+          "|Gamma|Iota|Nu"       => 0,
+        };
+        $descendant_counts = $obj->descendant_counts();
+        is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
+    }
 
     {
         my ($n, $node_descendant_count);
@@ -164,27 +223,6 @@ my ($obj, $source, $expect);
         $expect = 0;
         $node_descendant_count = $obj->get_descendant_count($n);
         is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
-    }
-
-    {
-        my ($n, $node_child_count);
-
-        local $@;
-        $n = 'foo';
-        eval { $node_child_count = $obj->get_child_count($n); };
-        like($@, qr/Node '$n' not found/,
-            "Argument '$n' to 'get_child_count' is not a node");
-        local $@;
-
-        $n = '|Gamma';
-        $expect = 2;
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, $expect, "Node with $expect descendants found");
-
-        $n = '|Gamma|Iota|Nu';
-        $expect = 0;
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, $expect, "Node with $expect descendants -- leaf node -- found");
     }
 
     {
@@ -374,10 +412,6 @@ my ($obj, $source, $expect);
     my $descendant_counts = $obj->descendant_counts();
     is_deeply($descendant_counts, $expect, "Got expected descendant count for each node");
 
-    my $child_counts = $obj->child_counts();
-    is_deeply($child_counts, $expect, "Got expected child count for each node");
-
-
     {
         my ($n, $node_descendant_count);
 
@@ -397,27 +431,6 @@ my ($obj, $source, $expect);
         $expect = 0;
         $node_descendant_count = $obj->get_descendant_count($n);
         is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
-    }
-
-    {
-        my ($n, $node_child_count);
-
-        local $@;
-        $n = 'foo';
-        eval { $node_child_count = $obj->get_child_count($n); };
-        like($@, qr/Node '$n' not found/,
-            "Argument '$n' to 'get_child_count' is not a node");
-        local $@;
-
-        $n = '|Gamma';
-        $expect = 2;
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, $expect, "Node with $expect descendants found");
-
-        $n = '|Gamma|Iota|Nu';
-        $expect = 0;
-        $node_child_count = $obj->get_child_count($n);
-        is($node_child_count, $expect, "Node with $expect descendants -- leaf node -- found");
     }
 } 
 
@@ -465,4 +478,157 @@ my ($obj, $source, $expect);
     is($path_col_sep, $expect, "Path column separator is '$expect'");
 }
 
+{
+    note("Test free-standing get_descendant_count()");
+    my ($obj, $source, $expect);
+
+    $source = "./t/data/alpha.csv";
+    note($source);
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my ($n, $node_descendant_count);
+
+    {
+        local $@;
+        $n = 'foo';
+        eval { $node_descendant_count = $obj->get_descendant_count($n); };
+        like($@, qr/Node '$n' not found/,
+            "Argument '$n' to 'get_descendant_count' is not a node");
+    }
+
+    $n = '|Gamma';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node with $expect descendants found");
+
+    $n = '|Gamma|Iota|Nu';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node with $expect descendants -- leaf node -- found");
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, generations => 1 );
+        };
+        like($@, qr/^Second argument to 'get_descendant_count\(\)' must be hashref/,
+            "'get_descendant_count()' died to lack of hashref as second argument; was just a key-value pair");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, [ generations => 1 ] );
+        };
+        like($@, qr/^Second argument to 'get_descendant_count\(\)' must be hashref/,
+            "'get_descendant_count()' died to lack of hashref as second argument; was arrayref");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, { generations => 'foo' } );
+        };
+        like($@, qr/^Value for 'generations' element passed to second argument to get_descendant_count\(\) must be integer > 0/,
+            "'get_descendant_count()' died to non-integer as value in second argument");
+    }
+
+    {
+        local $@;
+        eval {
+            $node_descendant_count =
+                $obj->get_descendant_count($n, { generations => 0 } );
+        };
+        like($@, qr/^Value for 'generations' element passed to second argument to get_descendant_count\(\) must be integer > 0/,
+            "'get_descendant_count()' died to 0 as value in second argument");
+    }
+
+    my $gen_count = 1;
+
+    $n = '|Alpha';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Alpha|Epsilon';
+    $expect = 1;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Alpha|Epsilon|Kappa';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta';
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta|Eta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Beta|Theta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+
+    $n = '|Delta';
+    $expect = 0;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s):  $expect descendants found");
+}
+
+{
+    note("Test a file with more segments in path");
+    $source = "./t/data/gamma.csv";
+    note($source);
+    $obj = Parse::Taxonomy::MaterializedPath->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "'new()' returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::MaterializedPath');
+
+    my ($n, $gen_count, $expect, $node_descendant_count);
+
+    $n = '|Omicron';
+    $expect = 5;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node '$n': $expect descendants found");
+
+    $gen_count = 1;
+    $expect = 1;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $gen_count = 3;
+    $expect = 4;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $gen_count = 4;
+    $expect = 5;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+    $n = '|Omicron|Pi|Rho';
+    $expect = 3;
+    $node_descendant_count = $obj->get_descendant_count($n);
+    is($node_descendant_count, $expect, "Node '$n': $expect descendants found");
+
+    $gen_count = 1;
+    $expect = 2;
+    $node_descendant_count = $obj->get_descendant_count($n, { generations => $gen_count } );
+    is($node_descendant_count, $expect, "Node '$n', limited to $gen_count generation(s): $expect descendants found");
+
+}
 

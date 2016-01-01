@@ -13,23 +13,6 @@ implement?
 Cookbook:  Include recipe for predicting the result of a data migration
 between relational database tables.
 
-=head2 Remove C<child_counts()> and C<get_child_count()>
-
-In Internet discussions of hierarchical data, one often sees a distinction
-between the B<children> of a node and the B<descendants> of a node.  The
-former term usually means "first-generation only", whereas the latter usually
-means "all subsequent generations."
-
-C<Parse::Taxonomy::MaterializedPath::child_counts()> and C<get_child_count()>
-are documented as returning the count of all descendants of a node, I<i.e.,> a
-multi-generational count for either all nodes (C<child_counts()>) or for one
-particular node (C<get_child_count()>).  Hence, these methods would be better
-named C<descendant_counts()> and C<get_descendant_count()>, respectively.
-
-C<child_counts()> and C<get_child_count()> are deprecated as of v0.16.  Remove
-them and their associated unit tests in the first CPAN release after
-January 1, 2016.
-
 =head2 Nested Sets
 
 =head3 Methods in existing packages
@@ -46,12 +29,5 @@ Explore creation of a Parse::Taxonomy::NestedSet package which would
 take as input a taxonomy-by-nested-set (via a CSV file or via a C<components>
 interface), created a NestedSet object against which methods such as
 C<descendant_counts()>, C<pathify()> and C<adjacentify()> would be callable.
-
-=head2 Speed Up C<descendant_counts()> and C<get_descendant_count()>
-
-Up through v0.16, these methods in Parse::Taxonomy::MaterializedPath are
-extremely slow.  See if they can be sped up.  IN PROGRESS.  Next step:
-explore generation of path depth table from inside C<descendant_counts()> to end
-of C<new()>.
 
 =cut

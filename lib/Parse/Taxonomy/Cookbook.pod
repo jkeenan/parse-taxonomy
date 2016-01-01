@@ -122,10 +122,10 @@ In this case:
     $self = Parse::Taxonomy::MaterializedPath->new( {
         file    => 'local_requirement.csv',
     } );
-    $hashified       = $self->hashify();
-    $child_counts    = $self->child_counts();
+    $hashified          = $self->hashify();
+    $descendant_counts  = $self->descendant_counts();
 
-Use C<hashify()> to turn the taxonomy into a hash.  Use C<child_counts()> to
+Use C<hashify()> to turn the taxonomy into a hash.  Use C<descendant_counts()> to
 get the number of children each node has.  Then iterate over the hash checking
 whether an element has no children and, if so, whether the node's
 C<is_actionable> setting is true.
@@ -133,7 +133,7 @@ C<is_actionable> setting is true.
     @non_actionable_leaf_nodes = ();
     for my $node (keys %{$hashified}) {
         if (
-            ($child_counts->{$node} == 0) &&
+            ($descendant_counts->{$node} == 0) &&
             (! $hashified->{$node}->{is_actionable})
         ) {
             push @non_actionable_leaf_nodes, $node;
