@@ -863,7 +863,7 @@ sub write_pathified_to_csv {
         map { $columns_in->[$_]  }
         grep { ! $path_columns{$columns_in->[$_]} }
         (0..$#{$columns_in});
-    my @columns_out = (qw| path |);
+    my @columns_out = ( $pathified->[0]->[0]);
     push @columns_out, @non_path_columns_in;
 
     my $cwd = cwd();

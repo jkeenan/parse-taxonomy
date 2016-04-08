@@ -9,8 +9,9 @@ use utf8;
 use lib ('./lib');
 use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 127;
+use Test::More tests => 135;
 use Scalar::Util qw( reftype );
+use Text::CSV;
 
 my ($obj, $source, $expect);
 my ($exp_fields, $exp_data_records);
@@ -657,4 +658,40 @@ my $path_data_records = [
     } );
     ok(defined $newobj, "Output of 'pathify' with 'as_string' used as input to Parse::Taxonomy::MaterializedPath::new() with 'components' inteface");
 
+}
+
+{
+    note("rt.cpan.org: #113605: header in output of write_pathified_to_csv() does not reflect 'path_col' argument to pathify()");
+
+    my ($source, $obj);
+    $source = "./t/data/theta.csv";
+    $obj = Parse::Taxonomy::AdjacentList->new( {
+        file    => $source,
+    } );
+    ok(defined $obj, "new() returned defined value");
+    isa_ok($obj, 'Parse::Taxonomy::AdjacentList');
+
+    my ($pathified, $csv_file);
+    my $path_col_name = 'my_full_path';
+    $pathified = $obj->pathify( { path_col => $path_col_name } );
+    ok($pathified, "pathify() with 'path_col' argument returned true value");
+    my $header_in_pathified = $pathified->[0];
+    is($header_in_pathified->[0], $path_col_name,
+        "Value for 'path_col' located in output of pathify()");
+
+    $csv_file = $obj->write_pathified_to_csv( {
+        pathified   =>  $pathified,
+    } );
+    ok($csv_file, "write_pathified_to_csv() returned '$csv_file'");
+    ok((-f $csv_file), "'$csv_file' is plain-text file");
+    ok((-r $csv_file), "'$csv_file' is readable");
+
+    my $csv = Text::CSV->new ( { binary => 1 } )
+        or croak "Cannot use CSV: ".Text::CSV->error_diag ();
+    open my $IN, "<:encoding(utf8)", $csv_file or croak "Unable to open $csv_file for reading";
+    my $header_in_file = $csv->getline($IN);
+    close $IN or croak "Unable to close $csv_file after reading";
+
+    is_deeply($header_in_pathified, $header_in_file,
+        "Value for 'path_col' located in header row of CSV file");
 }
