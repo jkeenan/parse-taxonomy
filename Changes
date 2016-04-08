@@ -89,3 +89,8 @@ Revision history for Perl module Parse::File::Taxonomy
     - Remove deprecated Parse::Taxonomy methods child_counts() and
       get_child_count().  Improve performance, documentation and testing of
       descendant_counts() and get_descendant_count().
+
+0.23 Fri Apr  8 06:14:51 EDT 2016
+    - Correction for https://rt.cpan.org/Public/Bug/Display.html?id=113605:
+      write_pathified_to_csv() was not honoring argument in
+      pathify( path_col => 'argument' ).
