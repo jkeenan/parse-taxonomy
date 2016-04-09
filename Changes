@@ -94,3 +94,8 @@ Revision history for Perl module Parse::File::Taxonomy
     - Correction for https://rt.cpan.org/Public/Bug/Display.html?id=113605:
       write_pathified_to_csv() was not honoring argument in
       pathify( path_col => 'argument' ).
+
+0.24 Sat Apr  9 07:56:19 EDT 2016
+    - CPANtester reports suggest that Text::CSV_XS may be installed without
+      Text::CSV also being installed, leading to test failures when the
+      latter is used in tests.  Test failures fixed.
