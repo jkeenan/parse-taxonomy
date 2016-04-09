@@ -11,7 +11,7 @@ use Parse::Taxonomy::AdjacentList;
 use Parse::Taxonomy::MaterializedPath;
 use Test::More tests => 135;
 use Scalar::Util qw( reftype );
-use Text::CSV;
+use Text::CSV_XS;
 
 my ($obj, $source, $expect);
 my ($exp_fields, $exp_data_records);
@@ -686,7 +686,7 @@ my $path_data_records = [
     ok((-f $csv_file), "'$csv_file' is plain-text file");
     ok((-r $csv_file), "'$csv_file' is readable");
 
-    my $csv = Text::CSV->new ( { binary => 1 } )
+    my $csv = Text::CSV_XS->new ( { binary => 1 } )
         or croak "Cannot use CSV: ".Text::CSV->error_diag ();
     open my $IN, "<:encoding(utf8)", $csv_file or croak "Unable to open $csv_file for reading";
     my $header_in_file = $csv->getline($IN);
