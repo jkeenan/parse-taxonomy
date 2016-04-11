@@ -7,7 +7,7 @@ use utf8;
 
 use lib ('./lib');
 use Parse::Taxonomy::MaterializedPath;
-use Test::More tests => 19;
+use Test::More tests => 17;
 
 my ($obj, $source, $expect, $hashified);
 
@@ -780,35 +780,3 @@ my ($obj, $source, $expect, $hashified);
         "leaf nodes which are non-actionable were identified");
 }
 
-{
-    note("Example of local validation");
-    my $obj = Parse::Taxonomy::MaterializedPath->new( {
-        file    => 't/data/iota.csv',
-    } );
-    my $hashified           = $obj->hashify();
-    my $descendant_counts   = $obj->descendant_counts();
-    my @non_actionable_leaf_nodes = ();
-    for my $node (keys %{$hashified}) {
-        if (
-            ($descendant_counts->{$node} == 0) &&
-            (! $hashified->{$node}->{is_actionable})
-        ) {
-            push @non_actionable_leaf_nodes, $node;
-        }
-    }
-    ok(scalar(@non_actionable_leaf_nodes),
-        "leaf nodes which are non-actionable were identified");
-
-    my %non_actionable_leaf_nodes =
-        map { $_ => {
-            descendant_count    => $descendant_counts->{$_},
-            is_actionable       => $hashified->{$_}->{is_actionable},
-        } }
-        grep {
-            ($descendant_counts->{$_} == 0) &&
-            (! $hashified->{$_}->{is_actionable})
-        }
-        keys %{$hashified};
-    ok(scalar(keys %non_actionable_leaf_nodes),
-        "leaf nodes which are non-actionable were identified");
-}
