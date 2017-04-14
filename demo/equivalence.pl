@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use 5.10.1;
 use Carp;
-use lib qw( lib );
 use Parse::Taxonomy::MaterializedPath;
 use Parse::Taxonomy::AdjacentList;
 use Scalar::Util qw( reftype );
