@@ -8,6 +8,7 @@ WriteMakefile(
     VERSION_FROM    => 'lib/Parse/Taxonomy.pm',
     ABSTRACT_FROM   => 'lib/Parse/Taxonomy.pm',
     AUTHOR          => 'James E Keenan (jkeenan@cpan.org>)',
+    LICENSE         => 'perl',
     ( $mm_ver < 6.63_03 ? 'BUILD_REQUIRES' : 'TEST_REQUIRES' )
                     =>  {
                             'Test::Simple' => 0.10,
